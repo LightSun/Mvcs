@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @param <P> the param type.
  */
-public interface IController<S extends AbstractState<P>, P extends StateParameter> {
+public interface IController<S extends AbstractState<P>, P> {
 
     /**
      * set the max state stack size. default max is ten.
@@ -169,9 +169,15 @@ public interface IController<S extends AbstractState<P>, P extends StateParamete
      * @param factory the state factory.
      */
     void setStateFactory(StateFactory<S,P> factory);
+
+    /**
+     * set the param merger.
+     * @param merger the target merger.
+     */
+    void setParameterMerger(ParameterMerger<P> merger);
     
     
-    interface StateFactory<S extends AbstractState<P>, P extends StateParameter>{
+    interface StateFactory<S extends AbstractState<P>, P>{
     	
     	S createState(int stateKey, P p);
     }

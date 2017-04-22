@@ -1,5 +1,7 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.mvcs.util.SparseArray;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,17 +12,23 @@ import java.util.List;
  * @param <P> the state parameter type
  * @see IController
  * @see AbstractState
- * @see StateParameter
+ * @see ParameterMerger
  */
-public class SimpleController<S extends AbstractState<P>, P extends StateParameter>
+public class SimpleController<S extends AbstractState<P>, P extends ParameterMerger>
 		implements IController<S,P> {
+
+	private final StateGroup<S,P> mGroup;
+	private final StateGroup.Callback<S, P> mCallback;
+	private StateGroup<S,P> mGlobalGroup;
+
+	private final SparseArray<S> mStateMap;
+	private StateFactory<S,P> mFactory;
+	private ParameterMerger<P> mMerger;
 
 	/**
 	 * the history state stack.
 	 */
 	private LinkedList<StateNode> mStateStack;
-	private StateGroup<S,P> mGroup;
-	private StateGroup<S,P> mGlobalGroup;
     /**  indicate the state history is enabled or not.  */
 	private boolean mStateHistoryEnabled;
 
@@ -44,9 +52,22 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 		}
 	}
 	public SimpleController(){
-	}
-	public SimpleController(StateFactory<S,P> factory) {
-		setStateFactory(factory);
+		this.mStateMap = new SparseArray<S>();
+		this.mCallback = new StateGroup.Callback<S, P>() {
+			@Override
+			public ParameterMerger<P> getMerger() {
+				return mMerger;
+			}
+			@Override
+			public StateFactory<S, P> getStateFactory() {
+				return mFactory;
+			}
+			@Override
+			public SparseArray<S> getStateMap() {
+				return mStateMap;
+			}
+		};
+		this.mGroup = new StateGroup<S,P>(mCallback);
 	}
 
 	private void addHistory(int states, P extra){
@@ -56,8 +77,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 	}
 	private P mergeShareParam(P param){
 		if(param != null){
-			param.merge(mShareParam);
-			return param;
+			return mMerger.merge(mShareParam,  param);
 		}else{
 			return mShareParam;
 		}
@@ -107,9 +127,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 		if(mGlobalGroup != null){
 			mGlobalGroup.notifyStateUpdate(param);
 		}
-		if(mGroup != null){
-			mGroup.notifyStateUpdate(param);
-		}
+		mGroup.notifyStateUpdate(param);
 	}
 
 	@Override
@@ -174,7 +192,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 	@Override
 	public void setGlobalState(int states, P extra) {
 		if(mGlobalGroup == null) {
-			mGlobalGroup = new StateGroup<S,P>(mGroup);
+			mGlobalGroup = new StateGroup<S,P>(mCallback);
 		}
 		mGlobalGroup.setStates(states, extra);
 	}
@@ -237,12 +255,23 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 		if(factory == null){
 			throw new NullPointerException();
 		}
-		this.mGroup = new StateGroup<S,P>(factory);
+		this.mFactory = factory;
+	}
+
+	@Override
+	public void setParameterMerger(ParameterMerger<P> merger) {
+		if(merger == null){
+			throw new NullPointerException();
+		}
+		this.mMerger = merger;
 	}
 
 	private void checkState() {
-		if(mGroup == null){
+		if(mFactory == null){
 			throw new IllegalStateException("you must call setStateFactory(). first.");
+		}
+		if(mMerger == null){
+			throw new IllegalStateException("you must call setParameterMerger(). first.");
 		}
 	}
 }

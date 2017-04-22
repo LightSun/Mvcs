@@ -14,28 +14,26 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
  * @param <P> the state parameter type.
  * @author Administrator
  */
-/*public*/ final class StateGroup<S extends AbstractState<P> ,P extends StateParameter> {
+/*public*/ final class StateGroup<S extends AbstractState<P> ,P> {
 
-    //TODO log
-    private final SparseArray<S> mStateMap;
-    private final StateFactory<S,P> mFactory;
     private int mCurrentStates;
     private P mParam;
+    private final Callback<S,P> mCallback;
 
-    public StateGroup(StateGroup<S,P> group) {
-        this.mStateMap = group.mStateMap;
-        this.mFactory = group.mFactory;
+    public StateGroup(Callback<S,P> callback) {
+        this.mCallback = callback;
     }
-
-    public StateGroup(StateFactory<S,P> factory) {
-        this.mStateMap = new SparseArray<S>();
-        this.mFactory = factory;
-    }
-    public P getStateParameter() {
+    private P getStateParameter() {
         return mParam;
     }
-    public StateFactory<S,P> getStateFactory() {
-        return mFactory;
+    private StateFactory<S,P> getStateFactory() {
+        return mCallback.getStateFactory();
+    }
+    private SparseArray<S> getStateMap(){
+        return mCallback.getStateMap();
+    }
+    private ParameterMerger<P> getMerger(){
+        return mCallback.getMerger();
     }
     public int getStateFlags() {
         return mCurrentStates;
@@ -149,29 +147,33 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     public S getStateByKey(int key) {
-        return mStateMap.get(key);
+        return getStateMap().get(key);
     }
 
     public int getStateCount() {
-        return mStateMap.size();
+        return getStateMap().size();
     }
 
     private void reenter0(int singleState) {
-        AbstractState<P> state = mStateMap.get(singleState);
-        state.mergeStateParameter(getStateParameter());
+        AbstractState<P> state = getStateMap().get(singleState);
+        final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
+        state.setStateParameter(p);
         state.onReenter();
     }
 
     private void enter0(int singleState, S state) {
-        mStateMap.put(singleState, state);
-        state.mergeStateParameter(getStateParameter());
+        getStateMap().put(singleState, state);
+        final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
+        state.setStateParameter(p);
         state.onEnter();
     }
 
     private void exit0(int singleState) {
-        AbstractState<P> state = mStateMap.get(singleState);
-        mStateMap.remove(singleState);
-        state.mergeStateParameter(getStateParameter());
+        final SparseArray<S> stateMap = getStateMap();
+        AbstractState<P> state = stateMap.get(singleState);
+        stateMap.remove(singleState);
+        final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
+        state.setStateParameter(p);
         state.onExit();
     }
 
@@ -206,5 +208,11 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
                 s.onUpdate(param);
             }
         }
+    }
+
+    public interface Callback<S extends AbstractState<P>, P>{
+        ParameterMerger<P> getMerger();
+        StateFactory<S,P> getStateFactory();
+        SparseArray<S> getStateMap();
     }
 }
