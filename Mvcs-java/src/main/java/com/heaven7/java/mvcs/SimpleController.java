@@ -14,7 +14,7 @@ import java.util.List;
  * @see AbstractState
  * @see ParameterMerger
  */
-public class SimpleController<S extends AbstractState<P>, P extends ParameterMerger>
+public class SimpleController<S extends AbstractState<P>, P>
 		implements IController<S,P> {
 
 	private final StateGroup<S,P> mGroup;
@@ -71,7 +71,7 @@ public class SimpleController<S extends AbstractState<P>, P extends ParameterMer
 	}
 
 	private void addHistory(int states, P extra){
-		if(isStateStackEnable() && mLockEvents.size() < mMaxStackSize ) {
+		if(isStateStackEnable() && mStateStack.size() < mMaxStackSize ) {
 			mStateStack.offerLast(new StateNode(states, extra));
 		}
 	}
@@ -147,13 +147,33 @@ public class SimpleController<S extends AbstractState<P>, P extends ParameterMer
 	}
 
 	@Override
-	public boolean removeState(int states) {
+	public boolean removeState(int states, P param) {
 		checkState();
-		if(mGroup.removeState(states)){
-			addHistory(mGroup.getStateFlags(), null);
+		param = mergeShareParam(param);
+		if(mGroup.removeState(states, param)){
+			addHistory(mGroup.getStateFlags(), param);
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean removeState(int states) {
+		return removeState(states, null);
+	}
+
+	@Override
+	public void clearState() {
+        clearState(null);
+	}
+
+	@Override
+	public void clearState(P param) {
+		checkState();
+		param = mergeShareParam(param);
+		if(mGroup.clearState(param)){
+			addHistory(mGroup.getStateFlags(), param);
+		}
 	}
 
 	@Override
@@ -177,11 +197,15 @@ public class SimpleController<S extends AbstractState<P>, P extends ParameterMer
 					"y calling setStateStackEnable() first.");
 		}
 		checkState();
-		final StateNode node = mStateStack.pollLast();
-		if(node != null){
-            return mGroup.setStates(node.states, node.getParam());
+		StateNode node = mStateStack.pollLast();
+		if(node == null){
+			return false;
 		}
-		return false;
+		final int stateFlags = mGroup.getStateFlags();
+		for(;  node.states == stateFlags;){
+			node = mStateStack.pollLast();
+		}
+        return mGroup.setStates(node.states, node.getParam());
 	}
 
 	@Override

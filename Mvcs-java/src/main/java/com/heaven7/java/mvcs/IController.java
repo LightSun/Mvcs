@@ -74,7 +74,26 @@ public interface IController<S extends AbstractState<P>, P> {
      * @see {@link #addState(int)}
      */
     boolean removeState(int states);
-    
+
+    /**
+     * remove the target state from current state.
+     * @param states the target state
+     * @param param the extra parameter.
+     * @return true if remove state success. or else this state is not entered,
+     * @see {@link #addState(int)}
+     */
+    boolean removeState(int states, P param);
+
+    /**
+     * clear the all states
+     * @param  param the param which will used by state exit.
+     */
+    void clearState(P param);
+    /**
+     * clear the all states
+     */
+    void clearState();
+
     /**
      * change to the state
      *

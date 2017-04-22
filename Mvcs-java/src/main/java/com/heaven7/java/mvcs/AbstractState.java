@@ -41,7 +41,7 @@ public abstract class AbstractState<P> {
 	public abstract void onExit();
 
 	/**
-	 * called on update this state. often called by {@linkplain IController#notifyStateUpdate(ParameterMerger)}.
+	 * called on update this state. often called by {@linkplain IController#notifyStateUpdate(Object)} .
 	 * @param param the extra parameter.
      */
 	public void onUpdate(P param) {

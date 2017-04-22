@@ -41,10 +41,24 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     public boolean hasState(int state) {
         return (getStateFlags() & state) != 0;
     }
-    public boolean removeState(int states) {
+
+    public boolean clearState(P param) {
+        final int current = mCurrentStates;
+        if(current == 0){
+            return false;
+        }
+        this.mCurrentStates = 0;
+        this.mParam = param;
+        dispatchStateChange(current, 0);
+        this.mParam = null;
+        return true;
+    }
+    public boolean removeState(int states, P param) {
         if (states <= 0) return false;
         this.mCurrentStates &= ~states;
+        this.mParam = param;
         dispatchStateChange(0, 0, states);
+        this.mParam = null;
         return true;
     }
 
@@ -63,8 +77,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     public boolean setStates(int newStates, P p) {
-        //0 means clear state.
-        if (newStates < 0 ) return false;
+        if (newStates <= 0 ) return false;
         final int mCurr = this.mCurrentStates;
         if (mCurr == newStates) {
             return false;
@@ -209,6 +222,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
             }
         }
     }
+
+
 
     public interface Callback<S extends AbstractState<P>, P>{
         ParameterMerger<P> getMerger();
