@@ -23,7 +23,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private P mParam;
 
     public StateGroup(StateGroup<S,P> group) {
-        this(group.mFactory);
+        this.mStateMap = group.mStateMap;
+        this.mFactory = group.mFactory;
     }
 
     public StateGroup(StateFactory<S,P> factory) {
