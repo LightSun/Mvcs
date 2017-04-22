@@ -22,18 +22,20 @@ public abstract class AbstractState<P extends StateParameter> {
 	
 	/**
 	 * this is called on enter this state.
-	 * @param entity the entity
 	 */
 	public abstract void onEnter();
-	
-	
+
+
+	/**
+	 * this is called on reenter this state.
+	 */
 	public abstract void onReenter();
 
 	/**
 	 * this is called on exit this state.
-	 * @param entity the entity
 	 */
 	public abstract void onExit();
 
-
+	public void onUpdate(P param) {
+	}
 }

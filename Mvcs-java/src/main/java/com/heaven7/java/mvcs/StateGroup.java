@@ -1,8 +1,9 @@
 package com.heaven7.java.mvcs;
 
-import com.heaven7.java.mvcs.StateController.StateFactory;
+import com.heaven7.java.mvcs.IController.StateFactory;
 import com.heaven7.java.mvcs.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
@@ -13,26 +14,26 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
  * @param <P> the state parameter type.
  * @author Administrator
  */
-/*public*/ final class StateGroup<P extends StateParameter> {
+/*public*/ final class StateGroup<S extends AbstractState<P> ,P extends StateParameter> {
 
     //TODO log
-    private final SparseArray<AbstractState<P>> mStateMap;
-    private final StateFactory<P> mFactory;
+    private final SparseArray<S> mStateMap;
+    private final StateFactory<S,P> mFactory;
     private int mCurrentStates;
     private P mParam;
 
-    public StateGroup(StateGroup<P> group) {
+    public StateGroup(StateGroup<S,P> group) {
         this(group.mFactory);
     }
 
-    public StateGroup(StateFactory<P> factory) {
-        this.mStateMap = new SparseArray<AbstractState<P>>();
+    public StateGroup(StateFactory<S,P> factory) {
+        this.mStateMap = new SparseArray<S>();
         this.mFactory = factory;
     }
     public P getStateParameter() {
         return mParam;
     }
-    public StateFactory<P> getStateFactory() {
+    public StateFactory<S,P> getStateFactory() {
         return mFactory;
     }
     public int getStateFlags() {
@@ -134,7 +135,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     private void enterState(int enterFlags) {
-        final StateFactory<P> factory = getStateFactory();
+        final StateFactory<S,P> factory = getStateFactory();
         final P sp = getStateParameter();
         int maxKey;
         for (; enterFlags > 0; ) {
@@ -146,7 +147,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         }
     }
 
-    public AbstractState<P> getState(int key) {
+    public S getStateByKey(int key) {
         return mStateMap.get(key);
     }
 
@@ -159,7 +160,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         state.onReenter();
     }
 
-    private void enter0(int singleState, AbstractState<P> state) {
+    private void enter0(int singleState, S state) {
         mStateMap.put(singleState, state);
         state.onEnter();
     }
@@ -170,7 +171,36 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         state.onExit();
     }
 
-    public List<AbstractState<P>> getState() {
-        return mStateMap.getValues();
+    public List<S> getCurrentStates() {
+        if(mCurrentStates == 0){
+            return null;
+        }
+        final List<S> list = new ArrayList<S>();
+        int curFlags = this.mCurrentStates;
+        int maxKey;
+        for (; curFlags > 0; ) {
+            maxKey = max2K(curFlags);
+            if (maxKey > 0) {
+                list.add(getStateByKey(maxKey));
+                curFlags -= maxKey;
+            }
+        }
+        return list;
+    }
+    public S getCurrentState() {
+        if(mCurrentStates == 0){
+            return null;
+        }
+        int maxKey = max2K(this.mCurrentStates);
+        return getStateByKey(maxKey);
+    }
+
+    public void notifyStateChanged(P param) {
+        final List<S> states = getCurrentStates();
+        if(states != null ) {
+            for (S s : states) {
+                s.onUpdate(param);
+            }
+        }
     }
 }
