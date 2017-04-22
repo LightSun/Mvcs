@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * a simple implements of {@linkplain IController}
+ * @param <S> the state type .
+ * @param <P> the state parameter type
+ * @see IController
+ * @see AbstractState
+ * @see StateParameter
+ */
 public class SimpleController<S extends AbstractState<P>, P extends StateParameter>
 		implements IController<S,P> {
 
@@ -30,7 +38,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 			this.states = states;
 			this.param = param;
 		}
-
+        /** auto wrap share param. */
 		public P getParam(){
 			return mergeShareParam(param);
 		}

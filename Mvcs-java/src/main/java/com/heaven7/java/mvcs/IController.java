@@ -16,10 +16,21 @@ public interface IController<S extends AbstractState<P>, P extends StateParamete
      */
     void setMaxStateStackSize(int max);
 
+    /**
+     * set if enable state stack/history.
+     * @param enable true to enable false to disable.
+     */
     void setStateStackEnable(boolean enable);
 
+    /**
+     * indicate if the state stack is enabled.
+     * @return true if the state stack is enabled.
+     */
     boolean isStateStackEnable();
 
+    /**
+     * clear state stack.
+     */
     void clearStateStack();
 
     /**
@@ -28,13 +39,32 @@ public interface IController<S extends AbstractState<P>, P extends StateParamete
      */
     void notifyStateUpdate(P param);
 
+    /**
+     * set share state parameter.
+     * @param param the parameter
+     */
     void setShareStateParam(P param);
 
+    /**
+     * get the share state parameter
+     * @return the share state parameter
+     */
     P getShareStateParam();
     //==============================================
 
+    /**
+     * add states(may be multi) to controller.
+     * @param states the new states flags.
+     * @param extra the extra state parameter
+     * @return true if add the target states success.
+     */
 	boolean addState(int states, P extra);
-	
+
+    /**
+     * add states(may be multi) to controller.
+     * @param states the new states flags.
+     * @return true if add the target states success.
+     */
 	boolean addState(int states);
 	
 	 /**
@@ -66,13 +96,18 @@ public interface IController<S extends AbstractState<P>, P extends StateParamete
      * no state change occurs and {@code false} will be returned.
      */
     boolean revertToPreviousState();
-    
-    
+
+
+    /**
+     * set global states
+     * @param states the target global states.
+     */
     void setGlobalState(int states);
     /**
      * Sets the global state of this state machine.
      *
      * @param states the global state.
+     * @param extra the extra parameter
      */
     void setGlobalState(int states, P extra);
     
