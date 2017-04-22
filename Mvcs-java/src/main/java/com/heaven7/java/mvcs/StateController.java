@@ -6,10 +6,13 @@ import java.util.List;
  * a state controller which support multi states.
  * @author heaven7
  *
- * @param <Param> the param type.
+ * @param <P> the param type.
  */
 public interface StateController<P extends StateParameter> {
-	
+
+    void setStateHistoryEnable(boolean enable);
+
+    boolean isStateHistoryEnable();
 	
 	boolean addState(int states, P extra);
 	
