@@ -63,7 +63,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     public boolean setStates(int newStates, P p) {
-        if (newStates <= 0) return false;
+        //0 means clear state.
+        if (newStates < 0 ) return false;
         final int mCurr = this.mCurrentStates;
         if (mCurr == newStates) {
             return false;
@@ -117,8 +118,6 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
             if (maxKey > 0) {
                 reenter0(maxKey);
                 sharFlags -= maxKey;
-            } else {
-                //never reach here
             }
         }
     }
@@ -130,8 +129,6 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
             if (maxKey > 0) {
                 exit0(maxKey);
                 exitFlags -= maxKey;
-            } else {
-                //never reach here
             }
         }
     }
@@ -145,8 +142,6 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
             if (maxKey > 0) {
                 enter0(maxKey, factory.createState(maxKey, sp));
                 enterFlags -= maxKey;
-            } else {
-                //never reach here
             }
         }
     }

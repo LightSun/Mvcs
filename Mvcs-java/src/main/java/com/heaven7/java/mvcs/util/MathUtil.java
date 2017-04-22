@@ -21,10 +21,10 @@ public class MathUtil {
 	}
 	
 	
-	 public static void main(String[] args) {
+	/* public static void main(String[] args) {
 	    System.out.println(Math.log(Math.E));//1
 		System.out.println(Math.log(5) /Math.log(2)); //2
 		System.out.println(max2K(5)); //4
 		System.out.println(max2K(1));
-	}
+	}*/
 }

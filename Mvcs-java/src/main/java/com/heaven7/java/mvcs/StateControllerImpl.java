@@ -1,5 +1,6 @@
 package com.heaven7.java.mvcs;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +12,13 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 	private LinkedList<StateNode> mStateStack;
 	private StateGroup<P> mGroup;
 	private StateGroup<P> mGlobalGroup;
+    /**  indicate the state history is enabled or not.  */
+	private boolean mStateHistoryEnabled;
+
+	/** the locked event keys */
+	private ArrayList<Integer> mLockEvents;
+    /**  the max size of state stack/history */
+	private int mMaxStackSize = 10;
 
 	private class StateNode{
 		int states;
@@ -21,31 +29,43 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 		}
 	}
 	public StateControllerImpl(){
-
 	}
 	public StateControllerImpl(StateFactory<P> factory) {
 		mGroup = new StateGroup<P>(factory);
 	}
 
 	private void addHistory(int states, P extra){
-		if(isStateHistoryEnable()) {
+		if(isStateStackEnable() && mLockEvents.size() < mMaxStackSize ) {
 			mStateStack.offerLast(new StateNode(states, extra));
 		}
 	}
 
 	@Override
-	public boolean isStateHistoryEnable() {
-		return mStateStack != null;
+	public void clearStateStack() {
+		if(mStateStack != null){
+			mStateStack.clear();
+		}
 	}
 
 	@Override
-	public void setStateHistoryEnable(boolean enable) {
-         if(enable){
+	public void setMaxStateStackSize(int max) {
+		this.mMaxStackSize = max;
+	}
+
+	@Override
+	public boolean isStateStackEnable() {
+		return mStateHistoryEnabled;
+	}
+
+	@Override
+	public void setStateStackEnable(boolean enable) {
+		mStateHistoryEnabled = enable;
+		if(enable){
 			 if(mStateStack == null) {
 				 mStateStack = new LinkedList<StateNode>();
 			 }
 		 }else{
-			 mStateStack = null;
+			 mStateStack.clear();
 		 }
 	}
 
@@ -83,13 +103,13 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 	public void setState(int newStates, P extra) {
 		checkState();
 		if(mGroup.setStates(newStates, extra)){
-			addHistory(mGroup.getStateFlags(), null);
+			addHistory(mGroup.getStateFlags(), extra);
 		}
 	}
 
 	@Override
 	public boolean revertToPreviousState() {
-		if(!isStateHistoryEnable()){
+		if(!isStateStackEnable()){
 			throw new IllegalStateException("you must enable state stack b" +
 					"y calling setStateStackEnable() first.");
 		}
@@ -133,20 +153,32 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 
 	@Override
 	public boolean lockEvent(int eventKey) {
-		// TODO Auto-generated method stub
-		return false;
+		if(mLockEvents == null){
+			mLockEvents = new ArrayList<Integer>();
+		}
+		if(mLockEvents.contains(eventKey)){
+			return false;
+		}
+		mLockEvents.add(eventKey);
+		return true;
 	}
 
 	@Override
 	public boolean unlockEvent(int eventKey) {
-		// TODO Auto-generated method stub
+		if(mLockEvents == null){
+			return false;
+		}
+		final int index = mLockEvents.indexOf(eventKey);
+		if(index != -1){
+			mLockEvents.remove(index);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean isLockedEvent(int eventKey) {
-		// TODO Auto-generated method stub
-		return false;
+		return mLockEvents != null && mLockEvents.contains(eventKey);
 	}
 
 	@Override

@@ -10,9 +10,17 @@ import java.util.List;
  */
 public interface StateController<P extends StateParameter> {
 
-    void setStateHistoryEnable(boolean enable);
+    /**
+     * set the max state stack size. default max is ten.
+     * @param max the max size of state stack.
+     */
+    void setMaxStateStackSize(int max);
 
-    boolean isStateHistoryEnable();
+    void setStateStackEnable(boolean enable);
+
+    boolean isStateStackEnable();
+
+    void clearStateStack();
 	
 	boolean addState(int states, P extra);
 	
@@ -64,7 +72,7 @@ public interface StateController<P extends StateParameter> {
      * they are compared with the {@code ==} operator instead of the
      * {@code equals} method.
      *
-     * @param state the state to be compared with the current state
+     * @param states the state to be compared with the current state
      * @return true if the current state and the given state are the same
      * object.
      */
@@ -108,7 +116,7 @@ public interface StateController<P extends StateParameter> {
     void setStateFactory(StateFactory<P> factory);
     
     
-    public interface StateFactory<P extends StateParameter>{
+    interface StateFactory<P extends StateParameter>{
     	
     	AbstractState<P> createState(int stateKey, P p);
     }
