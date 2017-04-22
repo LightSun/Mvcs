@@ -1,11 +1,17 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.mvcs.util.SparseArray;
+
 import java.util.List;
-import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
 public class StateControllerImpl<P extends StateParameter> implements StateController<P> {
-	
+
+	private final SparseArray<AbstractState<P>> mStateMap;
 	private StateGroup<P> mGroup;
+
+	public StateControllerImpl() {
+		mStateMap = new SparseArray<AbstractState<P>>();
+	}
 
 	@Override
 	public boolean addState(int states, P extra) {
@@ -13,34 +19,26 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 		return mGroup.addState(states, extra);
 	}
 
-	private void checkState() {
-		if(mGroup == null){
-			throw new IllegalStateException("you must call setStateFactory(). first.");
-		}
-	}
-
 	@Override
 	public boolean addState(int states) {
-		// TODO Auto-generated method stub
-		return false;
+		return addState(states, null);
 	}
 
 	@Override
 	public boolean removeState(int states) {
-		// TODO Auto-generated method stub
-		return false;
+		checkState();
+		return mGroup.removeState(states);
 	}
 
 	@Override
 	public void setState(int newStates) {
-		// TODO Auto-generated method stub
-		
+	    setState(newStates, null);
 	}
 
 	@Override
 	public void setState(int newStates, P extra) {
-		// TODO Auto-generated method stub
-		
+		checkState();
+		mGroup.setStates(newStates, extra);
 	}
 
 	@Override
@@ -99,9 +97,12 @@ public class StateControllerImpl<P extends StateParameter> implements StateContr
 
 	@Override
 	public void setStateFactory(StateFactory<P> factory) {
-		this.mGroup = new StateGroup<P>(factory);
+		this.mGroup = new StateGroup<P>(factory , mStateMap);
 	}
-	
 
-
+	private void checkState() {
+		if(mGroup == null){
+			throw new IllegalStateException("you must call setStateFactory(). first.");
+		}
+	}
 }

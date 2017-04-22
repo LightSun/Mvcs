@@ -1,53 +1,65 @@
 package com.heaven7.java.mvcs;
 
-import static com.heaven7.java.mvcs.util.MathUtil.max2K;
-
 import com.heaven7.java.mvcs.StateController.StateFactory;
 import com.heaven7.java.mvcs.util.SparseArray;
+
+import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 /**
  * the state group . manage a group of state.
  * @author Administrator
  *
- * @param <SP> the state parameter type.
+ * @param <P> the state parameter type.
  */
-/*public*/ final class StateGroup<SP extends StateParameter>{
+/*public*/ final class StateGroup<P extends StateParameter>{
 	
 	//TODO log
+	private final SparseArray<AbstractState<P>> mStateMap;
+	private final StateFactory<P> mFactory;
+	private int mCurrentStates;
+	private P mParam;
 
-	private final SparseArray<AbstractState<SP>> mStateMap;
-	private final StateFactory<SP> mFactory;
-	private int mCurrenStates; 
-	private SP mParam;
-
-	public StateGroup(StateFactory<SP> factory) {
-		this.mStateMap = new SparseArray<>();
+	public StateGroup(StateFactory<P> factory) {
+		this(factory, new SparseArray<AbstractState<P>>());
+	}
+	public StateGroup(StateFactory<P> factory, SparseArray<AbstractState<P>> stateMap) {
+		this.mStateMap = stateMap;
 		this.mFactory = factory;
 	}
 	
-	public SP getStateParameter(){
+	public P getStateParameter(){
 		return mParam;
 	}
 
-	public StateFactory<SP> getStateFactory() {
+	public StateFactory<P> getStateFactory() {
 		return mFactory;
 	}
+
+	public boolean removeState(int states) {
+		if(states <= 0 ) return false;
+		this.mCurrentStates &= ~states;
+		dispatchStateChange(0, 0, states);
+		return true;
+	}
 	
-	public boolean addState(int states, SP extra) {
+	public boolean addState(int states, P extra) {
 		if(states <= 0 ) return false;
 		//no change.
-		int shareFlags = mCurrenStates & states;
+		final int shareFlags = mCurrentStates & states;
 		if(shareFlags == states){
 			return false;
 		}
-		//dispatchStateChange(shareFlags, enterFlags, exitFlags);
-		return false;
+		this.mParam = extra;
+		this.mCurrentStates |= states;
+		dispatchStateChange(shareFlags, states & ~shareFlags, 0);
+		this.mParam = null;
+		return true;
 	}
 	
-	public void setStates(int newStates, SP p){
+	public void setStates(int newStates, P p){
 		if(newStates <= 0 ) return;
 		
-		final int mCurr = this.mCurrenStates;
-		this.mCurrenStates = newStates;
+		final int mCurr = this.mCurrentStates;
+		this.mCurrentStates = newStates;
 		this.mParam = p;
 		dispatchStateChange(mCurr, newStates);
 		mParam = null;
@@ -64,7 +76,13 @@ import com.heaven7.java.mvcs.util.SparseArray;
         final int exitFlags = currentState & ~shareFlags;
         dispatchStateChange(shareFlags, enterFlags, exitFlags);
     }
-    
+
+    /**
+	 * dispatch state change.
+	 * @param shareFlags the share flags to exit().
+	 * @param enterFlags the enter flags to exit()
+	 * @param exitFlags the exit flags to exit().
+     */
     protected void dispatchStateChange(int shareFlags, int enterFlags, int exitFlags){
     	// Call the exit method of the existing state
         if (exitFlags != 0) {
@@ -106,8 +124,8 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 	}
 	private void enterState(int enterFlags) {
-		final StateFactory<SP> factory = getStateFactory();
-		final SP sp = getStateParameter();
+		final StateFactory<P> factory = getStateFactory();
+		final P sp = getStateParameter();
 		int maxKey;
 		for( ; enterFlags > 0 ; ){
 			maxKey = max2K(enterFlags);
@@ -120,33 +138,28 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 	}
 
-	public AbstractState<SP> getState(int key) {
+	public AbstractState<P> getState(int key) {
 		return mStateMap.get(key);
 	}
 	
-	public boolean hasKey(int key){
-		return mStateMap.indexOfKey(key) >=0;
-	}
-
 	public int getStateCount() {
 		return mStateMap.size();
 	}
 	
 	private void reenter0(int singleState){
-		AbstractState<SP> state = mStateMap.get(singleState);
+		AbstractState<P> state = mStateMap.get(singleState);
 		state.onReenter();
 	}
 	
-	private void enter0(int singleState, AbstractState<SP> state){
+	private void enter0(int singleState, AbstractState<P> state){
 		mStateMap.put(singleState, state);
 		state.onEnter();
 	}
 	
 	private void exit0(int singleState){
-		AbstractState<SP> state = mStateMap.get(singleState);
+		AbstractState<P> state = mStateMap.get(singleState);
 		mStateMap.remove(singleState);
 		state.onExit();
 	}
-
 
 }
