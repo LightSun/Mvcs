@@ -23,14 +23,14 @@ public interface IController<S extends AbstractState<P>, P extends StateParamete
     void clearStateStack();
 
     /**
-     * notify state changed by target param.
+     * notify state update by target param.
      * @param param the parameter.
      */
-    void notifyStateChanged(P param);
+    void notifyStateUpdate(P param);
 
     void setShareStateParam(P param);
 
-    P sgetShareStateParam();
+    P getShareStateParam();
     //==============================================
 
 	boolean addState(int states, P extra);

@@ -13,6 +13,9 @@ public abstract class AbstractState<P extends StateParameter> {
 	}
 	
 	public void mergeStateParameter(P p){
+		if(p == null){
+			return;
+		}
 	    if(mParam == null){
 	    	mParam = p;
 	    }else{

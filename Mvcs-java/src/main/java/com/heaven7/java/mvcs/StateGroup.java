@@ -157,17 +157,20 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
     private void reenter0(int singleState) {
         AbstractState<P> state = mStateMap.get(singleState);
+        state.mergeStateParameter(getStateParameter());
         state.onReenter();
     }
 
     private void enter0(int singleState, S state) {
         mStateMap.put(singleState, state);
+        state.mergeStateParameter(getStateParameter());
         state.onEnter();
     }
 
     private void exit0(int singleState) {
         AbstractState<P> state = mStateMap.get(singleState);
         mStateMap.remove(singleState);
+        state.mergeStateParameter(getStateParameter());
         state.onExit();
     }
 
@@ -195,7 +198,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         return getStateByKey(maxKey);
     }
 
-    public void notifyStateChanged(P param) {
+    public void notifyStateUpdate(P param) {
         final List<S> states = getCurrentStates();
         if(states != null ) {
             for (S s : states) {

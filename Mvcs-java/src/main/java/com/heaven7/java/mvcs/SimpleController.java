@@ -30,6 +30,10 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 			this.states = states;
 			this.param = param;
 		}
+
+		public P getParam(){
+			return mergeShareParam(param);
+		}
 	}
 	public SimpleController(){
 	}
@@ -42,6 +46,14 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 			mStateStack.offerLast(new StateNode(states, extra));
 		}
 	}
+	private P mergeShareParam(P param){
+		if(param != null){
+			param.merge(mShareParam);
+			return param;
+		}else{
+			return mShareParam;
+		}
+	}
 
 	@Override
 	public void setShareStateParam(P param) {
@@ -49,7 +61,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 	}
 
 	@Override
-	public P sgetShareStateParam() {
+	public P getShareStateParam() {
 		return mShareParam;
 	}
 
@@ -83,18 +95,19 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 	}
 
 	@Override
-	public void notifyStateChanged(P param) {
+	public void notifyStateUpdate(P param) {
 		if(mGlobalGroup != null){
-			mGlobalGroup.notifyStateChanged(param);
+			mGlobalGroup.notifyStateUpdate(param);
 		}
 		if(mGroup != null){
-			mGroup.notifyStateChanged(param);
+			mGroup.notifyStateUpdate(param);
 		}
 	}
 
 	@Override
 	public boolean addState(int states, P extra) {
 		checkState();
+		extra = mergeShareParam(extra);
 		if(mGroup.addState(states, extra)){
 			addHistory(mGroup.getStateFlags(), extra);
 			return true;
@@ -125,6 +138,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 	@Override
 	public void setState(int newStates, P extra) {
 		checkState();
+		extra = mergeShareParam(extra);
 		if(mGroup.setStates(newStates, extra)){
 			addHistory(mGroup.getStateFlags(), extra);
 		}
@@ -139,7 +153,7 @@ public class SimpleController<S extends AbstractState<P>, P extends StateParamet
 		checkState();
 		final StateNode node = mStateStack.pollLast();
 		if(node != null){
-            return mGroup.setStates(node.states, node.param);
+            return mGroup.setStates(node.states, node.getParam());
 		}
 		return false;
 	}
