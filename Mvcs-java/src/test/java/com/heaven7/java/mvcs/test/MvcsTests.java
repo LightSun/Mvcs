@@ -40,8 +40,15 @@ public class MvcsTests extends TestCase {
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
 
+    public void testGlobalState(){
+        mController.setGlobalState(STATE_SLEEP);
+        mController.setState(STATE_MOVING, "moving");
+        mController.notifyStateUpdate("testGlobalState");
+    }
+
     public void testState(){
         mController.setStateStackEnable(true);
+        mController.setShareStateParam("__share__");
         mController.addState(STATE_EAT, "dfdff");
         mController.addState(STATE_MOVING |STATE_SLEEP);
         assertFalse(mController.addState(STATE_MOVING | STATE_EAT));
@@ -63,5 +70,8 @@ public class MvcsTests extends TestCase {
         System.out.println(mController.getCurrentState());
 
         assertTrue(mController.revertToPreviousState());
+
+        System.out.println("----------- start notify update -------------");
+        mController.notifyStateUpdate("tag_update");
     }
 }
