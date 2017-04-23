@@ -157,24 +157,26 @@ public interface IController<S extends AbstractState<P>, P> {
 	List<S> getCurrentStates();
 
     /**
-     * get the current if you use single state.
+     * get the current if you use single state. or else return the max state.
      * @return the current single state.
      */
 	S getCurrentState();
 
 	  /**
-     * lock the event
-     * @param eventKey  the event key
-     * @return true if lock success. false if is already locked.
+     * lock the target events
+     * @param eventKeys  the event keys
+     * @return true if lock the all target events success. false if is already locked.
+     * @throws IllegalArgumentException if  eventKeys ==null or eventKeys.length ==0.
      */
-    boolean lockEvent(int eventKey);
+    boolean lockEvent(int... eventKeys) throws IllegalArgumentException;
 
     /**
      * unlock the target events .
      * @param keys the event keys
      * @return true if unlock the all events success. false otherwise..
+     * @throws IllegalArgumentException if  eventKeys ==null or eventKeys.length ==0.
      */
-    boolean unlockEvent(int...  keys);
+    boolean unlockEvent(int...  keys) throws IllegalArgumentException;
 
     /**
      * unlock all events .

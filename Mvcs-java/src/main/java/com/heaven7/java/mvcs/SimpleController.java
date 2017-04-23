@@ -245,19 +245,30 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean lockEvent(int eventKey) {
+	public boolean lockEvent(int...eventKeys) {
+		if(eventKeys == null || eventKeys.length == 0){
+			throw new IllegalArgumentException();
+		}
 		if(mLockEvents == null){
 			mLockEvents = new ArrayList<Integer>();
 		}
-		if(mLockEvents.contains(eventKey)){
-			return false;
+		boolean result = true;
+		final ArrayList<Integer> mLockEvents = this.mLockEvents;
+		for(int key : eventKeys){
+			if(mLockEvents.contains(key)){
+				result = false;
+			}else {
+				mLockEvents.add(key);
+			}
 		}
-		mLockEvents.add(eventKey);
-		return true;
+		return result;
 	}
 
 	@Override
-	public boolean unlockEvent(int... keys) {
+	public boolean unlockEvent(int... keys) throws IllegalArgumentException {
+		if(keys == null || keys.length == 0){
+			throw new IllegalArgumentException();
+		}
 		if(mLockEvents == null){
 			return false;
 		}
