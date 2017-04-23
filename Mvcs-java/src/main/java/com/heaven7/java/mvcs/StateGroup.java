@@ -223,8 +223,6 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         }
     }
 
-
-
     public interface Callback<S extends AbstractState<P>, P>{
         ParameterMerger<P> getMerger();
         StateFactory<S,P> getStateFactory();

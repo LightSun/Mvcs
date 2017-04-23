@@ -170,11 +170,17 @@ public interface IController<S extends AbstractState<P>, P> {
     boolean lockEvent(int eventKey);
 
     /**
-     * unlock the event .
-     * @param eventKey the event key
-     * @return true if unlock the event success. false if is not locked.
+     * unlock the target events .
+     * @param keys the event keys
+     * @return true if unlock the all events success. false otherwise..
      */
-    boolean unlockEvent(int eventKey);
+    boolean unlockEvent(int...  keys);
+
+    /**
+     * unlock all events .
+     * @return true if unlock the all events success. false otherwise..
+     */
+    boolean unlockAllEvent();
 
     /**
      * is the event locked.

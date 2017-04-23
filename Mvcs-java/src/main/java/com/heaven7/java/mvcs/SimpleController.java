@@ -257,16 +257,30 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean unlockEvent(int eventKey) {
+	public boolean unlockEvent(int... keys) {
 		if(mLockEvents == null){
 			return false;
 		}
-		final int index = mLockEvents.indexOf(eventKey);
-		if(index != -1){
-			mLockEvents.remove(index);
-			return true;
+		boolean result = true;
+		int index;
+		for(int key : keys){
+			index = mLockEvents.indexOf(key);
+			if(index != -1){
+				mLockEvents.remove(index);
+			}else{
+				result = false;
+			}
 		}
-		return false;
+		return result;
+	}
+
+	@Override
+	public boolean unlockAllEvent() {
+		if(mLockEvents == null){
+			return false;
+		}
+		mLockEvents.clear();
+		return true;
 	}
 
 	@Override

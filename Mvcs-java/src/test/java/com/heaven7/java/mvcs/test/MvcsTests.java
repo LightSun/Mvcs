@@ -40,6 +40,16 @@ public class MvcsTests extends TestCase {
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
 
+    public void testLockEvent(){
+        assertTrue(mController.lockEvent(1));
+        assertTrue(mController.unlockEvent(1));
+        mController.lockEvent(1);
+        assertFalse(mController.lockEvent(1));
+        mController.lockEvent(2);
+        mController.lockEvent(4);
+        assertTrue(mController.unlockEvent(1,2,4));
+    }
+
     public void testGlobalState(){
         mController.setGlobalState(STATE_SLEEP);
         mController.setState(STATE_MOVING, "moving");
