@@ -47,7 +47,8 @@ public class MvcsTests extends TestCase {
         assertFalse(mController.lockEvent(1));
         mController.lockEvent(2);
         mController.lockEvent(4);
-        assertTrue(mController.unlockEvent(1,2,4));
+        assertFalse(mController.unlockEvent(1,3));
+       // assertTrue(mController.unlockEvent(1,2,4));
     }
 
     public void testGlobalState(){
