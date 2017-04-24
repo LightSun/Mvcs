@@ -2,7 +2,6 @@ package com.heaven7.android.mvcs;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 
 import com.heaven7.core.util.Toaster;
 
@@ -11,9 +10,10 @@ import com.heaven7.core.util.Toaster;
  * Created by heaven7 on 2017/4/24 0024.
  */
 
-public abstract class MvcsBaseActivity extends AppCompatActivity implements AppComponentContext{
+public abstract class MvcsBaseActivity<C extends AndroidController<MvcsBaseActivity<C>>>
+        extends AppCompatActivity implements AppComponentContext{
 
-    private AndroidController<MvcsBaseActivity> mController;
+    private C mController;
 
     @Override
     public final void onCreate(Bundle savedInstanceState) {
@@ -21,7 +21,8 @@ public abstract class MvcsBaseActivity extends AppCompatActivity implements AppC
 
         onPreSetContentView();
         setContentView(getLayoutId());
-        mController = new AndroidController<MvcsBaseActivity>(this, Gravity.CENTER);
+        mController = createController();
+       // mController = new AndroidController<MvcsBaseActivity>(this, Gravity.CENTER);
         mController.onCreate();
         mController.onRestoreInstanceState(savedInstanceState);
         onInitialize(this, savedInstanceState);
@@ -47,7 +48,7 @@ public abstract class MvcsBaseActivity extends AppCompatActivity implements AppC
         mController.onSaveInstanceState(outState);
     }
 
-    public AndroidController<MvcsBaseActivity> getController(){
+    public C getController(){
         return mController;
     }
 
@@ -55,4 +56,6 @@ public abstract class MvcsBaseActivity extends AppCompatActivity implements AppC
     public final Toaster getToaster() {
         return getController().getToaster();
     }
+
+    protected abstract C createController();
 }

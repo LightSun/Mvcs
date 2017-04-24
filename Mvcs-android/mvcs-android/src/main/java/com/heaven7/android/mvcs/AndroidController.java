@@ -115,9 +115,9 @@ public class AndroidController<A extends AppCompatActivity> extends SimpleContro
 
 
     /**
-     * Returns a Parcelable describing the current state of the presenter.
+     * Returns a Parcelable describing the current state of this controller.
      * It will be passed to the {@link #onRestoreInstanceState(Bundle)}
-     * method of the presenter sharing the same ID later.
+     * method of this controller sharing the same ID later.
      * @param  outState the out state to save
      * @return The saved instance state
      */

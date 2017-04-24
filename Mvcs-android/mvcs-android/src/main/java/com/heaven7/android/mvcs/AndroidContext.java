@@ -13,12 +13,12 @@ import java.util.List;
  * Created by heaven7 on 2017/4/24 0024.
  */
 
-public class AndroidContext<A extends AppCompatActivity, C extends AndroidController<A>> {
+public class AndroidContext<C extends AndroidController<A>, A extends AppCompatActivity> {
 
-    private AndroidController<A> mController;
+    private C mController;
 
-    void onAttachController(AndroidController<A> ac){
-        this.mController = ac;
+    void onAttachController(C controller){
+        this.mController = controller;
     }
 
     void onDetach(){
@@ -41,7 +41,7 @@ public class AndroidContext<A extends AppCompatActivity, C extends AndroidContro
         return getViewHelper().getRootView();
     }
     public final C getController(){
-        return null;
+        return mController;
     }
     public final AndroidState getCurrentState(){
         return getController().getCurrentState();
