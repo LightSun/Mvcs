@@ -94,7 +94,12 @@ public class AndroidController<A extends AppCompatActivity> extends SimpleContro
                 as.onDestroy();
             }
         }
-        //TODO destroy global
+       states = getGlobalStates();
+       if(states != null) {
+            for (AndroidState as : states) {
+                as.onDestroy();
+            }
+        }
     }
 
     /**

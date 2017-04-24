@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 
+import com.heaven7.core.util.Toaster;
+
 /**
+ * this is a sample mvcs base activity.
  * Created by heaven7 on 2017/4/24 0024.
  */
 
@@ -21,6 +24,7 @@ public abstract class MvcsBaseActivity extends AppCompatActivity implements AppC
         mController = new AndroidController<MvcsBaseActivity>(this, Gravity.CENTER);
         mController.onCreate();
         mController.onRestoreInstanceState(savedInstanceState);
+        onInitialize(this, savedInstanceState);
         if(!mController.onHandleIntent(this, getIntent())){
             finish();
         }
@@ -43,9 +47,12 @@ public abstract class MvcsBaseActivity extends AppCompatActivity implements AppC
         mController.onSaveInstanceState(outState);
     }
 
-    public final AndroidController<MvcsBaseActivity> getController(){
+    public AndroidController<MvcsBaseActivity> getController(){
         return mController;
     }
 
-
+    @Override
+    public final Toaster getToaster() {
+        return getController().getToaster();
+    }
 }

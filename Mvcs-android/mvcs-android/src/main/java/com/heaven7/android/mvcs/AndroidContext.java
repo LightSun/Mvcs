@@ -13,44 +13,41 @@ import java.util.List;
  * Created by heaven7 on 2017/4/24 0024.
  */
 
-public class AndroidContext<A extends AppCompatActivity, C extends AndroidController> {
+public class AndroidContext<A extends AppCompatActivity, C extends AndroidController<A>> {
 
-    private ViewHelper mViewHelper;
-    private Toaster mToaster;
-    private A mActivity;
+    private AndroidController<A> mController;
+
+    void onAttachController(AndroidController<A> ac){
+        this.mController = ac;
+    }
+
+    void onDetach(){
+        mController = null;
+    }
 
     public final ViewHelper getViewHelper(){
-        return mViewHelper;
+        return getController().getViewHelper();
     }
-
     public final Toaster getToaster() {
-        return mToaster;
+        return getController().getToaster();
     }
-
-    public A getActivity(){
-        return mActivity;
+    public final A getActivity(){
+        return getController().getActivity();
     }
-
-    public Context getContext() {
+    public final  Context getContext() {
         return getViewHelper().getContext();
     }
-
-    public View getRootView() {
+    public final View getRootView() {
         return getViewHelper().getRootView();
     }
-
-    public C getController(){
+    public final C getController(){
         return null;
     }
-
-    public AndroidState getCurrentState(){
+    public final AndroidState getCurrentState(){
         return getController().getCurrentState();
     }
-
-    public List<AndroidState> getCurrentStates(){
+    public final List<AndroidState> getCurrentStates(){
         return getController().getCurrentStates();
     }
-
-    //getState ?
 
 }
