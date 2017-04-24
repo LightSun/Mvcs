@@ -151,17 +151,42 @@ public interface IController<S extends AbstractState<P>, P> {
     boolean hasState(int state);
 
     /**
-     * get the current states.
+     * get the current states  without global states..
      * @return the all states if multi. or only contains one.
      */
 	List<S> getCurrentStates();
 
     /**
-     * get the current if you use single state. or else return the max state.
+     * get the current state if you use single state without global states.. or else return the max state
+     *  which is indicated by flag..
      * @return the current single state.
      */
 	S getCurrentState();
 
+    /**
+     * get current state as flags
+     * @return the flags of current states without global states.
+     */
+	int getCurrentStateFlags();
+
+    /**
+     * get global state flags. if not set (can call {@linkplain #setGlobalState(int, Object)})return zero.
+     * @return the global state flags.
+     * @see  #setGlobalState(int, Object)
+     * @see  #setGlobalState(int)
+     */
+    int getGlobalStateFlags();
+
+
+    /**
+     * get global states. if not set (can call {@linkplain #setGlobalState(int, Object)}) return null.
+     * @return the global states.
+     * @see  #setGlobalState(int, Object)
+     * @see  #setGlobalState(int)
+     */
+    List<S> getGlobalStates();
+
+    //============================== lock event ==================================
 	  /**
      * lock the target events
      * @param eventKeys  the event keys

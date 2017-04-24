@@ -222,6 +222,16 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
+	public int getGlobalStateFlags() {
+		return mGlobalGroup != null ? mGlobalGroup.getStateFlags() : 0;
+	}
+
+	@Override
+	public List<S> getGlobalStates() {
+		return mGlobalGroup.getStates();
+	}
+
+	@Override
 	public boolean isInState(int states) {
 		checkState();
 		return mGroup.getStateFlags() == states;
@@ -236,12 +246,17 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public List<S> getCurrentStates() {
 		checkState();
-		return mGroup.getCurrentStates();
+		return mGroup.getStates();
 	}
 
 	@Override
 	public S getCurrentState() {
-		return mGroup.getCurrentState();
+		return mGroup.getMaxState();
+	}
+
+	@Override
+	public int getCurrentStateFlags() {
+		return mGroup.getStateFlags();
 	}
 
 	@Override

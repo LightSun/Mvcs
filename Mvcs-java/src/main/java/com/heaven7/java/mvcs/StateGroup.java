@@ -190,7 +190,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         state.onExit();
     }
 
-    public List<S> getCurrentStates() {
+    public List<S> getStates() {
         if(mCurrentStates == 0){
             return null;
         }
@@ -206,7 +206,9 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         }
         return list;
     }
-    public S getCurrentState() {
+    /** get max state.
+     * @return  the max state. */
+    public S getMaxState() {
         if(mCurrentStates == 0){
             return null;
         }
@@ -215,7 +217,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     public void notifyStateUpdate(P param) {
-        final List<S> states = getCurrentStates();
+        final List<S> states = getStates();
         if(states != null ) {
             for (S s : states) {
                 s.onUpdate(param);
