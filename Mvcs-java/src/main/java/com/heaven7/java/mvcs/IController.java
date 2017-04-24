@@ -202,11 +202,21 @@ public interface IController<S extends AbstractState<P>, P> {
      * @param merger the target merger.
      */
     void setParameterMerger(ParameterMerger<P> merger);
-    
-    
+
+    /**
+     * state factory help we create state.
+     * @param <S> the state type
+     * @param <P> the parameter type.
+     */
     interface StateFactory<S extends AbstractState<P>, P>{
-    	
+
+        /**
+         * create state by key and parameter.
+         * @param stateKey the state key
+         * @param p the parameter
+         * @return a new state.
+         */
     	S createState(int stateKey, P p);
     }
-    
+
 }
