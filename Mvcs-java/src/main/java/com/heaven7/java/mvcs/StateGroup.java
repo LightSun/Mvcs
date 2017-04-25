@@ -12,9 +12,9 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
  * the state group . manage a group of state.
  *
  * @param <P> the state parameter type.
- * @author Administrator
+ * @author heaven7
  */
-/*public*/ final class StateGroup<S extends AbstractState<P> ,P> {
+/*public*/ final class StateGroup<S extends AbstractState<P> ,P> implements Disposeable{
 
     private int mCurrentStates;
     private P mParam;
@@ -45,7 +45,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     	return mController;
     }
     private boolean isStateCacheEnabled(){
-    	return mCallback.isStateCacheEnabled();
+    	return mController.isStateCacheEnabled();
     }
     //========================================================================
     
@@ -273,11 +273,31 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     	}*/
 	}
 
+    public void dispose() {
+        final SparseArray<S> map = getStateMap();
+        int curFlags = this.mCurrentStates;
+        int maxKey;
+        for (; curFlags > 0 ; ) {
+            maxKey = max2K(curFlags);
+            if (maxKey > 0) {
+                final S s = map.get(maxKey);
+                //destroy foreground state.
+                s.onExit();
+                s.dispose();
+                s.onDetach();
+                map.remove(maxKey);
+                curFlags -= maxKey;
+            }
+        }
+        this.mCurrentStates = 0;
+        this.mCachedState = 0;
+        this.mParam = null;
+    }
+
     public interface Callback<S extends AbstractState<P>, P>{
         ParameterMerger<P> getMerger();
         StateFactory<S,P> getStateFactory();
         SparseArray<S> getStateMap();
-        boolean isStateCacheEnabled();
     }
 
 }

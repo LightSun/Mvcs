@@ -4,11 +4,38 @@ import java.util.List;
 
 /**
  * a state controller which support multi states.
+ * <ul>
+ *     <li>State Factory: use {@linkplain #setStateFactory(StateFactory)} to set.
+ *     </li>
+ *     <li>State Parameter Merger: use {@linkplain #setParameterMerger(ParameterMerger)} to set
+ *          merger for state parameter.
+ *     </li>
+ *     <li>State Cache: use {@linkplain #setStateCacheEnabled(boolean)} to enable or disable state cache.
+ *     use {@linkplain #destroyStateCache()} to destroy state cache without current states.
+ *     </li>
+ *     <li>State Stack: use {@linkplain #setStateStackEnable(boolean)} to enable state stack. so that we can
+ *         call {@linkplain #revertToPreviousState()} to previous state. Use {@linkplain #setMaxStateStackSize(int)}
+ *         to control the max state stack size. or use {@linkplain #clearStateStack()} to clear state stack.
+ *     </li>
+ *     <li>Share Param: share parameter for multi states. you can use {@linkplain #setShareStateParam(Object)} to
+ *      set share parameter. {@linkplain #getShareStateParam()} to get shared parameter.
+ *     </li>
+ *     <li>State Manager: you can use 'CRUD' methods by calling addXXX() , removeXXX() , clearXXX() ,getXXXState.
+ *              hasXXX() and so on.
+ *     </li>
+ *     <li>Update State and dispose:
+ *         use {@linkplain #notifyStateUpdate(Object)} to update states. and  {@linkplain #dispose()}
+ *         to do the final action.
+ *     </li>
+ *     <li> Manage Lock Event: {@linkplain #lockEvent(int...)} , {@linkplain #unlockEvent(int...)} .
+ *          {@linkplain #unlockAllEvent()}.
+ *     </li>
+ * </ul>
  * @author heaven7
  *
  * @param <P> the param type.
  */
-public interface IController<S extends AbstractState<P>, P> {
+public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	
 	/**
 	 * set state cache enabled or not. default is false.
@@ -16,6 +43,12 @@ public interface IController<S extends AbstractState<P>, P> {
 	 * @see #destroyStateCache()
 	 */
 	void setStateCacheEnabled(boolean enable);
+
+    /**
+     * indicate is the state cache enabled or not.
+     * @return true if enabled.
+     */
+    boolean isStateCacheEnabled();
 	
 	/**
 	 * destroy the state cache without current running states. 
@@ -32,6 +65,11 @@ public interface IController<S extends AbstractState<P>, P> {
     void setMaxStateStackSize(int max);
 
     /**
+     * get the max state stack size.
+     * @return the max state stack size.
+     */
+    int getMaxStateStackSize();
+    /**
      * set if enable state stack/history. so we can revertTo previous state by calling {@linkplain #revertToPreviousState()}.
      * @param enable true to enable false to disable.
      * @see #setMaxStateStackSize(int)
@@ -40,7 +78,7 @@ public interface IController<S extends AbstractState<P>, P> {
     void setStateStackEnable(boolean enable);
 
     /**
-     * indicate if the state stack is enabled.
+     * indicate if the state stack is enabled .
      * @return true if the state stack is enabled.
      */
     boolean isStateStackEnable();
@@ -211,6 +249,9 @@ public interface IController<S extends AbstractState<P>, P> {
 	S getGlobalState();
 
 
+    @Override
+    void dispose();
+
     //============================== lock event ==================================
 	  /**
      * lock the target events
@@ -240,6 +281,12 @@ public interface IController<S extends AbstractState<P>, P> {
      * @return true if is locked. false otherwise.
      */
     boolean isLockedEvent(int eventKey);
+
+    /**
+     * get a copy list of locked events. if not have return null.
+     * @return a copy list of locked events.
+     */
+    List<Integer> getLockedEvents();
     
     /**
      * set the state factory

@@ -4,7 +4,7 @@ package com.heaven7.java.mvcs;
  * the abstract state which is controlled by {@link IController}
  * @param <P> the state parameter type.
  */
-public abstract class AbstractState<P> {
+public abstract class AbstractState<P> implements Disposeable{
 
 	private P mParam;
 	private IController<? extends AbstractState<P>, P> mController;
@@ -64,5 +64,10 @@ public abstract class AbstractState<P> {
 	 * @param param the extra parameter.
      */
 	public void onUpdate(P param) {
+	}
+
+	@Override
+	public void dispose() {
+
 	}
 }

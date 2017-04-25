@@ -24,6 +24,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private final SparseArray<S> mStateMap;
 	private StateFactory<S,P> mFactory;
 	private ParameterMerger<P> mMerger;
+	/** true to enable state cache */
 	private boolean mEnableStateCache;
 
 	/**
@@ -67,10 +68,6 @@ public class SimpleController<S extends AbstractState<P>, P>
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
 			}
-			@Override
-			public boolean isStateCacheEnabled() {
-				return mEnableStateCache;
-			}
 		};
 		this.mGroup = new StateGroup<S,P>(this, mCallback);
 	}
@@ -104,7 +101,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 		    mEnableStateCache = enable;
 		}
 	}
-	
+
+	@Override
+	public boolean isStateCacheEnabled() {
+		return mEnableStateCache;
+	}
+
 	@Override
 	public void destroyStateCache() {
 		if(mGlobalGroup != null){
@@ -123,6 +125,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public void setMaxStateStackSize(int max) {
 		this.mMaxStackSize = max;
+	}
+
+	@Override
+	public int getMaxStateStackSize() {
+		return mMaxStackSize;
 	}
 
 	@Override
@@ -284,6 +291,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
+	public List<Integer> getLockedEvents() {
+		return mLockEvents != null ? (List<Integer>) mLockEvents.clone() : null;
+	}
+
+	@Override
 	public boolean lockEvent(int...eventKeys) {
 		if(eventKeys == null || eventKeys.length == 0){
 			throw new IllegalArgumentException();
@@ -352,6 +364,22 @@ public class SimpleController<S extends AbstractState<P>, P>
 			throw new NullPointerException();
 		}
 		this.mMerger = merger;
+	}
+
+	@Override
+	public void dispose() {
+		//destroy foreground states.
+		if(mGlobalGroup != null){
+			mGlobalGroup.dispose();
+		}
+		mGroup.dispose();
+
+		//destroy back state. and clear
+		final SparseArray<S> map = this.mStateMap;
+		for (S s : map.getValues()) {
+			s.dispose();
+		}
+		map.clear();
 	}
 
 	private void checkState() {
