@@ -21,6 +21,7 @@ import java.util.List;
 
 public class AndroidController<A extends AppCompatActivity> extends SimpleController<AndroidState, Bundle>{
 
+
     private static final ParameterMerger<Bundle> BUNDLE_MERGER =  new ParameterMerger<Bundle>() {
         @Override
         public Bundle merge(Bundle t1, Bundle t2) {
