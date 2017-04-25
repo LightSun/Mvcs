@@ -248,11 +248,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public List<S> getGlobalStates() {
-		return mGlobalGroup.getStates();
+		return mGlobalGroup !=null ? mGlobalGroup.getStates() : null;
 	}
 	@Override
 	public S getGlobalState() {
-		return mGlobalGroup.getMaxState();
+		return mGlobalGroup != null ? mGlobalGroup.getMaxState() : null;
 	}
 
 	@Override
