@@ -376,8 +376,8 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 		//destroy back state. and clear
 		final SparseArray<S> map = this.mStateMap;
-		for (S s : map.getValues()) {
-			s.dispose();
+		for(int size = map.size() , i = size - 1 ; i >= 0 ;i --){
+			map.valueAt(i).dispose();
 		}
 		map.clear();
 	}

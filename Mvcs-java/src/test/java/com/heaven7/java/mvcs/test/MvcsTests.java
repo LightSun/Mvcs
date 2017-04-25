@@ -39,7 +39,14 @@ public class MvcsTests extends TestCase {
         });
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
-    
+
+    public void testDispose(){
+        mController.setStateCacheEnabled(true);
+        testState();
+        System.out.println(mController.getCurrentStates());
+        mController.dispose();
+    }
+
     public void testStateCache(){
     	mController.setStateCacheEnabled(true);
     	testState();
