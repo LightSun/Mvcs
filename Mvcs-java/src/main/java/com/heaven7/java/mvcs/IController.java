@@ -9,16 +9,33 @@ import java.util.List;
  * @param <P> the param type.
  */
 public interface IController<S extends AbstractState<P>, P> {
+	
+	/**
+	 * set state cache enabled or not. default is false.
+	 * @param enable  true to enable state cache.
+	 * @see #destroyStateCache()
+	 */
+	void setStateCacheEnabled(boolean enable);
+	
+	/**
+	 * destroy the state cache without current running states. 
+	 * @see IController#setStateCacheEnabled(boolean)
+	 */
+	void destroyStateCache();
 
     /**
-     * set the max state stack size. default max is ten.
+     * set the max state stack size, if you enabled state stack by calling {@linkplain #setStateStackEnable(boolean)}.default max is ten.
      * @param max the max size of state stack.
+     * @see #setStateStackEnable(boolean)
+     * @see #revertToPreviousState()
      */
     void setMaxStateStackSize(int max);
 
     /**
-     * set if enable state stack/history.
+     * set if enable state stack/history. so we can revertTo previous state by calling {@linkplain #revertToPreviousState()}.
      * @param enable true to enable false to disable.
+     * @see #setMaxStateStackSize(int)
+     * @see #revertToPreviousState()
      */
     void setStateStackEnable(boolean enable);
 

@@ -20,11 +20,15 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private P mParam;
     private final Callback<S,P> mCallback;
     private final IController<S, P> mController;
-
+    /** the cached all states without current states. that means background states.*/
+	private int mCachedState;
+    
     public StateGroup(IController<S, P> controller, Callback<S,P> callback) {
     	this.mController = controller;
         this.mCallback = callback;
     }
+    
+    //========================== easy methods ===========================
     private P getStateParameter() {
         return mParam;
     }
@@ -39,6 +43,14 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
     private IController<S, P> getController(){
     	return mController;
+    }
+    private boolean isStateCacheEnabled(){
+    	return mCallback.isStateCacheEnabled();
+    }
+    //========================================================================
+    
+    public int getCachedStateFlags(){
+    	return mCachedState;
     }
     
     public int getStateFlags() {
@@ -182,6 +194,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     private void enter0(int singleState, S state) {
+    	//cache state 
+    	mCachedState &= ~singleState;
         getStateMap().put(singleState, state);
         final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
         state.setStateParameter(p);
@@ -192,7 +206,13 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private void exit0(int singleState) {
         final SparseArray<S> stateMap = getStateMap();
         AbstractState<P> state = stateMap.get(singleState);
-        stateMap.remove(singleState);
+        // no cache ? remove from cache
+        if(!isStateCacheEnabled()){
+            stateMap.remove(singleState);
+            mCachedState &= ~singleState;
+        }else{
+        	mCachedState |= singleState;
+        }
         final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
         state.setStateParameter(p);
         state.onExit();
@@ -233,10 +253,31 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
             }
         }
     }
+    
+    /** destroy state cache without current states. */
+    public void destroyStateCache() {
+    	if(mCachedState > 0){
+	    	 final SparseArray<S> map = getStateMap();
+	    	 int curFlags = this.mCachedState;
+	         int maxKey;
+	         for (; curFlags > 0 ; ) {
+	             maxKey = max2K(curFlags);
+	             if (maxKey > 0) {
+	            	 map.remove(maxKey);
+	            	// System.out.println("destroy state = " + maxKey);
+	                 curFlags -= maxKey;
+	             }
+	         }
+    	}/*else{
+    		System.out.println("no state cache...");
+    	}*/
+	}
 
     public interface Callback<S extends AbstractState<P>, P>{
         ParameterMerger<P> getMerger();
         StateFactory<S,P> getStateFactory();
         SparseArray<S> getStateMap();
+        boolean isStateCacheEnabled();
     }
+
 }

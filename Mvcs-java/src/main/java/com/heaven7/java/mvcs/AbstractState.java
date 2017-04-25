@@ -19,6 +19,7 @@ public abstract class AbstractState<P> {
 	
 	/**
 	 * get current controller.
+	 * @param <S> state type
 	 * @return the current controller.
 	 * @see IController
 	 */

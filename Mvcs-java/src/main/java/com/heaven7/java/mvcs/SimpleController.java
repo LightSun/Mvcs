@@ -24,6 +24,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private final SparseArray<S> mStateMap;
 	private StateFactory<S,P> mFactory;
 	private ParameterMerger<P> mMerger;
+	private boolean mEnableStateCache;
 
 	/**
 	 * the history state stack.
@@ -66,6 +67,10 @@ public class SimpleController<S extends AbstractState<P>, P>
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
 			}
+			@Override
+			public boolean isStateCacheEnabled() {
+				return mEnableStateCache;
+			}
 		};
 		this.mGroup = new StateGroup<S,P>(this, mCallback);
 	}
@@ -91,6 +96,21 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public P getShareStateParam() {
 		return mShareParam;
+	}
+	
+	@Override
+	public void setStateCacheEnabled(boolean enable) {
+		if(mEnableStateCache != enable){
+		    mEnableStateCache = enable;
+		}
+	}
+	
+	@Override
+	public void destroyStateCache() {
+		if(mGlobalGroup != null){
+			mGlobalGroup.destroyStateCache();
+		}
+		mGroup.destroyStateCache();
 	}
 
 	@Override
