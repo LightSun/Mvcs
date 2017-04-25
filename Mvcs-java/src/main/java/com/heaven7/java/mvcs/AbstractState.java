@@ -7,7 +7,25 @@ package com.heaven7.java.mvcs;
 public abstract class AbstractState<P> {
 
 	private P mParam;
+	private IController<? extends AbstractState<P>, P> mController;
 
+	<S extends AbstractState<P>> void onAttach(IController<S, P> controller){
+		this.mController = controller;
+	}
+	
+	void onDetach(){
+		this.mController = null;
+	}
+	
+	/**
+	 * get current controller.
+	 * @return the current controller.
+	 * @see IController
+	 */
+	@SuppressWarnings("unchecked")
+	public <S extends AbstractState<P>> IController<S, P> getController(){
+		return (IController<S, P>) mController;
+	}
 	/**
 	 * get the state parameter.
 	 * @return the state parameter.

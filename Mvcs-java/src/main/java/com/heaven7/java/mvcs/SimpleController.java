@@ -67,7 +67,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 				return mStateMap;
 			}
 		};
-		this.mGroup = new StateGroup<S,P>(mCallback);
+		this.mGroup = new StateGroup<S,P>(this, mCallback);
 	}
 
 	private void addHistory(int states, P extra){
@@ -216,7 +216,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public void setGlobalState(int states, P extra) {
 		if(mGlobalGroup == null) {
-			mGlobalGroup = new StateGroup<S,P>(mCallback);
+			mGlobalGroup = new StateGroup<S,P>(this, mCallback);
 		}
 		mGlobalGroup.setStates(states, extra);
 	}
@@ -229,6 +229,10 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public List<S> getGlobalStates() {
 		return mGlobalGroup.getStates();
+	}
+	@Override
+	public S getGlobalState() {
+		return mGlobalGroup.getMaxState();
 	}
 
 	@Override

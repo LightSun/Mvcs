@@ -19,8 +19,10 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private int mCurrentStates;
     private P mParam;
     private final Callback<S,P> mCallback;
+    private final IController<S, P> mController;
 
-    public StateGroup(Callback<S,P> callback) {
+    public StateGroup(IController<S, P> controller, Callback<S,P> callback) {
+    	this.mController = controller;
         this.mCallback = callback;
     }
     private P getStateParameter() {
@@ -35,6 +37,10 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private ParameterMerger<P> getMerger(){
         return mCallback.getMerger();
     }
+    private IController<S, P> getController(){
+    	return mController;
+    }
+    
     public int getStateFlags() {
         return mCurrentStates;
     }
@@ -171,6 +177,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         AbstractState<P> state = getStateMap().get(singleState);
         final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
         state.setStateParameter(p);
+        state.onAttach(getController());
         state.onReenter();
     }
 
@@ -178,6 +185,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         getStateMap().put(singleState, state);
         final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
         state.setStateParameter(p);
+        state.onAttach(getController());
         state.onEnter();
     }
 
@@ -188,6 +196,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
         state.setStateParameter(p);
         state.onExit();
+        state.onDetach();
     }
 
     public List<S> getStates() {

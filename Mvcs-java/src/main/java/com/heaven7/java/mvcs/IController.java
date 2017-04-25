@@ -185,6 +185,14 @@ public interface IController<S extends AbstractState<P>, P> {
      * @see  #setGlobalState(int)
      */
     List<S> getGlobalStates();
+    
+    /**
+     * get the global state if you use single state. or else return the max state .
+     *  which is indicated by flag.
+     * @return the global single state.
+     */
+	S getGlobalState();
+
 
     //============================== lock event ==================================
 	  /**
