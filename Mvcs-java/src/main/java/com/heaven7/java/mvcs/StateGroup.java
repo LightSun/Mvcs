@@ -286,7 +286,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
                 s.dispose();
                 s.onDetach();
                 map.remove(maxKey);
-                System.out.println("dispose : " + s.toString());
+               // System.out.println("dispose : " + s.toString());
                 curFlags -= maxKey;
             }
         }
