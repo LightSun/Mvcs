@@ -80,7 +80,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
         return getViewHelper().getRootView();
     }
     @Override
-    public AndroidController getController() {
+    public final AndroidController getController() {
         return this;
     }
     @SuppressWarnings("unchecked")
@@ -90,7 +90,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
     }
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends AppCompatActivity> T getTargetActivity(Class<T> clazz) {
+    public final <T extends AppCompatActivity> T getTargetActivity(Class<T> clazz) {
         return (T) getActivity();
     }
     //=======================================================================//
