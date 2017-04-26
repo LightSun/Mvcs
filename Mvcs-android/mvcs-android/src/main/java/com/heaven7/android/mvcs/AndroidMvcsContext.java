@@ -13,7 +13,6 @@ import java.util.List;
  * the android mvcs context, define some useful method of android.
  * Created by heaven7 on 2017/4/24 0024.
  */
-
 public interface AndroidMvcsContext {
 
     /**
@@ -38,8 +37,9 @@ public interface AndroidMvcsContext {
      * @param clazz  the target activity
      * @param <T> the target activity type
      * @return the target activity
+     * @throws ClassCastException if the current owner activity can't cast to the target type.
      */
-    <T extends AppCompatActivity>T getTargetActivity(Class<T> clazz);
+    <T extends AppCompatActivity>T getTargetActivity(Class<T> clazz) throws ClassCastException;
 
     /**
      * get the context.
