@@ -283,8 +283,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
                 final S s = map.get(maxKey);
                 //destroy foreground state.
                 s.onExit();
-                s.dispose();
                 s.onDetach();
+                s.dispose();
                 map.remove(maxKey);
                // System.out.println("dispose : " + s.toString());
                 curFlags -= maxKey;

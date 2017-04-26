@@ -104,14 +104,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     void clearStateStack();
 
     /**
-     * notify state update by target param.
+     * notify state update by target parameter.
      * @param param the parameter.
      */
     void notifyStateUpdate(P param);
 
     /**
      * set share state parameter.
-     * @param param the parameter
+     * @param param the parameter. can be null , null means clear share state parameter.
      */
     void setShareStateParam(P param);
 

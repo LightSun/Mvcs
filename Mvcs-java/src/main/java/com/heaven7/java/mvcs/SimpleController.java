@@ -97,6 +97,9 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 	@Override
 	public void setOwner(Object owner) {
+		if(owner == null){
+			throw new NullPointerException();
+		}
 		this.mOwner = owner;
 	}
 
@@ -398,7 +401,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 		map.clear();
 		
 		//clean up controller
-		//this.mOwner = null;
+		this.mOwner = null;
 	}
 
 	private void checkState() {
