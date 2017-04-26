@@ -10,7 +10,24 @@ import com.heaven7.java.mvcs.SimpleState;
 
 public class AndroidState extends SimpleState<Bundle> {
 
-    public void onDestroy(){
+
+    /**
+     * Returns a Parcelable describing the current state of this controller.
+     * It will be passed to the {@link #onRestoreInstanceState(Bundle)}
+     * method of this controller sharing the same ID later.
+     * @param  outState the out state to save
+     * @return The saved instance state
+     */
+    public void onSaveInstanceState(Bundle outState) {
+
+    }
+
+    /**
+     * Supplies the previously saved instance state to be restored.
+     *
+     * @param saveInstanceState The previously saved instance state. can't be null.
+     */
+    public void onRestoreInstanceState(Bundle saveInstanceState) {
 
     }
 

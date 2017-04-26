@@ -24,11 +24,14 @@ public abstract class MvcsBaseActivity<C extends AndroidController<MvcsBaseActiv
         mController = createController();
        // mController = new AndroidController<MvcsBaseActivity>(this, Gravity.CENTER);
         mController.onCreate();
-        mController.onRestoreInstanceState(savedInstanceState);
         onInitialize(this, savedInstanceState);
-        if(!mController.onHandleIntent(this, getIntent())){
-            finish();
-        }
+        mController.onHandleIntent(this, getIntent());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mController.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -38,7 +41,7 @@ public abstract class MvcsBaseActivity<C extends AndroidController<MvcsBaseActiv
 
     @Override
     protected void onDestroy() {
-        mController.onDestroy();
+        mController.dispose();
         super.onDestroy();
     }
 
