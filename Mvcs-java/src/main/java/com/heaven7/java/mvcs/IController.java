@@ -33,6 +33,8 @@ import java.util.List;
  *     <li>Controller Owner: {@linkplain #setOwner(Object)} and {@linkplain #getOwner()} .
  *     </li>
  * </ul>
+ * <h1>Note: current state and global states shouldn't intersect state.</h1>
+ * 
  * @author heaven7
  *
  * @param <P> the parameter type.
