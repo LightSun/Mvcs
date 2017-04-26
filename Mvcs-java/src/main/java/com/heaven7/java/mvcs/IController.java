@@ -17,7 +17,7 @@ import java.util.List;
  *         call {@linkplain #revertToPreviousState()} to previous state. Use {@linkplain #setMaxStateStackSize(int)}
  *         to control the max state stack size. or use {@linkplain #clearStateStack()} to clear state stack.
  *     </li>
- *     <li>Share Param: share parameter for multi states. you can use {@linkplain #setShareStateParam(Object)} to
+ *     <li>Share Parameter: share parameter for multi states. you can use {@linkplain #setShareStateParam(Object)} to
  *      set share parameter. {@linkplain #getShareStateParam()} to get shared parameter.
  *     </li>
  *     <li>State Manager: you can use 'CRUD' methods by calling addXXX() , removeXXX() , clearXXX() ,getXXXState.
@@ -30,12 +30,27 @@ import java.util.List;
  *     <li> Manage Lock Event: {@linkplain #lockEvent(int...)} , {@linkplain #unlockEvent(int...)} .
  *          {@linkplain #unlockAllEvent()}.
  *     </li>
+ *     <li>Controller Owner: {@linkplain #setOwner(Object)} and {@linkplain #getOwner()} .
+ *     </li>
  * </ul>
  * @author heaven7
  *
- * @param <P> the param type.
+ * @param <P> the parameter type.
  */
 public interface IController<S extends AbstractState<P>, P> extends Disposeable{
+	
+	
+	/**
+	 * set the owner of this controller.
+	 * @param owner the owner.
+	 */
+	void setOwner(Object owner);
+	
+	/**
+	 * return the owner of this controller.
+	 * @return the owner
+	 */
+	Object getOwner();
 	
 	/**
 	 * set state cache enabled or not. default is false.

@@ -6,15 +6,30 @@ package com.heaven7.java.mvcs;
  */
 public abstract class AbstractState<P> implements Disposeable{
 
-	private P mParam;
 	private IController<? extends AbstractState<P>, P> mController;
+	private P mParam;
 
-	<S extends AbstractState<P>> void onAttach(IController<S, P> controller){
+	/**
+	 * called on attach this state. you shouldn't call it.
+	 * @param controller the controller.
+	 */
+	 <S extends AbstractState<P>> void onAttach(IController<S, P> controller){
 		this.mController = controller;
 	}
 	
+	/**
+	 * called on detach this state.
+	 * you shouldn't call it. 
+	 */
 	void onDetach(){
 		this.mController = null;
+	}
+	
+	public Object getOwner(){
+		if(mController == null){
+			throw new IllegalStateException("state haven't attach or is detached.");
+		}
+		return mController.getOwner();
 	}
 	
 	/**
@@ -25,6 +40,9 @@ public abstract class AbstractState<P> implements Disposeable{
 	 */
 	@SuppressWarnings("unchecked")
 	public <S extends AbstractState<P>> IController<S, P> getController(){
+		if(mController == null){
+			throw new IllegalStateException("state haven't attach or is detached.");
+		}
 		return (IController<S, P>) mController;
 	}
 	/**

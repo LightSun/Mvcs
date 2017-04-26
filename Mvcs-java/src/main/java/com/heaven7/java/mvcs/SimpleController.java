@@ -40,6 +40,8 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private int mMaxStackSize = 10;
 
 	private P mShareParam;
+	/** the owner of this controller or states. */
+	private Object mOwner;
 
 	private class StateNode{
 		int states;
@@ -52,6 +54,10 @@ public class SimpleController<S extends AbstractState<P>, P>
 		public P getParam(){
 			return mergeShareParam(param);
 		}
+	}
+	public SimpleController(Object owner){
+		this();
+		setOwner(owner);
 	}
 	public SimpleController(){
 		this.mStateMap = new SparseArray<S>();
@@ -83,6 +89,15 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}else{
 			return mShareParam;
 		}
+	}
+	
+	@Override
+	public Object getOwner() {
+		return mOwner;
+	}
+	@Override
+	public void setOwner(Object owner) {
+		this.mOwner = owner;
 	}
 
 	@Override
@@ -290,6 +305,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 		return mGroup.getStateFlags();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Integer> getLockedEvents() {
 		return mLockEvents != null ? (List<Integer>) mLockEvents.clone() : null;
@@ -380,6 +396,9 @@ public class SimpleController<S extends AbstractState<P>, P>
 			map.valueAt(i).dispose();
 		}
 		map.clear();
+		
+		//clean up controller
+		//this.mOwner = null;
 	}
 
 	private void checkState() {
