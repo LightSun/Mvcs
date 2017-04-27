@@ -4,7 +4,6 @@ import com.heaven7.java.mvcs.IController.StateFactory;
 import com.heaven7.java.mvcs.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
@@ -196,6 +195,10 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
 
     private void enter0(int singleState, S state) {
+        if(state == null){
+            throw new IllegalStateException("create state failed. Are you forget to create State " +
+                    "for state_flag = " + singleState + " ? ");
+        }
     	//cache state 
     	mCachedState &= ~singleState;
         getStateMap().put(singleState, state);
