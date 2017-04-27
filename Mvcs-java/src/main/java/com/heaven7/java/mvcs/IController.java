@@ -32,6 +32,13 @@ import java.util.List;
  *     </li>
  *     <li>Controller Owner: {@linkplain #setOwner(Object)} and {@linkplain #getOwner()} .
  *     </li>
+ *     <li>Mutex States:  what is this ?  This define the states can split to double groups.
+ *          any state of one group is mutex with any state of the other group. That is if double states is mutex.
+ *          when either one of them called {@linkplain AbstractState#onEnter()}, the other
+ *          state's {@linkplain AbstractState#onExit()} must be called.
+ *          see {@linkplain #setMutexState(int[], int[])} , {@linkplain #getMutexState(int[][])}
+ *          and {@linkplain #getMutexState(int)}.
+ *     </li>
  * </ul>
  * <h1>Note: current state and global states shouldn't intersect state.</h1>
  * 
@@ -52,7 +59,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	
 	/**
 	 * get mutex states and put it to the target groupStates .
-	 * @param groupStates the output group states. And groupStates[0] is one group of states, groupStates[1] is the other group state.
+	 * @param groupStates the output group states. And 'groupStates[0]' is one group of states,
+     *                    'groupStates[1]' is the other group state.
 	 */
 	void getMutexState(int[][] groupStates);
 	

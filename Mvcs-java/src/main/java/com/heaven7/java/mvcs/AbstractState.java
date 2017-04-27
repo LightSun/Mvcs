@@ -1,7 +1,20 @@
 package com.heaven7.java.mvcs;
 
 /**
- * the abstract state which is controlled by {@link IController}
+ * the abstract state which is controlled by {@link IController}.
+ * <ul>
+ *     <li>Life Cycle Methods: {@linkplain #onEnter()} is called when enter the state.
+ *          {@linkplain #onReenter()} is called when  reenter the state.
+ *          {@linkplain #onExit()} ()} is called when exit the state .
+ *          after exit {@linkplain #isDetached()}  always return true.
+ *     </li>
+ *     <li>Update state: see {@linkplain #onUpdate(Object)} called by
+ *              {@linkplain IController#notifyStateUpdate(Object)}.
+ *     </li>
+ *     <li> Release Resource: when destroy state is called by {@linkplain IController#dispose()}.
+ *        seee {@linkplain #dispose()}.
+ *     </li>
+ * </ul>
  * @param <P> the state parameter type.
  */
 public abstract class AbstractState<P> implements Disposeable{
