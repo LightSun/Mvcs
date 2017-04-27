@@ -1,4 +1,4 @@
-package com.heaven7.android.mvcs;
+package com.heaven7.android.mvcs.test;
 
 import android.content.Context;
 import android.os.Bundle;

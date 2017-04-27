@@ -6,15 +6,17 @@ package com.heaven7.java.mvcs;
  */
 public abstract class AbstractState<P> implements Disposeable{
 
-	private IController<? extends AbstractState<P>, P> mController;
+	private IController<?, P> mController;
 	private P mParam;
+	private boolean mDetached;
 
 	/**
 	 * called on attach this state. you shouldn't call it.
 	 * @param controller the controller.
 	 */
-	 <S extends AbstractState<P>> void onAttach(IController<S, P> controller){
+	 void onAttach(IController<?, P> controller){
 		this.mController = controller;
+		this.mDetached = false;
 	}
 	
 	/**
@@ -23,10 +25,24 @@ public abstract class AbstractState<P> implements Disposeable{
 	 */
 	void onDetach(){
 		this.mController = null;
+		this.mDetached = true;
 	}
-	
+
+	/**
+	 * Return true if the state has been explicitly detached from the UI.
+	 * That is, {@link #onDetach} have been called.
+	 */
+	public final boolean isDetached(){
+		return mDetached;
+	}
+
+	/**
+	 * get the owner;
+	 * @return the owner
+	 * @throws IllegalStateException if the state is detached.
+     */
 	public Object getOwner(){
-		if(mController == null){
+		if(isDetached()){
 			throw new IllegalStateException("state haven't attach or is detached.");
 		}
 		return mController.getOwner();
@@ -34,16 +50,16 @@ public abstract class AbstractState<P> implements Disposeable{
 	
 	/**
 	 * get current controller.
-	 * @param <S> state type
 	 * @return the current controller.
 	 * @see IController
+	 * @throws IllegalStateException if the state is detached.
 	 */
 	@SuppressWarnings("unchecked")
-	public <S extends AbstractState<P>> IController<S, P> getController(){
-		if(mController == null){
+	public IController<?, P> getController() throws IllegalStateException{
+		if(isDetached()){
 			throw new IllegalStateException("state haven't attach or is detached.");
 		}
-		return (IController<S, P>) mController;
+		return mController;
 	}
 	/**
 	 * get the state parameter.

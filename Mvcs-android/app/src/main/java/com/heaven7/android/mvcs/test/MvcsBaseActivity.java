@@ -1,8 +1,9 @@
-package com.heaven7.android.mvcs;
+package com.heaven7.android.mvcs.test;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.heaven7.android.mvcs.AndroidController;
 import com.heaven7.core.util.Toaster;
 
 /**
@@ -10,7 +11,7 @@ import com.heaven7.core.util.Toaster;
  * Created by heaven7 on 2017/4/24 0024.
  */
 
-public abstract class MvcsBaseActivity<C extends AndroidController<MvcsBaseActivity<C>>>
+public abstract class MvcsBaseActivity<C extends AndroidController>
         extends AppCompatActivity implements AppComponentContext{
 
     private C mController;

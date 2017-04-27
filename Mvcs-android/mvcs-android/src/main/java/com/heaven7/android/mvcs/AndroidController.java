@@ -20,9 +20,10 @@ import java.util.List;
  * Created by heaven7 on 2017/4/24 0024.
  */
 
-public class AndroidController<A extends AppCompatActivity> extends SimpleController<AndroidState, Bundle>{
+public class AndroidController extends SimpleController<AndroidState, Bundle>
+      implements AndroidMvcsContext{
 
-    private static final String KEY_BUNDLE = AndroidController.class.getName() + "_bundle";
+    private static final String KEY_BUNDLE              = "AndroidController_bundle";
     private static final String KEY_STATE_CACHE_ENABLED = "AndroidController_stateCacheEnabled";
     private static final String KEY_STATE_STACK_ENABLED = "AndroidController_stateStackEnabled";
     private static final String KEY_MAX_STATE_STACK     = "AndroidController_maxStateStackSize";
@@ -30,7 +31,6 @@ public class AndroidController<A extends AppCompatActivity> extends SimpleContro
     private static final String KEY_SHARE_PARAM         = "AndroidController_stateShareParam";
     private static final String KEY_CURRENT_STATE_FLAGS = "AndroidController_currentStateFlags";
     private static final String KEY_GLOBAL_STATE_FLAGS  = "AndroidController_globalStateFlags";
-
 
     private static final ParameterMerger<Bundle> BUNDLE_MERGER =  new ParameterMerger<Bundle>() {
         @Override
@@ -48,43 +48,51 @@ public class AndroidController<A extends AppCompatActivity> extends SimpleContro
     private final Toaster mToaster;
     private final ViewHelper mViewHelper;
 
-    public AndroidController(A activity){
+    public AndroidController(AppCompatActivity activity){
         this(activity, Gravity.CENTER);
     }
 
     /**
-     * create AndroidController .
+     * create an AndroidController .
      * @param activity the activity
      * @param gravity the gravity. {@linkplain android.view.Gravity#CENTER} and etc.
      */
-    public AndroidController(A activity, int gravity) {
+    public AndroidController(AppCompatActivity activity, int gravity) {
         super(activity);
         this.mToaster = new Toaster(activity, gravity);
         this.mViewHelper = new ViewHelper(activity.getWindow().getDecorView());
         setParameterMerger(BUNDLE_MERGER);
     }
-
+    @Override
     public final ViewHelper getViewHelper(){
         return mViewHelper;
     }
-
+    @Override
     public final Toaster getToaster() {
         return mToaster;
     }
-
-    @SuppressWarnings("unchecked")
-    public final A getActivity(){
-        return (A) getOwner();
-    }
-
+    @Override
     public final Context getContext() {
         return getViewHelper().getContext();
     }
-
+    @Override
     public final View getRootView() {
         return getViewHelper().getRootView();
     }
-
+    @Override
+    public final AndroidController getController() {
+        return this;
+    }
+    @SuppressWarnings("unchecked")
+    @Override
+    public final AppCompatActivity getActivity(){
+        return (AppCompatActivity) getOwner();
+    }
+    @SuppressWarnings("unchecked")
+    @Override
+    public final <T extends AppCompatActivity> T getTargetActivity(Class<T> clazz) {
+        return (T) getActivity();
+    }
     //=======================================================================//
 
     /**
@@ -196,11 +204,11 @@ public class AndroidController<A extends AppCompatActivity> extends SimpleContro
             if(shareParam != null){
                 setShareStateParam(shareParam);
             }
-            if(currFlags > 0){
-                setState(currFlags);
-            }
             if(globalFlags > 0){
                 setGlobalState(globalFlags);
+            }
+            if(currFlags > 0){
+                setState(currFlags);
             }
             //restore global states.
             List<AndroidState> states = getGlobalStates();
