@@ -41,6 +41,27 @@ import java.util.List;
  */
 public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	
+
+	/**
+	 * set mutex states between the target groupState1 and the target groupState2.
+	 * that means any state of groupState1 is mutex with any state of groupState2.
+	 * @param groupState1 the input group state1
+	 * @param groupState2 the input group state2.
+	 */
+	void setMutexState(int[] groupState1, int[] groupState2);
+	
+	/**
+	 * get mutex states and put it to the target groupStates .
+	 * @param groupStates the output group states. And groupStates[0] is one group of states, groupStates[1] is the other group state.
+	 */
+	void getMutexState(int[][] groupStates);
+	
+	/**
+	 * get the mutex states for target state.
+	 * @param mainState the single state.
+	 * @return the states which is mutex with target mainState. or null if not have the states mutex with it.
+	 */
+	int[] getMutexState(int mainState);
 	
 	/**
 	 * set the owner of this controller.

@@ -4,6 +4,7 @@ import com.heaven7.java.mvcs.IController.StateFactory;
 import com.heaven7.java.mvcs.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
@@ -191,6 +192,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         state.setStateParameter(p);
         state.onAttach(getController());
         state.onReenter();
+        //TODO need handle mutex ?
     }
 
     private void enter0(int singleState, S state) {
@@ -201,6 +203,22 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         state.setStateParameter(p);
         state.onAttach(getController());
         state.onEnter();
+        
+        //handle mutex states
+        int[] mutexStates = getController().getMutexState(singleState);
+        if(mutexStates != null){
+        	final SparseArray<S> stateMap = getStateMap();
+        	int oppositeState = 0;
+        	for(int s : mutexStates){
+        		if(stateMap.get(s) != null){
+        			oppositeState |= s;
+        	     	exit0(s);
+        		}
+        	}
+        	this.mCurrentStates &= ~oppositeState;
+        	//System.out.println("mutex state occurs. Main state : " + singleState + " , Mutex states : "+ Arrays.toString(mutexStates));
+        	//System.out.println("mutex state occurs. after adjust current state : " + mCurrentStates);
+        }
     }
 
     private void exit0(int singleState) {

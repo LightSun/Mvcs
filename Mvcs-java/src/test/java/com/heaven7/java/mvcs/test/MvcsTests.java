@@ -15,6 +15,7 @@ public class MvcsTests extends TestCase {
     static final int STATE_MOVING = 1;
     static final int STATE_EAT    = 2;
     static final int STATE_SLEEP  = 4;
+    static final int STATE_EAT_MUTEX  = 8;
     private SimpleController<SimpleState<String>,String> mController;
 
     @Override
@@ -33,11 +34,21 @@ public class MvcsTests extends TestCase {
 
                     case STATE_SLEEP:
                         return new SleepState();
+                        
+                    case STATE_EAT_MUTEX:
+                    	return new MutexEatState();
                 }
                 return null;
             }
         });
         mController.setParameterMerger(new ParamepterMergerImpl());
+    }
+    
+    public void testMutex(){
+    	mController.setMutexState(new int[]{ STATE_EAT }, new int[]{ STATE_EAT_MUTEX});
+    	mController.addState(STATE_EAT);
+    	mController.addState(STATE_EAT_MUTEX);
+    	mController.addState(STATE_EAT | STATE_SLEEP);
     }
 
     public void testDispose(){
@@ -46,7 +57,7 @@ public class MvcsTests extends TestCase {
         System.out.println(mController.getCurrentStates());
         mController.dispose();
     }
-
+    
     public void testStateCache(){
     	mController.setStateCacheEnabled(true);
     	testState();
