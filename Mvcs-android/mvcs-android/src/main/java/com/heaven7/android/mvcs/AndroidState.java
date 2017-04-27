@@ -14,6 +14,9 @@ import java.util.List;
 /**
  * the android state.
  * Created by heaven7 on 2017/4/24 0024.
+ * @see com.heaven7.java.mvcs.AbstractState
+ * @see SimpleState
+ * @see AndroidMvcsContext
  */
 public class AndroidState extends SimpleState<Bundle> implements AndroidMvcsContext{
 

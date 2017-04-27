@@ -17,9 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * a controller of android implements.
  * Created by heaven7 on 2017/4/24 0024.
+ * @see com.heaven7.java.mvcs.IController
+ * @see SimpleController
+ * @see AndroidMvcsContext
  */
-
 public class AndroidController extends SimpleController<AndroidState, Bundle>
       implements AndroidMvcsContext{
 
@@ -44,7 +47,6 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
             return t1;
         }
     };
-
     private final Toaster mToaster;
     private final ViewHelper mViewHelper;
 
