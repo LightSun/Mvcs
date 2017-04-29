@@ -197,7 +197,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     private void enter0(int singleState, S state) {
         if(state == null){
             throw new IllegalStateException("create state failed. Are you forget to create State " +
-                    "for state_flag = " + singleState + " ? ");
+                    "for state_flag = " + singleState + " by StateFactory? ");
         }
     	//cache state 
     	mCachedState &= ~singleState;
