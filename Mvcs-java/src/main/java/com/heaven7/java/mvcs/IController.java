@@ -36,7 +36,7 @@ import java.util.List;
  *          any state of one group is mutex with any state of the other group. That is if double states is mutex.
  *          when either one of them called {@linkplain AbstractState#onEnter()}, the other
  *          state's {@linkplain AbstractState#onExit()} must be called.
- *          see {@linkplain #setMutexState(int[], int[])} , {@linkplain #getMutexState(int[][])}
+ *          see {@linkplain #setMutexState(int[], int[])} , {@linkplain #addMutexState(int[])}
  *          and {@linkplain #getMutexState(int)}.
  *     </li>
  * </ul>
@@ -47,7 +47,14 @@ import java.util.List;
  * @param <P> the parameter type.
  */
 public interface IController<S extends AbstractState<P>, P> extends Disposeable{
-	
+
+
+    /**
+     * add a group state to mutex. This means any one state of the groupState is mutex with
+     * others of the groupState.
+     * @param groupState the target group state. which is mutex with each other.
+     */
+    void addMutexState(int[] groupState);
 
 	/**
 	 * set mutex states between the target groupState1 and the target groupState2.
@@ -56,13 +63,6 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @param groupState2 the input group state2.
 	 */
 	void setMutexState(int[] groupState1, int[] groupState2);
-	
-	/**
-	 * get mutex states and put it to the target groupStates .
-	 * @param groupStates the output group states. And 'groupStates[0]' is one group of states,
-     *                    'groupStates[1]' is the other group state.
-	 */
-	void getMutexState(int[][] groupStates);
 	
 	/**
 	 * get the mutex states for target state.

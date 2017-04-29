@@ -213,7 +213,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         	final SparseArray<S> stateMap = getStateMap();
         	int oppositeState = 0;
         	for(int s : mutexStates){
-        		if(stateMap.get(s) != null){
+                //state is not the main state.
+        		if(s != singleState && stateMap.get(s) != null){
         			oppositeState |= s;
         	     	exit0(s);
         		}

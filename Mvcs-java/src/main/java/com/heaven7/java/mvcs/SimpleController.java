@@ -2,7 +2,6 @@ package com.heaven7.java.mvcs;
 
 import com.heaven7.java.mvcs.util.SparseArray;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,10 +42,13 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private P mShareParam;
 	/** the owner of this controller or states. */
 	private Object mOwner;
+
 	/** mutex state group 1*/
 	private int[] mMutexStates1;
 	/** mutex state group 2*/
 	private int[] mMutexStates2;
+	/** the mutex groups(key is the sum of states, value is group (indicate any one is mutex with each other).) */
+	private SparseArray<int[]> mMutexMap;
 
 	private class StateNode{
 		int states;
@@ -95,34 +97,53 @@ public class SimpleController<S extends AbstractState<P>, P>
 			return mShareParam;
 		}
 	}
-	
+
+	@Override
+	public void addMutexState(int[] groupState) {
+		if(groupState == null || groupState.length == 0){
+			throw new IllegalArgumentException();
+		}
+		if(mMutexMap == null){
+			mMutexMap = new SparseArray<int[]>(4);
+		}
+		int key = 0;
+		for(int s : groupState){
+			key |= s;
+		}
+		final int[] val = mMutexMap.get(key);
+		if(val == null){
+			mMutexMap.put(key, groupState);
+		}
+	}
+
 	@Override
 	public void setMutexState(int[] groupState1, int[] groupState2) {
 		this.mMutexStates1 = groupState1;
 		this.mMutexStates2 = groupState2;
 	}
 	@Override
-	public void getMutexState(int[][] groupStates) {
-		groupStates[0] = mMutexStates1;
-		groupStates[1] = mMutexStates2;
-	}
-	
-	@Override
 	public int[] getMutexState(int mainState) {
-		if(mMutexStates1 == null || mMutexStates1.length == 0){
-			return null;
-		}
-		if(mMutexStates2 == null || mMutexStates2.length == 0){
-			return null;
-		}
-		for(int state : mMutexStates1){
-			if(state == mainState){
-				return mMutexStates2;
+		if(mMutexStates1 != null && mMutexStates1.length > 0) {
+			for (int state : mMutexStates1) {
+				if (state == mainState) {
+					return mMutexStates2;
+				}
 			}
 		}
-		for(int state : mMutexStates2){
-			if(state == mainState){
-				return mMutexStates1;
+		if(mMutexStates2 != null && mMutexStates2.length > 0) {
+			for (int state : mMutexStates2) {
+				if (state == mainState) {
+					return mMutexStates1;
+				}
+			}
+		}
+		final SparseArray<int[]> mMutexMap = this.mMutexMap;
+		if(mMutexMap != null) {
+			final int size = mMutexMap.size();
+			for (int i = size - 1; i >= 0; i--) {
+				if ((mMutexMap.keyAt(i) & mainState) != 0) {
+					return mMutexMap.valueAt(i);
+				}
 			}
 		}
 		return null;
