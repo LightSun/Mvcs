@@ -14,7 +14,7 @@ import com.heaven7.java.base.anno.Deprecated;
  *              {@linkplain IController#notifyStateUpdate(Object)}.
  *     </li>
  *     <li> Release Resource: when destroy state is called by {@linkplain IController#dispose()}.
- *        seee {@linkplain #dispose()}.
+ *        see {@linkplain #dispose()} or {@linkplain #onDispose()}.
  *     </li>
  * </ul>
  * @param <P> the state parameter type.
