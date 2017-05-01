@@ -328,7 +328,8 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	/**
 	 * check mutex state of the target expect states.
 	 * @param expect the expect states
-	 * @throws MutexStateException if the expect states have multi states and have mutex state,
+	 * @throws MutexStateException if the expect states have multi states and have mutex state.
+	 * @since 1.1.2
 	 */
 	private void checkMutexState(int expect) throws MutexStateException{
 		//check only one state.
