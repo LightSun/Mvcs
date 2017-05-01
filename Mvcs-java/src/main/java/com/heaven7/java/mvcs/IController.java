@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import com.heaven7.java.base.anno.IntDef;
+import com.heaven7.java.mvcs.util.MutexStateException;
 
 /**
  * a state controller which support multi states.
@@ -43,7 +44,7 @@ import com.heaven7.java.base.anno.IntDef;
  *          when either one of them called {@linkplain AbstractState#onEnter()}, the other
  *          state's {@linkplain AbstractState#onExit()} must be called.
  *          see {@linkplain #setMutexState(int[], int[])} , {@linkplain #addMutexState(int[])}
- *          and {@linkplain #getMutexState(int)}.
+ *          and {@linkplain #getMutexState(int)}. And you should care about {@linkplain MutexStateException}.
  *     </li>
  * </ul>
  * <h1>Note: current state and global states shouldn't intersect state.</h1>
@@ -171,6 +172,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * add states(may be multi) to controller.
      * @param states the new states flags.
      * @return true if add the target states success.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
 	boolean addState(@StateFlags int states);
 	
@@ -179,6 +181,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param states the target state
      * @return true if remove state success. or else this state is not entered,
      * @see {@link #addState(int)}
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     boolean removeState(@StateFlags int states);
 
@@ -188,6 +191,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param param the extra parameter.
      * @return true if remove state success. or else this state is not entered,
      * @see {@link #addState(int)}
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     boolean removeState(@StateFlags int states, P param);
 
@@ -205,6 +209,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * change to the state
      *
      * @param newStates the new state to change to.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     void setState(@StateFlags int newStates);
     
@@ -212,6 +217,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * change to the state
      *
      * @param newStates the new state to change to.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     void setState(@StateFlags int newStates, P extra);
     
@@ -227,6 +233,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     /**
      * set global states
      * @param states the target global states.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     void setGlobalState(@StateFlags int states);
     /**
@@ -234,6 +241,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      *
      * @param states the global state.
      * @param extra the extra parameter
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     void setGlobalState(@StateFlags int states, P extra);
     
@@ -247,6 +255,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param states the state to be compared with the current state
      * @return true if the current state and the given state are the same
      * object.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     boolean isInState(@StateFlags int states);
     
@@ -254,6 +263,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * indicate is the target state is acting or not. this is often used in mix state.
      * @param state the target state to check
      * @return true is has the target state.
+     * @throws MutexStateException if the target states have mutex states with states.
      */
     boolean hasState(@StateFlags int state);
 
