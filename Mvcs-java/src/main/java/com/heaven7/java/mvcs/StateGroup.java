@@ -295,7 +295,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     	}*/
 	}
 
-    public void dispose() {
+	public void dispose() {
         final SparseArray<S> map = getStateMap();
         int curFlags = this.mCurrentStates;
         int maxKey;
