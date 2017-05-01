@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import com.heaven7.android.mvcs.AndroidController;
 import com.heaven7.core.util.Toaster;
 
+import butterknife.ButterKnife;
+
 /**
  * this is a sample mvcs base activity.
  * Created by heaven7 on 2017/4/24 0024.
@@ -22,6 +24,7 @@ public abstract class MvcsBaseActivity<C extends AndroidController>
 
         onPreSetContentView();
         setContentView(getLayoutId());
+        ButterKnife.bind(this);
         mController = createController();
        // mController = new AndroidController<MvcsBaseActivity>(this, Gravity.CENTER);
         mController.onCreate();

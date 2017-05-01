@@ -1,13 +1,15 @@
 package com.heaven7.android.mvcs.test;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import com.heaven7.android.mvcs.test.sample.MvcsLogSample;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
 
+/**
+ * samples of mvcs.
+ */
+public class MainActivity extends AbsMainActivity {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected void addDemos(List<ActivityInfo> list) {
+        list.add(new ActivityInfo(MvcsLogSample.class, "only show log"));
     }
 }
