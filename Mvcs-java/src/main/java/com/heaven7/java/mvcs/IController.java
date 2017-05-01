@@ -1,6 +1,12 @@
 package com.heaven7.java.mvcs;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
+
+import com.heaven7.java.base.anno.IntDef;
 
 /**
  * a state controller which support multi states.
@@ -159,14 +165,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param extra the extra state parameter
      * @return true if add the target states success.
      */
-	boolean addState(int states, P extra);
+	boolean addState(@StateFlags int states, P extra);
 
     /**
      * add states(may be multi) to controller.
      * @param states the new states flags.
      * @return true if add the target states success.
      */
-	boolean addState(int states);
+	boolean addState(@StateFlags int states);
 	
 	 /**
      * remove the target state from current state.
@@ -174,7 +180,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @return true if remove state success. or else this state is not entered,
      * @see {@link #addState(int)}
      */
-    boolean removeState(int states);
+    boolean removeState(@StateFlags int states);
 
     /**
      * remove the target state from current state.
@@ -183,7 +189,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @return true if remove state success. or else this state is not entered,
      * @see {@link #addState(int)}
      */
-    boolean removeState(int states, P param);
+    boolean removeState(@StateFlags int states, P param);
 
     /**
      * clear the all states
@@ -200,14 +206,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      *
      * @param newStates the new state to change to.
      */
-    void setState(int newStates);
+    void setState(@StateFlags int newStates);
     
     /**
      * change to the state
      *
      * @param newStates the new state to change to.
      */
-    void setState(int newStates, P extra);
+    void setState(@StateFlags int newStates, P extra);
     
     /**
      * Change state back to the previous state.
@@ -222,14 +228,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * set global states
      * @param states the target global states.
      */
-    void setGlobalState(int states);
+    void setGlobalState(@StateFlags int states);
     /**
      * Sets the global state of this state machine.
      *
      * @param states the global state.
      * @param extra the extra parameter
      */
-    void setGlobalState(int states, P extra);
+    void setGlobalState(@StateFlags int states, P extra);
     
     /**
      * Indicates whether the state machine is in the given state.
@@ -242,14 +248,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @return true if the current state and the given state are the same
      * object.
      */
-    boolean isInState(int states);
+    boolean isInState(@StateFlags int states);
     
     /**
      * indicate is the target state is acting or not. this is often used in mix state.
      * @param state the target state to check
      * @return true is has the target state.
      */
-    boolean hasState(int state);
+    boolean hasState(@StateFlags int state);
 
     /**
      * get the current states  without global states..
@@ -276,7 +282,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @see  #setGlobalState(int, Object)
      * @see  #setGlobalState(int)
      */
-    int getGlobalStateFlags();
+	int getGlobalStateFlags();
 
 
     /**
@@ -362,7 +368,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     	S createState(int stateKey, P p);
     }
     
-   /* @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.PARAMETER, ElementType.FIELD})
     @IntDef(flag = true , value = {
     	0x00000001,
@@ -398,8 +404,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     	0x40000000,
     	//0x80000000, //-2147483648
     })
-    @interface StateType{
+    @interface StateFlags{
     	
-    }*/
+    }
 
 }

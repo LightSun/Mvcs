@@ -235,7 +235,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean addState(int states, P extra) {
+	public boolean addState(@StateFlags int states, P extra) {
 		checkState();
 		extra = mergeShareParam(extra);
 		if(mGroup.addState(states, extra)){
@@ -246,12 +246,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean addState(int states) {
+	public boolean addState(@StateFlags int states) {
 		return addState(states, null);
 	}
 
 	@Override
-	public boolean removeState(int states, P param) {
+	public boolean removeState(@StateFlags int states, P param) {
 		checkState();
 		param = mergeShareParam(param);
 		if(mGroup.removeState(states, param)){
@@ -262,7 +262,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean removeState(int states) {
+	public boolean removeState(@StateFlags int states) {
 		return removeState(states, null);
 	}
 
@@ -281,12 +281,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setState(int newStates) {
+	public void setState(@StateFlags int newStates) {
 	    setState(newStates, null);
 	}
 
 	@Override
-	public void setState(int newStates, P extra) {
+	public void setState(@StateFlags int newStates, P extra) {
 		checkState();
 		extra = mergeShareParam(extra);
 		if(mGroup.setStates(newStates, extra)){
@@ -313,12 +313,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setGlobalState(int states) {
+	public void setGlobalState(@StateFlags int states) {
         setGlobalState(states, null);
 	}
 
 	@Override
-	public void setGlobalState(int states, P extra) {
+	public void setGlobalState(@StateFlags int states, P extra) {
 		if(mGlobalGroup == null) {
 			mGlobalGroup = new StateGroup<S,P>(this, mCallback);
 		}
@@ -340,13 +340,13 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean isInState(int states) {
+	public boolean isInState(@StateFlags int states) {
 		checkState();
 		return mGroup.getStateFlags() == states;
 	}
 
 	@Override
-	public boolean hasState(int state) {
+	public boolean hasState(@StateFlags int state) {
 		checkState();
 		return mGroup.hasState(state);
 	}
