@@ -57,7 +57,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
     /**
      * create an AndroidController .
      * @param activity the activity
-     * @param gravity the gravity. {@linkplain android.view.Gravity#CENTER} and etc.
+     * @param gravity the gravity of toast. {@linkplain android.view.Gravity#CENTER} and etc.
      */
     public AndroidController(AppCompatActivity activity, int gravity) {
         super(activity);

@@ -52,7 +52,7 @@ public abstract class MvcsBaseActivity<C extends AndroidController>
         mController.onSaveInstanceState(outState);
     }
 
-    public C getController(){
+    public final  C getController(){
         return mController;
     }
 

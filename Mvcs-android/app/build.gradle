@@ -28,4 +28,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile project(':mvcs-android')
+    compile 'com.heaven7.core.adapter:adapter:1.8.8'
 }
