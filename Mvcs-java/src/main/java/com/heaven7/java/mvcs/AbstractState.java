@@ -1,5 +1,7 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.base.anno.Deprecated;
+
 /**
  * the abstract state which is controlled by {@link IController}.
  * <ul>
@@ -67,7 +69,6 @@ public abstract class AbstractState<P> implements Disposeable{
 	 * @see IController
 	 * @throws IllegalStateException if the state is detached.
 	 */
-	@SuppressWarnings("unchecked")
 	public IController<?, P> getController() throws IllegalStateException{
 		if(isDetached()){
 			throw new IllegalStateException("state haven't attach or is detached.");
@@ -113,8 +114,13 @@ public abstract class AbstractState<P> implements Disposeable{
 	public void onUpdate(P param) {
 	}
 
+	@Deprecated("use #onDispose() instead, this will be delete.")
 	@Override
 	public void dispose() {
+		onDispose();
+	}
+	
+	public void onDispose() {
 
 	}
 }
