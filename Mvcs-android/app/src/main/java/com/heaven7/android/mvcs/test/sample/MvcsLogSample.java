@@ -37,7 +37,6 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
 
     private static final int [] STATES = {STATE_EAT, STATE_WORK, STATE_SLEEP};
     private static final String [] STATE_STRS = {"STATE_EAT", "STATE_WORK", "STATE_SLEEP"};
-    private int index;
 
     @Override
     protected LogController createController() {
@@ -87,8 +86,7 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
     }
     @OnClick(R.id.bt_get)
     public void onClickGet(View v){
-        final int index =  randomState();
-        Logger.i(TAG, "onClickGet", STATE_STRS[index]);
+        Logger.i(TAG, "onClickGet");
         final List<AndroidState> states = getController().getCurrentStates();
         syso(states.toString(), true);
     }

@@ -5,9 +5,9 @@ import android.os.Bundle;
 import com.heaven7.java.mvcs.IController;
 
 /**
+ * the state factory of android
  * Created by heaven7 on 2017/5/1.
  */
-
 public interface AndroidStateFactory extends IController.StateFactory<AndroidState, Bundle>{
 
 }
