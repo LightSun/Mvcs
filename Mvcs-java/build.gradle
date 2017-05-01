@@ -25,7 +25,7 @@ allprojects {
 dependencies {
 
     testCompile 'junit:junit:4.12'
-   //compile 'com.heaven7.java.base:Java-base:1.0'
+    compile 'com.heaven7.java.base:Java-base:1.0'
 }
 
 publish {
