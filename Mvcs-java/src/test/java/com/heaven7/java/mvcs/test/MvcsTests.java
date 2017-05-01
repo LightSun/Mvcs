@@ -43,12 +43,26 @@ public class MvcsTests extends TestCase {
         });
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
-
-    public void testMutex2(){
+    
+    public void testMutex3(){
+    	mController.addState(STATE_EAT);
+        mController.addState(STATE_EAT | STATE_EAT_MUTEX);
+    	
         mController.addMutexState(new int[]{ STATE_EAT, STATE_EAT_MUTEX });
         mController.addState(STATE_EAT);
-        mController.addState(STATE_EAT_MUTEX);
-        mController.addState(STATE_EAT | STATE_SLEEP);
+        
+        // below all must be exception
+        // mController.addState(STATE_EAT | STATE_EAT_MUTEX); 
+        // mController.setGlobalState(STATE_EAT | STATE_EAT_MUTEX); 
+        // mController.setState(STATE_EAT | STATE_EAT_MUTEX); 
+        // mController.removeState(STATE_EAT | STATE_EAT_MUTEX); 
+        // mController.hasState(STATE_EAT | STATE_SLEEP | STATE_EAT_MUTEX ); 
+    }
+    public void testMutex2(){
+    	mController.addMutexState(new int[]{ STATE_EAT, STATE_EAT_MUTEX });
+    	mController.addState(STATE_EAT);
+    	mController.addState(STATE_EAT_MUTEX);
+    	mController.addState(STATE_EAT | STATE_SLEEP);
     }
     
     public void testMutex(){

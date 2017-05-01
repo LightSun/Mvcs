@@ -24,12 +24,13 @@ public class MathUtil {
 		return (int) Math.pow(2, log2n(n));
 	}
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		System.out.println(Math.log(Math.E));// 1
 		System.out.println(Math.log(5) / Math.log(2)); // 2
 		System.out.println(max2K(5)); // 4
-		System.out.println(max2K(1));
+		System.out.println(max2K(1)); //1
 		System.out.println(max2K(Integer.MAX_VALUE)); // 1073741824
+		//System.out.println(max2K(-1)); //1
 
 		int curFlags = 484359;
 		int maxKey;
@@ -40,5 +41,5 @@ public class MathUtil {
 				curFlags -= maxKey;
 			}
 		}
-	}*/
+	}
 }

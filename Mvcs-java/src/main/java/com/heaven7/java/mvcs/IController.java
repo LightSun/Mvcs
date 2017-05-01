@@ -368,6 +368,11 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     	S createState(int stateKey, P p);
     }
     
+    /**
+     * the state flags that define the values of multi states.
+     * @author heaven7
+     *
+     */
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.PARAMETER, ElementType.FIELD})
     @IntDef(flag = true , value = {

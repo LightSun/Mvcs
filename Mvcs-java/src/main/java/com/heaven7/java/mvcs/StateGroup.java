@@ -1,12 +1,13 @@
 package com.heaven7.java.mvcs;
 
-import com.heaven7.java.mvcs.IController.StateFactory;
-import com.heaven7.java.mvcs.util.SparseArray;
+import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.heaven7.java.mvcs.util.MathUtil.max2K;
+import com.heaven7.java.mvcs.IController.StateFactory;
+import com.heaven7.java.mvcs.util.MutexStateException;
+import com.heaven7.java.mvcs.util.SparseArray;
 
 /**
  * the state group . manage a group of state.
@@ -57,7 +58,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         return mCurrentStates;
     }
     public boolean hasState(int state) {
-        return (getStateFlags() & state) != 0;
+    	checkMutexState(state);
+        return state > 0 && (getStateFlags() & state) != 0;
     }
 
     public boolean clearState(P param) {
@@ -73,6 +75,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
     }
     public boolean removeState(int states, P param) {
         if (states <= 0) return false;
+        checkMutexState(states);
+        
         this.mCurrentStates &= ~states;
         this.mParam = param;
         dispatchStateChange(0, 0, states);
@@ -82,6 +86,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
     public boolean addState(int states, P extra) {
         if (states <= 0) return false;
+        checkMutexState(states);
         //no change.
         final int shareFlags = mCurrentStates & states;
         if (shareFlags == states) {
@@ -96,6 +101,8 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
     public boolean setStates(int newStates, P p) {
         if (newStates <= 0 ) return false;
+        checkMutexState(newStates);
+        
         final int mCurr = this.mCurrentStates;
         if (mCurr == newStates) {
             return false;
@@ -290,6 +297,7 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 	                 curFlags -= maxKey;
 	             }
 	         }
+	         mCachedState = 0;
     	}/*else{
     		System.out.println("no state cache...");
     	}*/
@@ -316,6 +324,36 @@ import static com.heaven7.java.mvcs.util.MathUtil.max2K;
         this.mCachedState = 0;
         this.mParam = null;
     }
+	
+	/**
+	 * check mutex state of the target expect states.
+	 * @param expect the expect states
+	 * @throws MutexStateException if the expect states have multi states and have mutex state,
+	 */
+	private void checkMutexState(int expect) throws MutexStateException{
+		//check only one state.
+		if(max2K(expect) == expect){
+			//System.out.println("only one state. state = " + expect);
+			return;
+		}
+		final IController<S, P> contro = this.mController;
+		int flags = expect;
+		int key;
+		for( ; flags > 0  ; ){
+			key = max2K(flags);
+			int[] mutexStates = contro.getMutexState(key);
+			if(mutexStates != null && mutexStates.length > 0){
+				for(int s : mutexStates){
+					if(s != key && (expect & s ) != 0){
+						//flags &= ~ s;  //cancel state
+						throw new MutexStateException("check parameter ,find unexpect mutex states, "
+								+ "mutex states = (" + key + ", " + s + ")");
+					}
+				}
+			}
+			flags -= key;
+		}
+	}
 
     public interface Callback<S extends AbstractState<P>, P>{
         ParameterMerger<P> getMerger();

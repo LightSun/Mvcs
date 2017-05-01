@@ -1,10 +1,10 @@
 package com.heaven7.java.mvcs;
 
-import com.heaven7.java.mvcs.util.SparseArray;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.heaven7.java.mvcs.util.SparseArray;
 
 /**
  * a simple implements of {@linkplain IController}
@@ -236,7 +236,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public boolean addState(@StateFlags int states, P extra) {
-		checkState();
+		checkMemberState();
 		extra = mergeShareParam(extra);
 		if(mGroup.addState(states, extra)){
 			addHistory(mGroup.getStateFlags(), extra);
@@ -252,7 +252,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public boolean removeState(@StateFlags int states, P param) {
-		checkState();
+		checkMemberState();
 		param = mergeShareParam(param);
 		if(mGroup.removeState(states, param)){
 			addHistory(mGroup.getStateFlags(), param);
@@ -273,7 +273,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public void clearState(P param) {
-		checkState();
+		checkMemberState();
 		param = mergeShareParam(param);
 		if(mGroup.clearState(param)){
 			addHistory(mGroup.getStateFlags(), param);
@@ -287,7 +287,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public void setState(@StateFlags int newStates, P extra) {
-		checkState();
+		checkMemberState();
 		extra = mergeShareParam(extra);
 		if(mGroup.setStates(newStates, extra)){
 			addHistory(mGroup.getStateFlags(), extra);
@@ -300,7 +300,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 			throw new IllegalStateException("you must enable state stack b" +
 					"y calling setStateStackEnable() first.");
 		}
-		checkState();
+		checkMemberState();
 		StateNode node = mStateStack.pollLast();
 		if(node == null){
 			return false;
@@ -341,19 +341,19 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public boolean isInState(@StateFlags int states) {
-		checkState();
+		checkMemberState();
 		return mGroup.getStateFlags() == states;
 	}
 
 	@Override
 	public boolean hasState(@StateFlags int state) {
-		checkState();
+		checkMemberState();
 		return mGroup.hasState(state);
 	}
 
 	@Override
 	public List<S> getCurrentStates() {
-		checkState();
+		checkMemberState();
 		return mGroup.getStates();
 	}
 
@@ -463,7 +463,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 		this.mOwner = null;
 	}
 
-	private void checkState() {
+	private void checkMemberState() {
 		if(mFactory == null){
 			throw new IllegalStateException("you must call setStateFactory(). first.");
 		}
