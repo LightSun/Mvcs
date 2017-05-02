@@ -99,6 +99,7 @@
         android:id="@+id/et_log"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="5dp"
         android:background="@null"
         android:hint="@string/log_hint"
         android:textColor="@android:color/black"

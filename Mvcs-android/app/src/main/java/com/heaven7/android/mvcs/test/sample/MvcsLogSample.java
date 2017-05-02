@@ -35,7 +35,6 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
     private static final int STATE_EAT     = 1;
     private static final int STATE_WORK    = 2;
     private static final int STATE_SLEEP   = 4;
-    /** 和 STATE_WORK 互斥*/
     private static final int STATE_WORK_2  = 8;
 
     private static final int [] STATES = {STATE_EAT, STATE_WORK, STATE_SLEEP};
@@ -62,7 +61,7 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
             super(activity);
         }
     }
-
+    //随机计算得到状态index
     private int randomState(){
         return RANDOM.nextInt(3);
     }
@@ -87,9 +86,9 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
         final int index =  randomState();
         Logger.i(TAG, "onClickRemove", STATE_STRS[index]);
         if(!getController().removeState(STATES[index])){
-            syso("remove failed.", true);
+            syso("remove state("+ STATE_STRS[index] +") failed.");
         }else{
-            syso("remove success.", true);
+            syso("remove state("+ STATE_STRS[index] +") success.");
         }
     }
     @OnClick(R.id.bt_get)
@@ -97,12 +96,13 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
         syso("---------------- start test:  onClickGet() ---------------->>> ");
         Logger.i(TAG, "onClickGet");
         final List<AndroidState> states = getController().getCurrentStates();
-        syso(states.toString(), true);
+        syso( states != null ? states.toString() : "have no state");
     }
     @OnClick(R.id.bt_mutex)
     public void onClickMutex(View v){
         syso("---------------- start test:  onClickMutex() ---------------->>> ");
-        getController().addMutexState(new int []{STATE_WORK, STATE_WORK_2});
+        //设置 状态 STATE_WORK 和 STATE_WORK_2 互斥
+        getController().addMutexState(new int []{ STATE_WORK, STATE_WORK_2 });
         getController().addState(STATE_WORK);
         getController().addState(STATE_WORK_2);
         getController().addState(STATE_WORK);
@@ -124,14 +124,18 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
     public void onClickLockEvent(View v){
         syso("---------------- start test:  onClickLockEvent() ---------------->>> ");
         if(getController().lockEvent(EVENT_CLICK_ITEM)){
-            syso("lock event ok. event = EVENT_CLICK_ITEM");
+            syso("lock event success. event = EVENT_CLICK_ITEM");
+        }else{
+            syso("lock event failed. event = EVENT_CLICK_ITEM");
         }
     }
     @OnClick(R.id.bt_unlock_event)
     public void onClickUnlockEvent(View v){
         syso("---------------- start test:  onClickUnlockEvent() ---------------->>> ");
         if(getController().unlockEvent(EVENT_CLICK_ITEM)){
-            syso("unlock event ok. event = EVENT_CLICK_ITEM");
+            syso("unlock event success. event = EVENT_CLICK_ITEM");
+        }else{
+            syso("unlock event failed. event = EVENT_CLICK_ITEM");
         }
     }
     @OnClick(R.id.bt_clear_log)
