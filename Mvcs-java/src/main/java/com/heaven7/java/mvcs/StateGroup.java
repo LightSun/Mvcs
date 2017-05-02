@@ -100,10 +100,11 @@ import com.heaven7.java.mvcs.util.SparseArray;
         //no change.
         final int shareFlags = mCurrentStates & states;
         if (shareFlags == states) {
-            return false;
+        	//reenter
+        }else{
+        	 this.mCurrentStates |= states;
         }
         this.mParam = extra;
-        this.mCurrentStates |= states;
         dispatchStateChange(shareFlags, states & ~shareFlags, 0);
         this.mParam = null;
         return true;
@@ -115,6 +116,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
         
         final int mCurr = this.mCurrentStates;
         if (mCurr == newStates) {
+        	//no reenter
             return false;
         }
         this.mCurrentStates = newStates;

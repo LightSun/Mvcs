@@ -110,7 +110,7 @@ public class MvcsTests extends TestCase {
         mController.setShareStateParam("__share__");
         mController.addState(STATE_EAT, "dfdff");
         mController.addState(STATE_MOVING |STATE_SLEEP);
-        assertFalse(mController.addState(STATE_MOVING | STATE_EAT));
+        assertTrue(mController.addState(STATE_MOVING | STATE_EAT));
 
         System.out.println("start remove state -------------");
         assertFalse(mController.removeState(STATE_UNKNOWN));
