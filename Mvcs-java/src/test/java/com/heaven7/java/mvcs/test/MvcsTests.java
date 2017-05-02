@@ -16,6 +16,8 @@ public class MvcsTests extends TestCase {
     static final int STATE_EAT    = 2;
     static final int STATE_SLEEP  = 4;
     static final int STATE_EAT_MUTEX  = 8;
+    
+    static final int STATE_UNKNOWN  = 32;
     private SimpleController<SimpleState<String>,String> mController;
 
     @Override
@@ -111,7 +113,9 @@ public class MvcsTests extends TestCase {
         assertFalse(mController.addState(STATE_MOVING | STATE_EAT));
 
         System.out.println("start remove state -------------");
-        mController.removeState(STATE_MOVING, "tag_remove");
+        assertFalse(mController.removeState(STATE_UNKNOWN));
+        //mController.removeState(STATE_MOVING, "tag_remove");
+        assertFalse(mController.removeState(STATE_MOVING | STATE_UNKNOWN));
         assertTrue(mController.addState(STATE_MOVING | STATE_EAT, "tag_reenter"));
 
         mController.clearState("tag_clear");

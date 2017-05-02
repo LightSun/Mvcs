@@ -73,15 +73,25 @@ import com.heaven7.java.mvcs.util.SparseArray;
         this.mParam = null;
         return true;
     }
+    /**
+     * only if all states remove success return true. 
+     * @param states the target states to remove
+     * @param param the parameter
+     * @return true if remove all states success.
+     */
     public boolean removeState(int states, P param) {
         if (states <= 0) return false;
         checkMutexState(states);
         
+        final int shareFlags = mCurrentStates & states;
+        if(shareFlags == 0){
+        	return false;
+        }
         this.mCurrentStates &= ~states;
         this.mParam = param;
-        dispatchStateChange(0, 0, states);
+        dispatchStateChange(0, 0, shareFlags);
         this.mParam = null;
-        return true;
+        return shareFlags == states;
     }
 
     public boolean addState(int states, P extra) {
@@ -115,7 +125,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
     }
 
     /**
-     * dispatch the state change if need.
+     * dispatch the state change if need. can't call this in remove method.
      *
      * @param currentState the current state before this state change.
      * @param newState     the target or new state
@@ -130,7 +140,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
     /**
      * dispatch state change.
      *
-     * @param shareFlags the share flags to exit().
+     * @param shareFlags the share flags to reenter().
      * @param enterFlags the enter flags to exit()
      * @param exitFlags  the exit flags to exit().
      */
