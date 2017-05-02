@@ -64,7 +64,6 @@ public class AndroidState extends SimpleState<Bundle> implements AndroidMvcsCont
      * It will be passed to the {@link #onRestoreInstanceState(Bundle)}
      * method of this controller sharing the same ID later.
      * @param  outState the out state to save
-     * @return The saved instance state
      */
     public void onSaveInstanceState(Bundle outState) {
 
