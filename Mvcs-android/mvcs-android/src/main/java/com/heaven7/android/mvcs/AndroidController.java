@@ -114,7 +114,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
 
     /**
      * called on save instance state internal. often used if you want to save other data.
-     * @param outState the out bundle
+     * @param outState the out bundle, never be null.
      */
     protected void onSaveInstanceStateInternal(Bundle outState){
 
@@ -122,7 +122,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
 
     /**
      * called on save instance state internal. often used if you want to restore other data.
-     * @param saveInstanceState The previously saved instance state
+     * @param saveInstanceState The previously saved instance state。never be null.
      */
     protected void onRestoreInstanceStateInternal(Bundle saveInstanceState){
 

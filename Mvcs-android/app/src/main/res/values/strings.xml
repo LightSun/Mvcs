@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mvcs-android</string>
+    <string name="log_hint">State log will show in here</string>
 </resources>
