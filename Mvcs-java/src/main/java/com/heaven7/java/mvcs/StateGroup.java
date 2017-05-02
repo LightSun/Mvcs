@@ -140,9 +140,9 @@ import com.heaven7.java.mvcs.util.SparseArray;
     /**
      * dispatch state change.
      *
-     * @param shareFlags the share flags to reenter().
-     * @param enterFlags the enter flags to exit()
-     * @param exitFlags  the exit flags to exit().
+     * @param shareFlags the share flags to reenter.
+     * @param enterFlags the enter flags to enter
+     * @param exitFlags  the exit flags to exit.
      */
     protected void dispatchStateChange(int shareFlags, int enterFlags, int exitFlags) {
         // Call the exit method of the existing state
