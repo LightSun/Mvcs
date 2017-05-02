@@ -2,8 +2,8 @@
 
 buildscript {
     repositories {
-        mavenCentral()
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
@@ -12,6 +12,7 @@ buildscript {
         // in the individual module build.gradle files
         //classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.jakewharton:butterknife-gradle-plugin:8.5.1'
+        classpath 'com.novoda:bintray-release:0.4.0'
     }
 }
 
