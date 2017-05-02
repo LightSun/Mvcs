@@ -105,7 +105,7 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
         getController().addMutexState(new int []{ STATE_WORK, STATE_WORK_2 });
         getController().addState(STATE_WORK);
         getController().addState(STATE_WORK_2);
-        getController().addState(STATE_WORK);
+        getController().addState(STATE_WORK | STATE_EAT);
     }
     @OnClick(R.id.bt_update)
     public void onClickUpdate(View v){
