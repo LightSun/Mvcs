@@ -114,7 +114,7 @@ public abstract class AbstractState<P> implements Disposeable{
 	public void onUpdate(P param) {
 	}
 
-	@Deprecated("use #onDispose() instead, this will be delete.")
+	@Deprecated("use #onDispose() instead, this will be delete in 2.x version.")
 	@Override
 	public void dispose() {
 		onDispose();

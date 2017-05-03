@@ -190,6 +190,7 @@ public class MvcsLogSample extends MvcsBaseActivity<MvcsLogSample.LogController>
     private class StateFactoryImpl implements AndroidStateFactory{
 
         final LogState.LogOutput mLot = new LogState.LogOutput() {
+            @Override
             public void log(String msg) {
                 syso(msg, false);
             }
