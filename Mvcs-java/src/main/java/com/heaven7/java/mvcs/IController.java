@@ -70,7 +70,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	/**
 	 * clear the state parameter of current states. this will cause call 
 	 * {@linkplain AbstractState#setStateParameter(Object)} to clear state parameter.
-	 * default clear all current states parameter.
+	 * default clear all states parameter include cached states.
 	 * @see 1.1.5
 	 */
 	void clearStateParameter();
