@@ -3,6 +3,8 @@ package com.heaven7.java.mvcs.test;
 import com.heaven7.java.mvcs.IController;
 import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
+import com.heaven7.java.mvcs.util.ResultAction;
+
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -45,6 +47,31 @@ public class MvcsTests extends TestCase {
         });
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
+    
+    public void testTransaction(){
+    	mController.addMutexState(new int[]{ STATE_EAT, STATE_EAT_MUTEX });
+    	transactionAdd(STATE_EAT);
+    	transactionAdd(STATE_EAT_MUTEX);
+    }
+
+	private void transactionAdd(int state) {
+		mController.beginTransaction()
+	    	.operateAdd(state)
+	    	.withStartAction(new Runnable() {
+				@Override
+				public void run() {
+					System.out.println("start action...run()");
+				}
+			})
+	    	.withResultAction(new ResultAction<Boolean>() {
+				@Override
+				public void onActionResult(Boolean result) {
+					System.out.println("add state " + (result ? "success" : "failed") 
+							+": state = " + STATE_EAT);
+				}
+			})
+	    	.commit();
+	}
     
     public void testMutex3(){
     	mController.addState(STATE_EAT);

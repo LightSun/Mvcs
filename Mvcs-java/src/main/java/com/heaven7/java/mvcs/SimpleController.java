@@ -1,5 +1,7 @@
 package com.heaven7.java.mvcs;
 
+import static com.heaven7.java.mvcs.util.MathUtil.max2K;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +17,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  * @see ParameterMerger
  */
 public class SimpleController<S extends AbstractState<P>, P>
-		implements IController<S,P> , StateTransaction.TransactionExecutor<P>{
+		implements IController<S,P> {
 
 	private final StateGroup<S,P> mGroup;
 	private final StateGroup.Callback<S, P> mCallback;
@@ -50,10 +52,8 @@ public class SimpleController<S extends AbstractState<P>, P>
 	/** the mutex groups(key is the sum of states, value is group (indicate any one is mutex with each other).) */
 	private SparseArray<int[]> mMutexMap;
 	
-	/** should save the state parameter or not. default is false. */
-	private boolean mShouldSaveStateParam;
 	/** the transaction */
-	private StateTransaction<P> mTransaction;
+	private StateTransactionImpl mTransaction;
 
 	private class StateNode{
 		int states;
@@ -85,10 +85,6 @@ public class SimpleController<S extends AbstractState<P>, P>
 			@Override
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
-			}
-			@Override
-			public boolean shouldSaveStateParam() {
-				return mShouldSaveStateParam;
 			}
 		};
 		this.mGroup = new StateGroup<S,P>(this, mCallback);
@@ -342,8 +338,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
+	public final List<S> getGlobalStates(List<S> outStates) {
+		return mGlobalGroup !=null ? mGlobalGroup.getStates(outStates) : null;
+	}
+	@Override
 	public final List<S> getGlobalStates() {
-		return mGlobalGroup !=null ? mGlobalGroup.getStates() : null;
+		return mGlobalGroup !=null ? mGlobalGroup.getStates(null) : null;
 	}
 	@Override
 	public final S getGlobalState() {
@@ -364,8 +364,13 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public final List<S> getCurrentStates() {
+		return getCurrentStates(null);
+	}
+	
+	@Override
+	public final List<S> getCurrentStates(List<S> outStates) {
 		checkMemberState();
-		return mGroup.getStates();
+		return  mGroup.getStates(outStates);
 	}
 
 	@Override
@@ -477,41 +482,43 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public final StateTransaction<P> beginTransaction() {
 		if(mTransaction == null){
-			mTransaction = new StateTransaction<P>(this);
+			mTransaction = new StateTransactionImpl();
 		}
 		return mTransaction;
 	}
 	
 	@Override
-	public final boolean execute(StateTransaction<P> tran) {
-		
-		//TODO handle mShouldSaveStateParam in StateGroup
-		mShouldSaveStateParam = tran.mSaveStateParam;
-		
-		final int states = tran.mOperateStates;
-		final P param = tran.mParam;
-		
-		boolean result = false;
-        switch (tran.mOp) {
-		case StateTransaction.OP_ADD:
-			result = addState(states, param);
-			break;
-			
-		case StateTransaction.OP_SET:
-			result = setState(states, param);
-			break;
-			
-		case StateTransaction.OP_REMOVE:
-			result = removeState(states, param);
-			break;
-
-		default:
-			System.err.println("execute StateTransaction failed. " + tran);
-		}		
-        mShouldSaveStateParam = false;
-		return result;
+	public final void clearStateParameter() {
+		clearStateParameter(true);		
 	}
-
+	@Override
+	public final void clearStateParameter(boolean includeCachedState) {
+		mGroup.clearStateParameter(includeCachedState);
+	}
+	@Override
+	public S getTargetState(int state) {
+		return mStateMap.get(state);
+	}
+	
+	@Override
+	public List<S> getTargetStates(int states, List<S> outStates) {
+		if(outStates == null){
+			outStates = new ArrayList<S>();
+		}
+		final SparseArray<S> map = this.mStateMap;
+		int maxKey;
+		S s;
+		for (; states > 0;) {
+			maxKey = max2K(states);
+			s = map.get(maxKey);
+			if(s != null){
+				outStates.add(s);
+			}
+			states -= maxKey;
+		}
+		return outStates;
+	}
+	
 	private void checkMemberState() {
 		if(mFactory == null){
 			throw new IllegalStateException("you must call setStateFactory(). first.");
@@ -521,4 +528,32 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 	}
 	
+	private class StateTransactionImpl extends StateTransaction<P>{
+		@Override
+		protected boolean performTransaction() {
+			
+			final int states = mOperateStates;
+			final P param = mParam;
+			
+			boolean result = false;
+	        switch (mOp) {
+			case StateTransaction.OP_ADD:
+				result = addState(states, param);
+				break;
+				
+			case StateTransaction.OP_SET:
+				result = setState(states, param);
+				break;
+				
+			case StateTransaction.OP_REMOVE:
+				result = removeState(states, param);
+				break;
+
+			default:
+				System.err.println("execute StateTransaction failed. " + this.toString());
+			}		
+			return result;
+		} 
+		
+	}
 }

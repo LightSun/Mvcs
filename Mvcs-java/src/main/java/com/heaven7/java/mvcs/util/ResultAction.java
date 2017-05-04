@@ -11,8 +11,8 @@ public interface ResultAction<R> {
 
 
 	/**
-	 * called on result action.
+	 * called on action result.
 	 * @param result the result.
 	 */
-	void onAction(R result);
+	void onActionResult(R result);
 }

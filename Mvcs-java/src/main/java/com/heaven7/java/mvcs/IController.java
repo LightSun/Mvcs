@@ -14,8 +14,9 @@ import com.heaven7.java.mvcs.util.MutexStateException;
  * <ul>
  *     <li>State Factory: use {@linkplain #setStateFactory(StateFactory)} to set.
  *     </li>
- *     <li>State Parameter Merger: use {@linkplain #setParameterMerger(ParameterMerger)} to set
- *          merger for state parameter.
+ *     <li>State Parameter:  [Merge], use {@linkplain #setParameterMerger(ParameterMerger)} to set
+ *          merger for state parameter.<br> 
+ *          [Clear]: use {@linkplain IController#clearStateParameter(boolean)}
  *     </li>
  *     <li>State Cache: use {@linkplain #setStateCacheEnabled(boolean)} to enable or disable state cache.
  *     use {@linkplain #destroyStateCache()} to destroy state cache without current states.
@@ -46,6 +47,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
  *          see {@linkplain #setMutexState(int[], int[])} , {@linkplain #addMutexState(int[])}
  *          and {@linkplain #getMutexState(int)}. And you should care about {@linkplain MutexStateException}.
  *     </li>
+ *     <li> State Transaction: use {@linkplain #beginTransaction()}.
+ *     </li>
  * </ul>
  * <h1>Note: current state and global states shouldn't intersect state.</h1>
  * 
@@ -58,9 +61,27 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 
 	/**
 	 * begin the state transaction with current states.
-	 * @return the transaction.
+	 * @return the state transaction.
+	 * @see StateTransaction
+	 * @since 1.1.5
 	 */
 	StateTransaction<P> beginTransaction();
+	
+	/**
+	 * clear the state parameter of current states. this will cause call 
+	 * {@linkplain AbstractState#setStateParameter(Object)} to clear state parameter.
+	 * default clear all current states parameter.
+	 * @see 1.1.5
+	 */
+	void clearStateParameter();
+	
+	/**
+	 * clear the state parameter of current states. this will cause call 
+	 * {@linkplain AbstractState#setStateParameter(Object)} to clear state parameter.
+	 * @param includeCachedState true if you want to clear the parameter of cached states.
+	 * @see 1.1.5
+	 */
+	void clearStateParameter(boolean includeCachedState);
 	
     /**
      * add a group state to mutex. This means any one state of the groupState is mutex with
@@ -277,11 +298,39 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @throws MutexStateException If the target state contains a mutex.
      */
     boolean hasState(@StateFlags int state);
+    
+    /**
+     * get the target state which is assigned by target int flag. And the state can from 
+     * current state or cached state or global state , or null if not found.
+     * @param state the target state.
+     * @return the target single state.
+     * @since 1.1.5
+     */
+    S getTargetState(int state);
+    
+    /**
+     * get the target state which is assigned by target int flag. And the state can from 
+     * current state or cached state or global state , or null if not found.
+     * @param states the target state flags.
+     * @param outStates the out states. optional, can be null.
+     * @return the target states.
+     * @since 1.1.5
+     */
+    List<S> getTargetStates(int states, List<S> outStates);
 
     /**
      * get the current states  without global states..
+     * @param outStates the out states. optional, can be null.
      * @return the all states if multi. or only contains one.
+     * @since 1.1.5
      */
+	List<S> getCurrentStates(List<S> outStates);
+	
+	/**
+	 * get the current states  without global states..
+	 * @return the all states if multi. or only contains one.
+	 * @see #getCurrentStates(List)
+	 */
 	List<S> getCurrentStates();
 
     /**
@@ -306,6 +355,15 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	int getGlobalStateFlags();
 
 
+	  /**
+     * get global states. if not set (can call {@linkplain #setGlobalState(int, Object)}) return null.
+     * @param outStates the out states. optional, can be null.
+     * @return the global states.
+     * @see  #setGlobalState(int, Object)
+     * @see  #setGlobalState(int)
+     * @since 1.1.5
+     */
+    List<S> getGlobalStates(List<S> outStates);
     /**
      * get global states. if not set (can call {@linkplain #setGlobalState(int, Object)}) return null.
      * @return the global states.
