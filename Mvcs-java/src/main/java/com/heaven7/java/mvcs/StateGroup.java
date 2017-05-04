@@ -210,7 +210,6 @@ import com.heaven7.java.mvcs.util.SparseArray;
         state.setStateParameter(p);
         state.onAttach(getController());
         state.onReenter();
-        //TODO need handle mutex ?
     }
 
     private void enter0(int singleState, S state) {
@@ -372,6 +371,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
         ParameterMerger<P> getMerger();
         StateFactory<S,P> getStateFactory();
         SparseArray<S> getStateMap();
+        boolean shouldSaveStateParam();
     }
 
 }

@@ -15,7 +15,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  * @see ParameterMerger
  */
 public class SimpleController<S extends AbstractState<P>, P>
-		implements IController<S,P> {
+		implements IController<S,P> , StateTransaction.TransactionExecutor<P>{
 
 	private final StateGroup<S,P> mGroup;
 	private final StateGroup.Callback<S, P> mCallback;
@@ -49,6 +49,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private int[] mMutexStates2;
 	/** the mutex groups(key is the sum of states, value is group (indicate any one is mutex with each other).) */
 	private SparseArray<int[]> mMutexMap;
+	
+	/** should save the state parameter or not. default is false. */
+	private boolean mShouldSaveStateParam;
+	/** the transaction */
+	private StateTransaction<P> mTransaction;
 
 	private class StateNode{
 		int states;
@@ -81,6 +86,10 @@ public class SimpleController<S extends AbstractState<P>, P>
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
 			}
+			@Override
+			public boolean shouldSaveStateParam() {
+				return mShouldSaveStateParam;
+			}
 		};
 		this.mGroup = new StateGroup<S,P>(this, mCallback);
 	}
@@ -99,7 +108,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void addMutexState(int[] groupState) {
+	public final void addMutexState(int[] groupState) {
 		if(groupState == null || groupState.length == 0){
 			throw new IllegalArgumentException();
 		}
@@ -117,12 +126,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setMutexState(int[] groupState1, int[] groupState2) {
+	public final void setMutexState(int[] groupState1, int[] groupState2) {
 		this.mMutexStates1 = groupState1;
 		this.mMutexStates2 = groupState2;
 	}
 	@Override
-	public int[] getMutexState(int mainState) {
+	public final int[] getMutexState(int mainState) {
 		if(mMutexStates1 != null && mMutexStates1.length > 0) {
 			for (int state : mMutexStates1) {
 				if (state == mainState) {
@@ -151,11 +160,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 	
 	
 	@Override
-	public Object getOwner() {
+	public final Object getOwner() {
 		return mOwner;
 	}
 	@Override
-	public void setOwner(Object owner) {
+	public final void setOwner(Object owner) {
 		if(owner == null){
 			throw new NullPointerException();
 		}
@@ -163,29 +172,29 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setShareStateParam(P param) {
+	public final void setShareStateParam(P param) {
 		this.mShareParam = param;
 	}
 
 	@Override
-	public P getShareStateParam() {
+	public final P getShareStateParam() {
 		return mShareParam;
 	}
 	
 	@Override
-	public void setStateCacheEnabled(boolean enable) {
+	public final void setStateCacheEnabled(boolean enable) {
 		if(mEnableStateCache != enable){
 		    mEnableStateCache = enable;
 		}
 	}
 
 	@Override
-	public boolean isStateCacheEnabled() {
+	public final boolean isStateCacheEnabled() {
 		return mEnableStateCache;
 	}
 
 	@Override
-	public void destroyStateCache() {
+	public final void destroyStateCache() {
 		if(mGlobalGroup != null){
 			mGlobalGroup.destroyStateCache();
 		}
@@ -193,29 +202,29 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void clearStateStack() {
+	public final void clearStateStack() {
 		if(mStateStack != null){
 			mStateStack.clear();
 		}
 	}
 
 	@Override
-	public void setMaxStateStackSize(int max) {
+	public final void setMaxStateStackSize(int max) {
 		this.mMaxStackSize = max;
 	}
 
 	@Override
-	public int getMaxStateStackSize() {
+	public final int getMaxStateStackSize() {
 		return mMaxStackSize;
 	}
 
 	@Override
-	public boolean isStateStackEnable() {
+	public final boolean isStateStackEnable() {
 		return mStateHistoryEnabled;
 	}
 
 	@Override
-	public void setStateStackEnable(boolean enable) {
+	public final void setStateStackEnable(boolean enable) {
 		mStateHistoryEnabled = enable;
 		if(enable){
 			 if(mStateStack == null) {
@@ -227,7 +236,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void notifyStateUpdate(P param) {
+	public final void notifyStateUpdate(P param) {
 		if(mGlobalGroup != null){
 			mGlobalGroup.notifyStateUpdate(param);
 		}
@@ -235,7 +244,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean addState(@StateFlags int states, P extra) {
+	public final boolean addState(@StateFlags int states, P extra) {
 		checkMemberState();
 		extra = mergeShareParam(extra);
 		if(mGroup.addState(states, extra)){
@@ -246,12 +255,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean addState(@StateFlags int states) {
+	public final boolean addState(@StateFlags int states) {
 		return addState(states, null);
 	}
 
 	@Override
-	public boolean removeState(@StateFlags int states, P param) {
+	public final boolean removeState(@StateFlags int states, P param) {
 		checkMemberState();
 		param = mergeShareParam(param);
 		if(mGroup.removeState(states, param)){
@@ -262,17 +271,17 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean removeState(@StateFlags int states) {
+	public final boolean removeState(@StateFlags int states) {
 		return removeState(states, null);
 	}
 
 	@Override
-	public void clearState() {
+	public final void clearState() {
         clearState(null);
 	}
 
 	@Override
-	public void clearState(P param) {
+	public final void clearState(P param) {
 		checkMemberState();
 		param = mergeShareParam(param);
 		if(mGroup.clearState(param)){
@@ -281,21 +290,23 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setState(@StateFlags int newStates) {
-	    setState(newStates, null);
+	public final boolean setState(@StateFlags int newStates) {
+	    return setState(newStates, null);
 	}
 
 	@Override
-	public void setState(@StateFlags int newStates, P extra) {
+	public final boolean setState(@StateFlags int newStates, P extra) {
 		checkMemberState();
 		extra = mergeShareParam(extra);
 		if(mGroup.setStates(newStates, extra)){
 			addHistory(mGroup.getStateFlags(), extra);
+			return true;
 		}
+		return false;
 	}
 
 	@Override
-	public boolean revertToPreviousState() {
+	public final boolean revertToPreviousState() {
 		if(!isStateStackEnable()){
 			throw new IllegalStateException("you must enable state stack b" +
 					"y calling setStateStackEnable() first.");
@@ -313,12 +324,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setGlobalState(@StateFlags int states) {
+	public final void setGlobalState(@StateFlags int states) {
         setGlobalState(states, null);
 	}
 
 	@Override
-	public void setGlobalState(@StateFlags int states, P extra) {
+	public final void setGlobalState(@StateFlags int states, P extra) {
 		if(mGlobalGroup == null) {
 			mGlobalGroup = new StateGroup<S,P>(this, mCallback);
 		}
@@ -326,55 +337,55 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public int getGlobalStateFlags() {
+	public final int getGlobalStateFlags() {
 		return mGlobalGroup != null ? mGlobalGroup.getStateFlags() : 0;
 	}
 
 	@Override
-	public List<S> getGlobalStates() {
+	public final List<S> getGlobalStates() {
 		return mGlobalGroup !=null ? mGlobalGroup.getStates() : null;
 	}
 	@Override
-	public S getGlobalState() {
+	public final S getGlobalState() {
 		return mGlobalGroup != null ? mGlobalGroup.getMaxState() : null;
 	}
 
 	@Override
-	public boolean isInState(@StateFlags int states) {
+	public final boolean isInState(@StateFlags int states) {
 		checkMemberState();
 		return mGroup.getStateFlags() == states;
 	}
 
 	@Override
-	public boolean hasState(@StateFlags int state) {
+	public final boolean hasState(@StateFlags int state) {
 		checkMemberState();
 		return mGroup.hasState(state);
 	}
 
 	@Override
-	public List<S> getCurrentStates() {
+	public final List<S> getCurrentStates() {
 		checkMemberState();
 		return mGroup.getStates();
 	}
 
 	@Override
-	public S getCurrentState() {
+	public final S getCurrentState() {
 		return mGroup.getMaxState();
 	}
 
 	@Override
-	public int getCurrentStateFlags() {
+	public final int getCurrentStateFlags() {
 		return mGroup.getStateFlags();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Integer> getLockedEvents() {
+	public final List<Integer> getLockedEvents() {
 		return mLockEvents != null ? (List<Integer>) mLockEvents.clone() : null;
 	}
 
 	@Override
-	public boolean lockEvent(int...eventKeys) {
+	public final boolean lockEvent(int...eventKeys) {
 		if(eventKeys == null || eventKeys.length == 0){
 			throw new IllegalArgumentException();
 		}
@@ -394,7 +405,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean unlockEvent(int... keys) throws IllegalArgumentException {
+	public final boolean unlockEvent(int... keys) throws IllegalArgumentException {
 		if(keys == null || keys.length == 0){
 			throw new IllegalArgumentException();
 		}
@@ -415,7 +426,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean unlockAllEvent() {
+	public final boolean unlockAllEvent() {
 		if(mLockEvents == null){
 			return false;
 		}
@@ -424,12 +435,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public boolean isLockedEvent(int eventKey) {
+	public final boolean isLockedEvent(int eventKey) {
 		return mLockEvents != null && mLockEvents.contains(eventKey);
 	}
 
 	@Override
-	public void setStateFactory(StateFactory<S,P> factory) {
+	public final void setStateFactory(StateFactory<S,P> factory) {
 		if(factory == null){
 			throw new NullPointerException();
 		}
@@ -437,7 +448,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void setParameterMerger(ParameterMerger<P> merger) {
+	public final void setParameterMerger(ParameterMerger<P> merger) {
 		if(merger == null){
 			throw new NullPointerException();
 		}
@@ -445,7 +456,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 
 	@Override
-	public void dispose() {
+	public final void dispose() {
 		//destroy foreground states.
 		if(mGlobalGroup != null){
 			mGlobalGroup.dispose();
@@ -462,6 +473,44 @@ public class SimpleController<S extends AbstractState<P>, P>
 		//clean up controller
 		this.mOwner = null;
 	}
+	
+	@Override
+	public final StateTransaction<P> beginTransaction() {
+		if(mTransaction == null){
+			mTransaction = new StateTransaction<P>(this);
+		}
+		return mTransaction;
+	}
+	
+	@Override
+	public final boolean execute(StateTransaction<P> tran) {
+		
+		//TODO handle mShouldSaveStateParam in StateGroup
+		mShouldSaveStateParam = tran.mSaveStateParam;
+		
+		final int states = tran.mOperateStates;
+		final P param = tran.mParam;
+		
+		boolean result = false;
+        switch (tran.mOp) {
+		case StateTransaction.OP_ADD:
+			result = addState(states, param);
+			break;
+			
+		case StateTransaction.OP_SET:
+			result = setState(states, param);
+			break;
+			
+		case StateTransaction.OP_REMOVE:
+			result = removeState(states, param);
+			break;
+
+		default:
+			System.err.println("execute StateTransaction failed. " + tran);
+		}		
+        mShouldSaveStateParam = false;
+		return result;
+	}
 
 	private void checkMemberState() {
 		if(mFactory == null){
@@ -471,4 +520,5 @@ public class SimpleController<S extends AbstractState<P>, P>
 			throw new IllegalStateException("you must call setParameterMerger(). first.");
 		}
 	}
+	
 }

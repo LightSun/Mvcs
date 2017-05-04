@@ -56,6 +56,12 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 
 
+	/**
+	 * begin the state transaction with current states.
+	 * @return the transaction.
+	 */
+	StateTransaction<P> beginTransaction();
+	
     /**
      * add a group state to mutex. This means any one state of the groupState is mutex with
      * others of the groupState.
@@ -161,10 +167,10 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     //==============================================
 
     /**
-     * add states(may be multi) to controller. As state can reenter , if states > 0 this always return true.
+     * add states(may be multi) to controller. 
      * @param states the new states flags.
      * @param extra the extra state parameter
-     * @return true if add the target states success.
+     * @return true if add the target states success.As state can reenter , if states > 0 this always return true.
      */
 	boolean addState(@StateFlags int states, P extra);
 
@@ -210,9 +216,10 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * this will have nothing effect. 
      *
      * @param newStates the new state to change to.
+     * @return true if set new states success ,false otherwise.
      * @throws MutexStateException If the target state contains a mutex.
      */
-    void setState(@StateFlags int newStates);
+    boolean setState(@StateFlags int newStates);
     
     /**
      * set the current states of this state machine. if the target new states == current states, 
@@ -220,9 +227,10 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      *
      * @param newStates the new state to change to.
      * @param extra the extra parameter
+     * @return true if set new states success ,false otherwise.
      * @throws MutexStateException If the target state contains a mutex.
      */
-    void setState(@StateFlags int newStates, P extra);
+    boolean setState(@StateFlags int newStates, P extra);
     
     /**
      * Change state back to the previous state.
