@@ -36,5 +36,3 @@ publish {
     desc = 'this is a lib of mvcs. '
     website = 'https://github.com/LightSun/Mvcs'
 }
-//cmd: gradle bintrayUpload -PbintrayUser=lightsun -PbintrayKey=1e7b05247f20b377fb6e47f1bc53812e69d46078 -PdryRun=false
-// need jdk1.8  gradle 3.0+
