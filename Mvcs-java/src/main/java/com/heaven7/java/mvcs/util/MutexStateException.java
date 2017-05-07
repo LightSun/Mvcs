@@ -5,14 +5,17 @@ import com.heaven7.java.mvcs.IController;
 /**
  *  a exception class that occurs when mutex state is set or add at same time. that means mutex exists 
  *  in the sample state parameter.  often used by
- *  {@linkplain IController#addState(int,Object)} / {@linkplain IController#addState(int)}
- *  {@linkplain IController#setState(int,Object)} / {@linkplain IController#setState(int)}
+ *  {@linkplain IController#addState(int,Object)} / {@linkplain IController#addState(int)} ,
+ *  {@linkplain IController#setState(int,Object)} / {@linkplain IController#setState(int)} ,
+ *  {@linkplain IController#hasState(int) , {@linkplain IController#removeState(int, Object)}}
  * @author heaven7
  * @since 1.1.2
  * @see IController#addState(int, Object)
  * @see IController#addState(int)
  * @see IController#setState(int)
  * @see IController#setState(int, Object)
+ * @see IController#removeState(int, Object)
+ * @see IController#hasState(int)
  */
 public class MutexStateException extends RuntimeException{
 
