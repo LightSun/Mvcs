@@ -83,7 +83,7 @@ public abstract class StateTransaction<P> {
 
 	/**
 	 * set the extra parameter to operate which will called by {@linkplain IController}.
-	 * @param states2Operate
+	 * @param param the parameter
 	 * @return this
 	 * @see IController#addState(int, Object)
 	 * @see IController#setState(int, Object)
@@ -106,7 +106,7 @@ public abstract class StateTransaction<P> {
 
 	/**
 	 * set the start action.
-	 * @param action the start action to perform
+	 * @param startAction the start action to perform
 	 * @return this.
 	 */
 	public StateTransaction<P> withStartAction(Runnable startAction) {
@@ -128,10 +128,11 @@ public abstract class StateTransaction<P> {
 			mStart.run();
 		}
 		final boolean result = performTransaction();
+		final ResultAction<Boolean> mEnd = this.mEnd;
+		reset();
 		if(mEnd != null){
 			mEnd.onActionResult(result);
 		}
-		reset();
 	}
 	
 	/** reset transaction */

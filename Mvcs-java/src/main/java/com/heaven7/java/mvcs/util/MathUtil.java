@@ -23,7 +23,7 @@ public class MathUtil {
 	public static int max2K(int n) {
 		return (int) Math.pow(2, log2n(n));
 	}
-
+/*
 	public static void main(String[] args) {
 		System.out.println(Math.log(Math.E));// 1
 		System.out.println(Math.log(5) / Math.log(2)); // 2
@@ -41,5 +41,5 @@ public class MathUtil {
 				curFlags -= maxKey;
 			}
 		}
-	}
+	}*/
 }

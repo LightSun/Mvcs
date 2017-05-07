@@ -449,7 +449,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     }
     
     /**
-     * the state flags that define the values of multi states.
+     * the state flags that define the values of multi states. so that the states value must be 
+     * any one of them or any sum of them.
      * @author heaven7
      *
      */
