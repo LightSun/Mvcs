@@ -44,7 +44,7 @@ public abstract class AbstractState<P> implements Disposeable{
 	}
 
 	/**
-	 * Return true if the state has been explicitly detached from the UI.
+	 * Return true if the state has been explicitly detached from the controller.
 	 * That is, {@link #onDetach} have been called.
 	 */
 	public final boolean isDetached(){
