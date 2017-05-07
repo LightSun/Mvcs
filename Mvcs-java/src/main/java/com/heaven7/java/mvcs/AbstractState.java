@@ -123,9 +123,4 @@ public abstract class AbstractState<P> implements Disposeable{
 	public void onDispose() {
 
 	}
-	
-	@Override
-	public String toString() {
-		return getClass().getName();
-	}
 }
