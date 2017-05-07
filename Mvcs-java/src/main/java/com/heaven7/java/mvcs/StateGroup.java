@@ -383,6 +383,11 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		this.mParam = null;
 	}
 
+	/**
+	 * clear state parameter
+	 * @param includeCachedState true to include cached state.
+	 * @since 1.1.5
+	 */
 	public void clearStateParameter(boolean includeCachedState) {
 		final SparseArray<S> map = getStateMap();
 		int curFlags = this.mCurrentStates;

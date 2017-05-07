@@ -496,12 +496,12 @@ public class SimpleController<S extends AbstractState<P>, P>
 		mGroup.clearStateParameter(includeCachedState);
 	}
 	@Override
-	public S getTargetState(int state) {
+	public final S getTargetState(int state) {
 		return mStateMap.get(state);
 	}
 	
 	@Override
-	public List<S> getTargetStates(int states, List<S> outStates) {
+	public final List<S> getTargetStates(int states, List<S> outStates) {
 		if(outStates == null){
 			outStates = new ArrayList<S>();
 		}

@@ -3,10 +3,13 @@ package com.heaven7.java.mvcs;
 import com.heaven7.java.mvcs.util.ResultAction;
 
 /**
- * the state transaction.
+ * the state transaction. with support. add,set,remove method for {@linkplain IController}.
  * 
  * @author heaven7
  * @since 1.1.5
+ * @see IController#addState(int, Object)
+ * @see IController#setState(int, Object)
+ * @see IController#removeState(int, Object)
  */
 public abstract class StateTransaction<P> {
 	

@@ -11,6 +11,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 
 /**
  * a state controller which support multi states.
+ * <p><h2>Note, any single state must be 2^n.  so multi states must be the sum of them.</h2></p>.
  * <ul>
  *     <li>State Factory: use {@linkplain #setStateFactory(StateFactory)} to set.
  *     </li>
@@ -223,8 +224,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     boolean removeState(@StateFlags int states, P param);
 
     /**
-     * clear the all states
-     * @param  param the param which will used by state exit.
+     * clear the all states with target parameter
+     * @param  param the parameter which will used by state exit.
      */
     void clearState(P param);
     /**
