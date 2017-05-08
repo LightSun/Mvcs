@@ -26,6 +26,9 @@ mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 - ### 将会对 动画和adapter提供支持。 Will
 - ### thinking other.
 
+## 限制
+- 因为多状态实现原理是通过2进制计算来的。所以。所有的状态必须为2的n次方，多状态则为任意多个状态(flag)之和.
+
 ## Gradle Usage
 in jcenter.
 ```java
