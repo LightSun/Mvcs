@@ -3,6 +3,7 @@ package com.heaven7.java.mvcs;
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 public class SimpleController<S extends AbstractState<P>, P>
 		implements IController<S,P> {
 
+	/** current state group/ */
 	private final StateGroup<S,P> mGroup;
 	private final StateGroup.Callback<S, P> mCallback;
 	private StateGroup<S,P> mGlobalGroup;
@@ -55,7 +57,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	/** the transaction */
 	private StateTransactionImpl mTransaction;
 	/** the delay messages. */
-	private List<Message> mDelayMessages;
+	private List<MessageInfo> mDelayMessages;
 
 	private class StateNode{
 		int states;
@@ -477,6 +479,15 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 		map.clear();
 		
+		synchronized (this) {
+			if(mDelayMessages != null){
+				for(MessageInfo info : mDelayMessages){
+					info.msg.recycleUnchecked();
+				}
+                mDelayMessages.clear();
+			}
+		}
+		
 		//clean up controller
 		this.mOwner = null;
 	}
@@ -520,42 +531,134 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 		return outStates;
 	}
+	@Override
+	public boolean sendMessage(Message msg,@PolicyType byte policy) {
+		return sendMessage(msg, policy, FLAG_SCOPE_CURRENT);
+	}
 	
 	@Override
 	public boolean sendMessage(Message msg,@PolicyType byte policy, @ScopeFlags byte scope) {
-		// TODO Auto-generated method stub
-		//filter delay message
+		//check in use or mark it.
+		if (msg.isInUse()) {
+			throw new IllegalStateException(msg + " This message is already in use.");
+		}
+		msg.markInUse();
+
+		//filter delay message.wait it will handle in update method.
 		long now = System.currentTimeMillis();
 		if(msg.when > now){
-			mDelayMessages.add(msg);
+			synchronized (this) {
+				if(mDelayMessages == null){
+					mDelayMessages = new ArrayList<>(8);
+				}
+				mDelayMessages.add(new MessageInfo(msg, policy, scope));
+			}
 			return false;
 		}
 		//dispatch to state
-		boolean handled = false;
-		final boolean includeCache = (scope & FLAG_SCOPE_CACHED) != 0;
-		if( (scope & FLAG_SCOPE_GLOBAL) != 0 ){
-			handled = mGlobalGroup.handleMessage(msg, policy, includeCache);
-		}
+		return dispatchMessage(msg, policy, scope);
+	}
+	@Override
+	public void update(long deltaTime) {
 		
-		switch (policy) {
-		case POLICY_BROADCAST:
-			break;
-			
-		case POLICY_CONSUME:
-			
-			break;
-			
-		default:
-			break;
+		final long now = System.currentTimeMillis() ;
+		MessageInfo info;
+		synchronized (this) {
+			if(mDelayMessages != null){
+				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				for( ; it.hasNext() ; ){
+					info = it.next();
+					if(info.msg.when <= now){
+						dispatchMessage(info.msg, info.policy, info.scope);
+						it.remove();
+					}
+				}
+			}
 		}
+	}
+	
+	@Override
+	public void clearMessage() {
+		synchronized (this) {
+			if(mDelayMessages != null){
+				mDelayMessages.clear();
+			}
+		}
+	}
+	
+	@Override
+	public boolean hasMessage(Message expect) {
 		
+		Message msg;
+		synchronized (this) {
+			if(mDelayMessages != null){
+				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				for( ; it.hasNext() ; ){
+					msg = it.next().msg;
+					if(msg.what == expect.what 
+							&& msg.arg1 == expect.arg1
+							&& msg.arg2 == expect.arg2
+							&& msg.obj.equals(expect.obj)
+							&& msg.data.equals(expect.data)  ){
+						return true;
+					}
+				}
+			}
+		}
 		return false;
 	}
 	
 	@Override
-	public void update(long deltaTime) {
-		// TODO Auto-generated method stub
+	public boolean hasMessage(int what) {
 		
+		MessageInfo info;
+		synchronized (this) {
+			if(mDelayMessages != null){
+				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				for( ; it.hasNext() ; ){
+					info = it.next();
+					if(info.msg.what == what){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public void removeMessage(int what) {
+		MessageInfo info;
+		synchronized (this) {
+			if(mDelayMessages != null){
+				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				for( ; it.hasNext() ; ){
+					info = it.next();
+					if(info.msg.what == what){
+						it.remove();
+					}
+				}
+			}
+		}
+	}
+	@Override
+	public void removeMessage(Message expect) {
+		Message msg;
+		synchronized (this) {
+			if(mDelayMessages != null){
+				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				for( ; it.hasNext() ; ){
+					msg = it.next().msg;
+					if(msg.what == expect.what 
+							&& msg.arg1 == expect.arg1
+							&& msg.arg2 == expect.arg2
+							&& msg.obj.equals(expect.obj)
+							&& msg.data.equals(expect.data)  ){
+						it.remove();
+					}
+				}
+			}
+		}
 	}
 	
 	private void checkMemberState() {
@@ -564,6 +667,33 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 		if(mMerger == null){
 			throw new IllegalStateException("you must call setParameterMerger(). first.");
+		}
+	}
+	private boolean dispatchMessage(Message msg, byte policy, byte scope) {
+		boolean handled = false;
+		final boolean includeCache = (scope & FLAG_SCOPE_CACHED) != 0;
+		if( (scope & FLAG_SCOPE_GLOBAL) != 0  && mGlobalGroup != null){
+			handled |= mGlobalGroup.handleMessage(msg, policy, includeCache);
+		}
+		if( (scope & FLAG_SCOPE_CURRENT) != 0 ){
+			handled |= mGroup.handleMessage(msg, policy, includeCache);
+		}
+		//recycle
+		if(handled){
+			msg.recycleUnchecked();
+		}
+		return handled;
+	}
+	
+	private static class MessageInfo{
+		Message msg;
+		byte policy;
+		byte scope;
+		public MessageInfo(Message msg, byte policy, byte scope) {
+			super();
+			this.msg = msg;
+			this.policy = policy;
+			this.scope = scope;
 		}
 	}
 	

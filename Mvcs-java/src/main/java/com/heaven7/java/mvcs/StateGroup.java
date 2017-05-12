@@ -19,7 +19,6 @@ import com.heaven7.java.mvcs.util.SparseArray;
  */
 /* public */ final class StateGroup<S extends AbstractState<P>, P> implements Disposeable {
 
-	private static final int MAX_FLAG = max2K(Integer.MAX_VALUE);
 	private int mCurrentStates;
 	private P mParam;
 	private final Callback<S, P> mCallback;
@@ -29,6 +28,8 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	 * states.
 	 */
 	private int mCachedState;
+	/** the list which is lazy load. */
+	private List<Integer> mTempFlags;
 
 	public interface Callback<S extends AbstractState<P>, P> {
 		
@@ -234,9 +235,9 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		return getStateMap().get(key);
 	}
 
-	public int getStateCount() {
+	/*public int getStateCount() {
 		return getStateMap().size();
-	}
+	}*/
 
 	private void reenter0(int singleState) {
 		AbstractState<P> state = getStateMap().get(singleState);
@@ -297,7 +298,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 	
 	/**
-	 *  get all state instance.
+	 *  get all current state instance.
 	 * @param outStates can be null
 	 * @return the states list
 	 */
@@ -409,55 +410,54 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 	
 	public boolean handleMessage(Message msg, byte policy, boolean includeCache) {
+		if(mTempFlags == null){
+			mTempFlags = new ArrayList<Integer>(6);
+		}
 		final SparseArray<S> map = getStateMap();
-		final int mCurrentStates = this.mCurrentStates ;
-		int lastFlag = 1;
+		getStateFlags(mCurrentStates, mTempFlags);
 		
+		boolean handled = false;
+		
+		outLoop:
 		switch (policy) {
-			case IController.POLICY_CONSUME:{
-				for ( ;  ; ) {
-					//state flags : 1,2,4,8 . if 1 consumed message. break and return.
-					if((mCurrentStates & lastFlag) != 0){
-						if(map.get(lastFlag).handleMessage(msg)){
-							return true;
-						}
-					}
-					if(lastFlag >= MAX_FLAG){
-						break;
-					}
-					lastFlag *= 2;
+		case IController.POLICY_CONSUME:
+			for(int state : mTempFlags){
+				if(map.get(state).handleMessage(msg)){
+					handled = true;
+					break outLoop;
 				}
-				
-				if(includeCache){
-					final int mCachedState = this.mCachedState;
-					lastFlag = 1;
-					for ( ;  ; ) {
-						//state flags : 1,2,4,8 . if 1 consumed message. break and return.
-						if((mCachedState & lastFlag) != 0){
-							if(map.get(lastFlag).handleMessage(msg)){
-								return true;
-							}
-						}
-						if(lastFlag >= MAX_FLAG){
-							break;
-						}
-						lastFlag *= 2;
+			}
+			if(includeCache){
+				mTempFlags.clear();
+				getStateFlags(mCachedState, mTempFlags);
+				for(int state : mTempFlags){
+					if(map.get(state).handleMessage(msg)){
+						handled = true;
+						break outLoop;
 					}
 				}
 			}
-				break;
-				
-			case IController.POLICY_BROADCAST:
-				
-				break;
-				
-			default:
-				throw new IllegalStateException("error policy = " + policy);
+			break;
+			
+		case IController.POLICY_BROADCAST:
+			for(int state : mTempFlags){
+				handled |= map.get(state).handleMessage(msg);
+			}
+			if(includeCache){
+				mTempFlags.clear();
+				getStateFlags(mCachedState, mTempFlags);
+				for(int state : mTempFlags){
+					handled |= map.get(state).handleMessage(msg);
+				}
+			}
+			break;
+
+		default:
+			throw new IllegalStateException("error policy = " + policy);
 		}
-		
-		
-		
-		return false;
+		//clear temp
+		mTempFlags.clear();
+		return handled;
 	}
 
 	/**
@@ -493,6 +493,23 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			flags -= key;
 		}
 	}
+	private static List<Integer> getStateFlags(int targetFlags, List<Integer> outStates) {
+		if(outStates == null){
+			outStates = new ArrayList<Integer>();
+		}
+		//int curFlags = this.mCurrentStates;
+		int maxKey;
+		for (; targetFlags > 0;) {
+			maxKey = max2K(targetFlags);
+			if (maxKey > 0) {
+				//sort ascending(up)  
+				outStates.add(0, maxKey);
+				targetFlags -= maxKey;
+			}
+		}
+		return outStates;
+	}
+
 
 
 }

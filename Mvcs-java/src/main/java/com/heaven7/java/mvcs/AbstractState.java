@@ -122,7 +122,7 @@ public abstract class AbstractState<P> implements Disposeable{
 	@CalledInternal
 	@Deprecated("use #onDispose() instead, this will be delete in 2.x version.")
 	@Override
-	public void dispose() {
+	public final void dispose() {
 		onDispose();
 	}
 	
@@ -132,8 +132,13 @@ public abstract class AbstractState<P> implements Disposeable{
 	}
 	
 	/**
-	 * @param msg
-	 * @return
+	 * handle the message which comes from {@linkplain IController#sendMessage(Message, byte, byte)}.
+	 * <h2>Note: if you want to reply, please use {@linkplain Message#replier}</h2>
+	 * @param msg the target in message
+	 * @return true if handled.
+	 * @see IController#sendMessage(Message, byte)
+	 * @see IController#sendMessage(Message, byte,byte)
+	 * @see {@linkplain Message#replier}
 	 */
 	@CalledInternal
 	public boolean handleMessage(Message msg){

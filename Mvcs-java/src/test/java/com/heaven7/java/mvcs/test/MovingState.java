@@ -1,5 +1,6 @@
 package com.heaven7.java.mvcs.test;
 
+import com.heaven7.java.mvcs.Message;
 import com.heaven7.java.mvcs.SimpleState;
 
 /**
@@ -37,5 +38,11 @@ public class MovingState extends SimpleState<String> {
     @Override
     public String toString() {
         return getName();
+    }
+    
+    @Override
+    public boolean handleMessage(Message msg) {
+    	System.out.println(getName() + ": handleMessage() ---> " + msg.toString());
+    	return false;
     }
 }

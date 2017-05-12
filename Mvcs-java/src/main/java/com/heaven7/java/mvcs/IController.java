@@ -88,6 +88,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * indicate the scope: global state.
 	 */
 	byte FLAG_SCOPE_GLOBAL        = 1 << 2;
+	/** the flags of all scope  */
+	byte FLAG_SCOPE_ALL           = FLAG_SCOPE_CURRENT | FLAG_SCOPE_CACHED | FLAG_SCOPE_GLOBAL;
 	
 	@IntDef(value = {
 		FLAG_SCOPE_CURRENT,
@@ -417,7 +419,48 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @return the global single state.
      */
 	S getGlobalState();
+	
+	//============================ message =====================================
 
+	/**
+	 * remove the target message which is indicated by what.
+	 * @param what the what flag .
+	 */
+	void removeMessage(int what);
+	/**
+	 * remove the target message which is indicated by the target message.
+	 * @param expect the expect Message .
+	 */
+	void removeMessage(Message expect);
+	
+	/**
+	 * whether has the target message or not.
+	 * @param what the what indicate the message.
+	 * @return true if has target what message.
+	 */
+	boolean hasMessage(int what);
+	/**
+	 * whether has the target message or not.
+	 * @param expect the target message to judge
+	 * @return true if has the target message.
+	 */
+	boolean hasMessage(Message expect);
+	
+	/**
+	 * clear the all messages which are delayed in pool.
+	 */
+	void clearMessage();
+	
+	/**
+	 * send the target message to the all state by the target policy.
+	 * And the default scope is {@linkplain IController#FLAG_SCOPE_CURRENT}.
+	 * @param msg the target message 
+	 * @param policy the policy of send message 
+	 * @return true if this message is handled.
+	 * @throws IllegalStateException if message is in use.
+	 * @throws NullPointerException if the target message is null.
+	 */
+    boolean sendMessage(Message msg, @PolicyType byte policy);
 
 	/**
 	 * send the target message to the all state by the target policy.
@@ -425,6 +468,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @param policy the policy of send message 
 	 * @param scopeFlags the scope flags of this message apply to.
 	 * @return true if this message is handled.
+	 * @throws IllegalStateException if message is in use.
+	 * @throws NullPointerException if the target message is null.
 	 */
     boolean sendMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
     

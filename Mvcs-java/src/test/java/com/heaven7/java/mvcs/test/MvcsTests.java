@@ -1,13 +1,14 @@
 package com.heaven7.java.mvcs.test;
 
+import java.util.List;
+
 import com.heaven7.java.mvcs.IController;
+import com.heaven7.java.mvcs.Message;
 import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
 import com.heaven7.java.mvcs.util.ResultAction;
 
 import junit.framework.TestCase;
-
-import java.util.List;
 
 /**
  * Created by heaven7 on 2017/4/22.
@@ -46,6 +47,44 @@ public class MvcsTests extends TestCase {
             }
         });
         mController.setParameterMerger(new ParamepterMergerImpl());
+    }
+    
+    public void testDelayMessage(){
+    	mController.setStateCacheEnabled(true);
+    	mController.addState(STATE_EAT | STATE_MOVING);
+    	Message msg = Message.obtain(99, "testDelayMessage");
+    	msg.delay(2000);
+    	assertFalse(mController.sendMessage(msg, IController.POLICY_BROADCAST));
+    	
+    	try {
+			Thread.sleep(2000);
+			mController.update(0);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void testMessage1(){
+    	mController.setStateCacheEnabled(true);
+    	mController.addState(STATE_EAT);
+    	mController.addState(STATE_MOVING);
+    	mController.setState(STATE_MOVING | STATE_SLEEP);
+    	
+    	//test cache
+    	Message msg = Message.obtain(99, "testMessage1");
+    	assertTrue(mController.sendMessage(msg, IController.POLICY_CONSUME, 
+    			IController.FLAG_SCOPE_ALL));
+    	mController.addState(STATE_EAT);
+    	
+    	//test consume
+    	msg = Message.obtain(99, "testMessage1__1");
+    	assertTrue(mController.sendMessage(msg, IController.POLICY_CONSUME, 
+    			IController.FLAG_SCOPE_ALL));
+    	
+    	//test broadcast
+    	msg = Message.obtain(99, "testMessage1__1");
+    	assertTrue(mController.sendMessage(msg, IController.POLICY_BROADCAST, 
+    			IController.FLAG_SCOPE_ALL));
     }
     
     public void testTransaction(){

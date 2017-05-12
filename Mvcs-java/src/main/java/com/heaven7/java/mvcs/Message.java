@@ -1,5 +1,6 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.base.util.Objects;
 
 public class Message {
 
@@ -36,7 +37,7 @@ public class Message {
     /**
      * indicate the message handler should reply this message.
      */
-    public MessageReplier reply;
+    public MessageReplier replier;
     
     /** If set message is in use.
      * This flag is set when the message is enqueued and remains set while it
@@ -62,6 +63,44 @@ public class Message {
     /**
      * Return a new Message instance from the global pool. Allows us to
      * avoid allocating new objects in many cases.
+     * @param what User-defined message code so that the recipient can identify what this message is about.
+     * @param obj  the entity of the message to carry.
+     */
+    public static Message obtain(int what, Object obj){
+    	return obtain(what, 0 , obj, null);
+    }
+    
+    /**
+     * Return a new Message instance from the global pool. Allows us to
+     * avoid allocating new objects in many cases.
+     * @param what User-defined message code so that the recipient can identify what this message is about.
+     * @param obj  the entity of the message to carry.
+     * @param replier  the message replier.
+     */
+    public static Message obtain(int what, Object obj, MessageReplier replier){
+    	return obtain(what, 0, obj, replier);
+    }
+    
+    /**
+     * Return a new Message instance from the global pool. Allows us to
+     * avoid allocating new objects in many cases.
+     * @param what User-defined message code so that the recipient can identify what this message is about.
+     * @param arg1 the extra User-defined code.
+     * @param obj  the entity of the message to carry.
+     * @param replier  the message replier.
+     */
+    public static Message obtain(int what, int arg1, Object obj, MessageReplier replier){
+    	Message msg = obtain();
+    	msg.what = what;
+    	msg.arg1 = arg1;
+    	msg.obj = obj;
+    	msg.replier = replier;
+    	return msg;
+    }
+    
+    /**
+     * Return a new Message instance from the global pool. Allows us to
+     * avoid allocating new objects in many cases.
      */
     public static Message obtain() {
         synchronized (sPoolSync) {
@@ -75,6 +114,10 @@ public class Message {
             }
         }
         return new Message();
+    }
+    
+    public void delay(long delayMillseconds){
+    	this.when = System.currentTimeMillis() + delayMillseconds;
     }
     /**
      * Return a Message instance to the global pool.
@@ -103,9 +146,11 @@ public class Message {
         what = 0;
         arg1 = 0;
         arg2 = 0;
+        when = 0;
+        
         obj = null;
         data = null;
-        when = 0;
+        replier = null;
 
         synchronized (sPoolSync) {
             if (sPoolSize < MAX_POOL_SIZE) {
@@ -123,7 +168,29 @@ public class Message {
         flags |= FLAG_IN_USE;
     }
     
+    @Override
+    public String toString() {
+    	return Objects.toStringHelper(this)
+    	 .add("what", what)
+    	 .add("arg1", arg1)
+    	 .add("arg2", arg2)
+    	 .add("when", when)
+    	 
+    	 .add("obj", obj)
+    	 .add("data", data)
+    	 .add("replier", replier)
+    	 .add("in-use", isInUse())
+    	 .toString();
+    }
+    
+    /**
+     * the message replier
+     */
     public interface MessageReplier{
+    	/**
+    	 * called when handle message success and want to reply it.
+    	 * @param msg the reply message
+    	 */
     	void reply(Message msg);
     }
 }
