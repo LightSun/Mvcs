@@ -1,5 +1,6 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.base.anno.CalledInternal;
 import com.heaven7.java.base.anno.Deprecated;
 
 /**
@@ -94,33 +95,49 @@ public abstract class AbstractState<P> implements Disposeable{
 	/**
 	 * this is called on enter this state.
 	 */
+	@CalledInternal
 	public abstract void onEnter();
 
 
 	/**
 	 * this is called on reenter this state.
 	 */
+	@CalledInternal
 	public abstract void onReenter();
 
 	/**
 	 * this is called on exit this state.
 	 */
+	@CalledInternal
 	public abstract void onExit();
 
 	/**
 	 * called on update this state. often called by {@linkplain IController#notifyStateUpdate(Object)} .
 	 * @param param the extra parameter.
      */
+	@CalledInternal
 	public void onUpdate(P param) {
 	}
 
+	@CalledInternal
 	@Deprecated("use #onDispose() instead, this will be delete in 2.x version.")
 	@Override
 	public void dispose() {
 		onDispose();
 	}
 	
+	@CalledInternal
 	public void onDispose() {
 
+	}
+	
+	/**
+	 * @param msg
+	 * @return
+	 */
+	@CalledInternal
+	public boolean handleMessage(Message msg){
+		
+		return false;
 	}
 }

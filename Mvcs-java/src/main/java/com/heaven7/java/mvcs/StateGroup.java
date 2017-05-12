@@ -19,6 +19,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  */
 /* public */ final class StateGroup<S extends AbstractState<P>, P> implements Disposeable {
 
+	private static final int MAX_FLAG = max2K(Integer.MAX_VALUE);
 	private int mCurrentStates;
 	private P mParam;
 	private final Callback<S, P> mCallback;
@@ -406,6 +407,58 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			}
 		}
 	}
+	
+	public boolean handleMessage(Message msg, byte policy, boolean includeCache) {
+		final SparseArray<S> map = getStateMap();
+		final int mCurrentStates = this.mCurrentStates ;
+		int lastFlag = 1;
+		
+		switch (policy) {
+			case IController.POLICY_CONSUME:{
+				for ( ;  ; ) {
+					//state flags : 1,2,4,8 . if 1 consumed message. break and return.
+					if((mCurrentStates & lastFlag) != 0){
+						if(map.get(lastFlag).handleMessage(msg)){
+							return true;
+						}
+					}
+					if(lastFlag >= MAX_FLAG){
+						break;
+					}
+					lastFlag *= 2;
+				}
+				
+				if(includeCache){
+					final int mCachedState = this.mCachedState;
+					lastFlag = 1;
+					for ( ;  ; ) {
+						//state flags : 1,2,4,8 . if 1 consumed message. break and return.
+						if((mCachedState & lastFlag) != 0){
+							if(map.get(lastFlag).handleMessage(msg)){
+								return true;
+							}
+						}
+						if(lastFlag >= MAX_FLAG){
+							break;
+						}
+						lastFlag *= 2;
+					}
+				}
+			}
+				break;
+				
+			case IController.POLICY_BROADCAST:
+				
+				break;
+				
+			default:
+				throw new IllegalStateException("error policy = " + policy);
+		}
+		
+		
+		
+		return false;
+	}
 
 	/**
 	 * check mutex state of the target expect states.
@@ -440,5 +493,6 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			flags -= key;
 		}
 	}
+
 
 }

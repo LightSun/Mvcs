@@ -54,6 +54,8 @@ public class SimpleController<S extends AbstractState<P>, P>
 	
 	/** the transaction */
 	private StateTransactionImpl mTransaction;
+	/** the delay messages. */
+	private List<Message> mDelayMessages;
 
 	private class StateNode{
 		int states;
@@ -517,6 +519,43 @@ public class SimpleController<S extends AbstractState<P>, P>
 			states -= maxKey;
 		}
 		return outStates;
+	}
+	
+	@Override
+	public boolean sendMessage(Message msg,@PolicyType byte policy, @ScopeFlags byte scope) {
+		// TODO Auto-generated method stub
+		//filter delay message
+		long now = System.currentTimeMillis();
+		if(msg.when > now){
+			mDelayMessages.add(msg);
+			return false;
+		}
+		//dispatch to state
+		boolean handled = false;
+		final boolean includeCache = (scope & FLAG_SCOPE_CACHED) != 0;
+		if( (scope & FLAG_SCOPE_GLOBAL) != 0 ){
+			handled = mGlobalGroup.handleMessage(msg, policy, includeCache);
+		}
+		
+		switch (policy) {
+		case POLICY_BROADCAST:
+			break;
+			
+		case POLICY_CONSUME:
+			
+			break;
+			
+		default:
+			break;
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public void update(long deltaTime) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	private void checkMemberState() {

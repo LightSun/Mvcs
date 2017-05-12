@@ -59,6 +59,44 @@ import com.heaven7.java.mvcs.util.MutexStateException;
  */
 public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 
+	/**
+	 * the message send policy: broadcast.
+	 */
+	byte POLICY_BROADCAST   = 1;
+	/**
+	 * the message send policy: consume.
+	 */
+	byte POLICY_CONSUME     = 2;
+	
+	@IntDef({
+		POLICY_BROADCAST,
+		POLICY_CONSUME,
+	})
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.SOURCE)
+	@interface PolicyType{		}
+	
+	/**
+	 * indicate the scope: current state.
+	 */
+	byte FLAG_SCOPE_CURRENT       = 1 << 0;
+	/**
+	 * indicate the scope: cached state.
+	 */
+	byte FLAG_SCOPE_CACHED        = 1 << 1;
+	/**
+	 * indicate the scope: global state.
+	 */
+	byte FLAG_SCOPE_GLOBAL        = 1 << 2;
+	
+	@IntDef(value = {
+		FLAG_SCOPE_CURRENT,
+		FLAG_SCOPE_CACHED,
+		FLAG_SCOPE_GLOBAL,
+	},flag = true)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.SOURCE)
+	@interface ScopeFlags{		}
 
 	/**
 	 * begin the state transaction with current states.
@@ -381,8 +419,21 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	S getGlobalState();
 
 
-    @Override
-    void dispose();
+	/**
+	 * send the target message to the all state by the target policy.
+	 * @param msg the target message 
+	 * @param policy the policy of send message 
+	 * @param scopeFlags the scope flags of this message apply to.
+	 * @return true if this message is handled.
+	 */
+    boolean sendMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
+    
+    /**
+     * update the controller. At present only handle delay messages. this is often used by game.
+     * @param deltaTime the delta time 
+     */
+    void update(long deltaTime);
+    
 
     //============================== lock event ==================================
 	  /**
