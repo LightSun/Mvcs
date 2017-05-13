@@ -35,9 +35,9 @@ mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 in jcenter.
 ```java
   //java 版本
-  compile 'com.heaven7.java.mvcs:Mvcs-java:1.1.6'
+  compile 'com.heaven7.java.mvcs:Mvcs-java:1.1.7'
   //android版本
-  compile 'com.heaven7.android.mvcs:mvcs-android:1.0'
+  compile 'com.heaven7.android.mvcs:mvcs-android:1.0.1'
 
 ```
 
