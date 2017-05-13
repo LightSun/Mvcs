@@ -50,12 +50,15 @@ public class MvcsTests extends TestCase {
     }
     
     public void testDelayMessage(){
+    	final int what = 99;
     	mController.setStateCacheEnabled(true);
     	mController.addState(STATE_EAT | STATE_MOVING);
-    	Message msg = Message.obtain(99, "testDelayMessage");
-    	msg.delay(2000);
+    	Message msg = Message.obtain(what, "testDelayMessage");
+    	msg.setDelay(2000);
     	assertFalse(mController.sendMessage(msg, IController.POLICY_BROADCAST));
-    	
+
+        assertTrue(mController.hasMessage(what)); 
+        assertTrue(mController.hasMessage(Message.obtain(what, "testDelayMessage"))); 
     	try {
 			Thread.sleep(2000);
 			mController.update(0);

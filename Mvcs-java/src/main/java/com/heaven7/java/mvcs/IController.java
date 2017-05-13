@@ -50,6 +50,14 @@ import com.heaven7.java.mvcs.util.MutexStateException;
  *     </li>
  *     <li> State Transaction: use {@linkplain #beginTransaction()}.
  *     </li>
+ *     <li>Message Control: send, handle(with reply), has,  remove.<br>
+ *         send: {@linkplain #sendMessage(Message, byte, byte)} and  {@linkplain #sendMessage(Message, byte)} <br>
+ *         handle: {@linkplain AbstractState#handleMessage(Message)},suggest {@linkplain Message#replier} called in
+ *                  {@linkplain AbstractState#handleMessage(Message)}. <br>
+ *         has: {@linkplain #hasMessage(int) and  {@linkplain #hasMessage(Message)}. <br>
+ *         remove: {@linkplain #removeMessage(int)  , {@linkplain #removeMessage(Message)} and {@linkplain IController#clearMessages()}. <br>
+ *         And want to handle delay messages ? please use {@linkplain #update(long)}.
+ *     </li>
  * </ul>
  * <h1>Note: current state and global states shouldn't intersect state.</h1>
  * 
@@ -447,9 +455,9 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	boolean hasMessage(Message expect);
 	
 	/**
-	 * clear the all messages which are delayed in pool.
+	 * clear the all messages which are delayed in pool and have not handled.
 	 */
-	void clearMessage();
+	void clearMessages();
 	
 	/**
 	 * send the target message to the all state by the target policy.
@@ -475,7 +483,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     
     /**
      * update the controller. At present only handle delay messages. this is often used by game.
-     * @param deltaTime the delta time 
+     * @param deltaTime the delta time in mill second.
      */
     void update(long deltaTime);
     

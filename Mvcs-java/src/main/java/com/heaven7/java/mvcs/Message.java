@@ -2,7 +2,7 @@ package com.heaven7.java.mvcs;
 
 import com.heaven7.java.base.util.Objects;
 
-public class Message {
+public final class Message {
 
 	  /**
      * User-defined message code so that the recipient can identify 
@@ -30,8 +30,14 @@ public class Message {
      */
     public Object obj;
     
+    /**
+     * extra data.
+     */
     public Object data;
     
+    /**
+     * indicate the message will be handled in future or right now. 
+     */
     public long when;
     
     /**
@@ -116,7 +122,11 @@ public class Message {
         return new Message();
     }
     
-    public void delay(long delayMillseconds){
+    /**
+     * set the delay of this message to be handled.
+     * @param delayMillseconds the delay in millseconds.
+     */
+    public void setDelay(long delayMillseconds){
     	this.when = System.currentTimeMillis() + delayMillseconds;
     }
     /**
@@ -168,7 +178,40 @@ public class Message {
         flags |= FLAG_IN_USE;
     }
     
-    @Override
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		//when, replier
+		Message other = (Message) obj;
+		
+		if (what != other.what)
+			return false;
+		if (arg1 != other.arg1)
+			return false;
+		if (arg2 != other.arg2)
+			return false;
+		
+		if (data == null) {
+			if (other.data != null)
+				return false;
+		} else if (!data.equals(other.data))
+			return false;
+		
+		if (this.obj == null) {
+			if (other.obj != null)
+				return false;
+		} else if (!this.obj.equals(other.obj))
+			return false;
+		
+		return true;
+	}
+
+	@Override
     public String toString() {
     	return Objects.toStringHelper(this)
     	 .add("what", what)

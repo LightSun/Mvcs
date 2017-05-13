@@ -578,7 +578,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 	
 	@Override
-	public void clearMessage() {
+	public void clearMessages() {
 		synchronized (this) {
 			if(mDelayMessages != null){
 				mDelayMessages.clear();
@@ -588,21 +588,9 @@ public class SimpleController<S extends AbstractState<P>, P>
 	
 	@Override
 	public boolean hasMessage(Message expect) {
-		
-		Message msg;
 		synchronized (this) {
 			if(mDelayMessages != null){
-				final Iterator<MessageInfo> it = mDelayMessages.iterator();
-				for( ; it.hasNext() ; ){
-					msg = it.next().msg;
-					if(msg.what == expect.what 
-							&& msg.arg1 == expect.arg1
-							&& msg.arg2 == expect.arg2
-							&& msg.obj.equals(expect.obj)
-							&& msg.data.equals(expect.data)  ){
-						return true;
-					}
-				}
+				return mDelayMessages.contains(new MessageInfo(expect));
 			}
 		}
 		return false;
@@ -649,11 +637,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 				final Iterator<MessageInfo> it = mDelayMessages.iterator();
 				for( ; it.hasNext() ; ){
 					msg = it.next().msg;
-					if(msg.what == expect.what 
-							&& msg.arg1 == expect.arg1
-							&& msg.arg2 == expect.arg2
-							&& msg.obj.equals(expect.obj)
-							&& msg.data.equals(expect.data)  ){
+					if(msg.equals(expect)){
 						it.remove();
 					}
 				}
@@ -689,12 +673,32 @@ public class SimpleController<S extends AbstractState<P>, P>
 		Message msg;
 		byte policy;
 		byte scope;
+		public MessageInfo(Message msg){
+			this.msg = msg;
+		}
 		public MessageInfo(Message msg, byte policy, byte scope) {
 			super();
 			this.msg = msg;
 			this.policy = policy;
 			this.scope = scope;
 		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			MessageInfo other = (MessageInfo) obj;
+			if (msg == null) {
+				if (other.msg != null)
+					return false;
+			} else if (!msg.equals(other.msg))
+				return false;
+			return true;
+		}
+		
 	}
 	
 	private class StateTransactionImpl extends StateTransaction<P>{

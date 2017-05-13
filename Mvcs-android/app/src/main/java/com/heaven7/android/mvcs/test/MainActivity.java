@@ -11,5 +11,6 @@ public class MainActivity extends AbsMainActivity {
     @Override
     protected void addDemos(List<ActivityInfo> list) {
         list.add(new ActivityInfo(MvcsLogSample.class, "only show log"));
+        list.add(new ActivityInfo(ScrollingActivity.class, "ScrollingActivity"));
     }
 }

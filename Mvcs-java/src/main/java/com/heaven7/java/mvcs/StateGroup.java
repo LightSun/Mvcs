@@ -409,6 +409,13 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 	}
 	
+	/**
+	 * handle the target message now.
+	 * @param msg the message to handle
+	 * @param policy the handle policy
+	 * @param includeCache true to include cache
+	 * @return true if handled the message.
+	 */
 	public boolean handleMessage(Message msg, byte policy, boolean includeCache) {
 		if(mTempFlags == null){
 			mTempFlags = new ArrayList<Integer>(6);
