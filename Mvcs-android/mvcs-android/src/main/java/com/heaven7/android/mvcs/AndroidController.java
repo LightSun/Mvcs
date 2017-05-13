@@ -164,7 +164,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
         //save global states.
         List<AndroidState> states = getGlobalStates();
         if(states != null && states.size() > 0){
-            final SparseArray<Parcelable> globalMap = new SparseArray<>();
+            final SparseArray<Parcelable> globalMap = new SparseArray<>(3);
             for(AndroidState state : states){
                 final Parcelable save = state.onSaveInstanceState();
                 if(save != null){
@@ -176,7 +176,7 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
         //save current states
         states = getCurrentStates();
         if(states != null && states.size() > 0 ){
-            final SparseArray<Parcelable> currentMap = new SparseArray<>();
+            final SparseArray<Parcelable> currentMap = new SparseArray<>(6);
             for(AndroidState state : states) {
                 final Parcelable save = state.onSaveInstanceState();
                 if (save != null) {
