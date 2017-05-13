@@ -68,6 +68,7 @@ public class AndroidState extends SimpleState<Bundle> implements AndroidMvcsCont
      * Returns a Parcelable describing the current state of this controller.
      * It will be passed to the {@link #onRestoreInstanceState(Parcelable)}
      * method of this controller sharing the same ID later.
+     * @return  the data to save state
      */
     protected Parcelable onSaveInstanceState() {
          return null;
