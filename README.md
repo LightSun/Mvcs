@@ -19,6 +19,7 @@ mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 - ###  支持对状态的各个操作。 eg: 'add'/'get'/'clear'/'set'/'remove'
 - ###  支持状态更新和销毁
 - ###  支持锁定/解锁事件。以方便我们处理app中的事件互斥。
+- ###  新增(v1.1.6): 消息的处理。包括发送，移除，更新，回执等消息处理。
 
 ## android 平台扩展特性
 - ### 支持 以 ViewHelper来链接所有的view. 还有toast.
@@ -27,13 +28,14 @@ mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 - ### thinking other.
 
 ## 限制
-- 因为多状态实现原理是通过2进制计算来的。所以。所有的状态必须为2的n次方，多状态则为任意多个状态(flag)之和. 而flag以int来表示的，  所以以单个状态来说。最多支持31种状态(2^31是int类型下2^n的的最大值)。
+- 因为多状态实现原理是通过2进制计算来的。且所有的状态必须为2的n次方，多状态则为任意多个状态(flag)之和. 而flag以int来表示的， 所以以单个状态来说。
+  最多支持31种状态(2^31是int类型下2^n的的最大值)。
 
 ## Gradle Usage
 in jcenter.
 ```java
   //java 版本
-  compile 'com.heaven7.java.mvcs:Mvcs-java:1.1.4'
+  compile 'com.heaven7.java.mvcs:Mvcs-java:1.1.6'
   //android版本
   compile 'com.heaven7.android.mvcs:mvcs-android:1.0'
 
