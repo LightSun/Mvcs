@@ -3,8 +3,10 @@ package com.heaven7.android.mvcs;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
 
@@ -27,13 +29,15 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
       implements AndroidMvcsContext{
 
     private static final String KEY_BUNDLE              = "AndroidController_bundle";
-    private static final String KEY_STATE_CACHE_ENABLED = "AndroidController_stateCacheEnabled";
-    private static final String KEY_STATE_STACK_ENABLED = "AndroidController_stateStackEnabled";
-    private static final String KEY_MAX_STATE_STACK     = "AndroidController_maxStateStackSize";
-    private static final String KEY_LOCK_EVENTS         = "AndroidController_lockEvents";
-    private static final String KEY_SHARE_PARAM         = "AndroidController_stateShareParam";
-    private static final String KEY_CURRENT_STATE_FLAGS = "AndroidController_currentStateFlags";
-    private static final String KEY_GLOBAL_STATE_FLAGS  = "AndroidController_globalStateFlags";
+    private static final String KEY_STATE_CACHE_ENABLED = "AC_stateCacheEnabled";
+    private static final String KEY_STATE_STACK_ENABLED = "AC_stateStackEnabled";
+    private static final String KEY_MAX_STATE_STACK     = "AC_maxStateStackSize";
+    private static final String KEY_LOCK_EVENTS         = "AC_lockEvents";
+    private static final String KEY_SHARE_PARAM         = "AC_stateShareParam";
+    private static final String KEY_CURRENT_STATE_FLAGS = "AC_currentStateFlags";
+    private static final String KEY_GLOBAL_STATE_FLAGS  = "AC_globalStateFlags";
+    private static final String KEY_CONTAINER_GLOBAL    = "AC_container_global";
+    private static final String KEY_CONTAINER_CURRRENT  = "AC_container_current";
 
     private static final ParameterMerger<Bundle> BUNDLE_MERGER =  new ParameterMerger<Bundle>() {
         @Override
@@ -159,17 +163,27 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
         }
         //save global states.
         List<AndroidState> states = getGlobalStates();
-        if(states != null){
+        if(states != null && states.size() > 0){
+            final SparseArray<Parcelable> globalMap = new SparseArray<>();
             for(AndroidState state : states){
-                state.onSaveInstanceState(newBundle);
+                final Parcelable save = state.onSaveInstanceState();
+                if(save != null){
+                    globalMap.put(state.getId(), save);
+                }
             }
+            newBundle.putSparseParcelableArray(KEY_CONTAINER_GLOBAL, globalMap);
         }
         //save current states
         states = getCurrentStates();
-        if(states != null){
-            for(AndroidState state : states){
-                state.onSaveInstanceState(newBundle);
+        if(states != null && states.size() > 0 ){
+            final SparseArray<Parcelable> currentMap = new SparseArray<>();
+            for(AndroidState state : states) {
+                final Parcelable save = state.onSaveInstanceState();
+                if (save != null) {
+                    currentMap.put(state.getId(), save);
+                }
             }
+            newBundle.putSparseParcelableArray(KEY_CONTAINER_CURRRENT, currentMap);
         }
         onSaveInstanceStateInternal(newBundle);
         outState.putBundle(KEY_BUNDLE, newBundle);
@@ -213,16 +227,22 @@ public class AndroidController extends SimpleController<AndroidState, Bundle>
             }
             //restore global states.
             List<AndroidState> states = getGlobalStates();
-            if(states != null){
-                for(AndroidState state : states){
-                    state.onRestoreInstanceState(data);
+            if(states != null && states.size() > 0){
+                final SparseArray<Parcelable> sa = data.getSparseParcelableArray(KEY_CONTAINER_GLOBAL);
+                if ( sa != null) {
+                    for (AndroidState state : states) {
+                        state.onRestoreInstanceState(sa.get(state.getId()));
+                    }
                 }
             }
             //restore current states
             states = getCurrentStates();
             if(states != null){
-                for(AndroidState state : states){
-                    state.onRestoreInstanceState(data);
+                final SparseArray<Parcelable> sa = data.getSparseParcelableArray(KEY_CONTAINER_CURRRENT);
+                if(sa != null) {
+                    for (AndroidState state : states) {
+                        state.onRestoreInstanceState(sa.get(state.getId()));
+                    }
                 }
             }
             onRestoreInstanceStateInternal(data);

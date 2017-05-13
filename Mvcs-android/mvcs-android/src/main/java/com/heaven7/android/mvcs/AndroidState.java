@@ -2,6 +2,7 @@ package com.heaven7.android.mvcs;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -23,6 +24,10 @@ public class AndroidState extends SimpleState<Bundle> implements AndroidMvcsCont
     @SuppressWarnings("unchecked")
     @Override
     public final AndroidController getController() {
+        if(isDetached()){
+            throw new IllegalStateException("this state is detached, state = "
+                    + getClass().getName());
+        }
         return (AndroidController)super.getController();
     }
     @Override
@@ -61,20 +66,41 @@ public class AndroidState extends SimpleState<Bundle> implements AndroidMvcsCont
     }
     /**
      * Returns a Parcelable describing the current state of this controller.
-     * It will be passed to the {@link #onRestoreInstanceState(Bundle)}
+     * It will be passed to the {@link #onRestoreInstanceState(Parcelable)}
      * method of this controller sharing the same ID later.
-     * @param  outState the out state to save
      */
-    public void onSaveInstanceState(Bundle outState) {
-
+    protected Parcelable onSaveInstanceState() {
+         return null;
     }
 
     /**
      * Supplies the previously saved instance state to be restored.
-     *
+     * @param state The frozen state that had previously been returned by
+     *        {@link #onSaveInstanceState}.
+     */
+    protected void onRestoreInstanceState(Parcelable state) {
+
+    }
+
+    /**
+     * <h2>this may cause bug if multi state class has same field, please
+     * use {@linkplain #onSaveInstanceState()} instead.</h2>
+     * Returns a Parcelable describing the current state of this controller.
+     * It will be passed to the {@link #onRestoreInstanceState(Bundle)}
+     * method of this controller sharing the same ID later.
+     * @param  outState the out state to save
+     */
+    @Deprecated
+    protected void onSaveInstanceState(Bundle outState) {
+
+    }
+
+    /** <h2> Please use {@linkplain #onRestoreInstanceState(Parcelable)} instead.</h2>
+     * Supplies the previously saved instance state to be restored.
      * @param saveInstanceState The previously saved instance state. can't be null.
      */
-    public void onRestoreInstanceState(Bundle saveInstanceState) {
+    @Deprecated
+    protected void onRestoreInstanceState(Bundle saveInstanceState) {
 
     }
 
