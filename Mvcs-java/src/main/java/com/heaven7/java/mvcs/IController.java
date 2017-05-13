@@ -431,12 +431,12 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	//============================ message =====================================
 
 	/**
-	 * remove the target message which is indicated by what.
+	 * remove the delayed message  which is indicated by what.
 	 * @param what the what flag .
 	 */
 	void removeMessage(int what);
 	/**
-	 * remove the target message which is indicated by the target message.
+	 * remove the delayed message which is indicated by the target message.
 	 * @param expect the expect Message .
 	 */
 	void removeMessage(Message expect);

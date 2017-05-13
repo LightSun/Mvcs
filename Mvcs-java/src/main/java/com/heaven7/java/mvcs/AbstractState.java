@@ -17,6 +17,11 @@ import com.heaven7.java.base.anno.Deprecated;
  *     <li> Release Resource: when destroy state is called by {@linkplain IController#dispose()}.
  *        see {@linkplain #dispose()} or {@linkplain #onDispose()}.
  *     </li>
+ *     <li>Handle Message: {@linkplain #handleMessage(Message)} which comes from the call of {@linkplain IController#sendMessage(Message, byte, byte)}.
+ *     </li>
+ *     <li>The Detach state: if {@linkplain #isDetached()} return true , that means this state is detached, and also may be in pool.
+ *        see {@linkplain IController#setStateCacheEnabled(boolean)}
+ *     </li>
  * </ul>
  * @param <P> the state parameter type.
  */
