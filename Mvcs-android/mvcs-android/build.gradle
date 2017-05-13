@@ -38,7 +38,7 @@ publish {
     userOrg = 'lightsun'
     groupId = 'com.heaven7.android.mvcs'
     artifactId = 'mvcs-android'
-    publishVersion = '1.0'
+    publishVersion = '1.0.1'
     desc = 'a mvcs implements of android platform'
     website = 'https://github.com/LightSun/Mvcs'
 }
