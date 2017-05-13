@@ -59,6 +59,7 @@ public class MvcsTests extends TestCase {
 
         assertTrue(mController.hasMessage(what)); 
         assertTrue(mController.hasMessage(Message.obtain(what, "testDelayMessage"))); 
+        assertFalse(mController.hasMessage(Message.obtain(what, "12345"))); 
     	try {
 			Thread.sleep(2000);
 			mController.update(0);

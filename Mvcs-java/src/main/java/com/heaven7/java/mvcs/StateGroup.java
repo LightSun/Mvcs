@@ -245,6 +245,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
 		state.onAttach(getController());
+		state.setId(singleState);
 		state.onReenter();
 	}
 
@@ -259,6 +260,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
 		state.onAttach(getController());
+		state.setId(singleState);
 		state.onEnter();
 
 		// handle mutex states
