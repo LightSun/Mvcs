@@ -144,6 +144,7 @@ public abstract class AbstractState<P> implements Disposeable{
 	 * @see IController#sendMessage(Message, byte)
 	 * @see IController#sendMessage(Message, byte,byte)
 	 * @see {@linkplain Message#replier}
+	 * @since 1.1.6
 	 */
 	@CalledInternal
 	public boolean handleMessage(Message msg){

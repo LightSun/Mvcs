@@ -2,6 +2,11 @@ package com.heaven7.java.mvcs;
 
 import com.heaven7.java.base.util.Objects;
 
+/**
+ * the message communicate between out side to {@linkplain AbstractState}, by calling {@linkplain IController#sendMessage(Message, byte, byte)}.
+ * @author heaven7
+ * @since 1.1.6
+ */
 public final class Message {
 
 	  /**
@@ -228,6 +233,7 @@ public final class Message {
     
     /**
      * the message replier
+     * @since 1.1.6
      */
     public interface MessageReplier{
     	/**

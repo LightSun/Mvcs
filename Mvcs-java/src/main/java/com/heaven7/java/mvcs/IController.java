@@ -93,10 +93,11 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 */
 	byte FLAG_SCOPE_CACHED        = 1 << 1;
 	/**
-	 * indicate the scope: global state.
+	 * indicate the scope: global state. the priority is highest.
 	 */
 	byte FLAG_SCOPE_GLOBAL        = 1 << 2;
-	/** the flags of all scope  */
+	
+	/** the flags of all scope, handle priority: global > current > cache(global)  */
 	byte FLAG_SCOPE_ALL           = FLAG_SCOPE_CURRENT | FLAG_SCOPE_CACHED | FLAG_SCOPE_GLOBAL;
 	
 	@IntDef(value = {
@@ -433,11 +434,13 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	/**
 	 * remove the delayed message  which is indicated by what.
 	 * @param what the what flag .
+	 * @since 1.1.6
 	 */
 	void removeMessage(int what);
 	/**
 	 * remove the delayed message which is indicated by the target message.
 	 * @param expect the expect Message .
+	 * @since 1.1.6
 	 */
 	void removeMessage(Message expect);
 	
@@ -445,17 +448,20 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * whether has the target message or not.
 	 * @param what the what indicate the message.
 	 * @return true if has target what message.
+	 * @since 1.1.6
 	 */
 	boolean hasMessage(int what);
 	/**
 	 * whether has the target message or not.
 	 * @param expect the target message to judge
 	 * @return true if has the target message.
+	 * @since 1.1.6
 	 */
 	boolean hasMessage(Message expect);
 	
 	/**
 	 * clear the all messages which are delayed in pool and have not handled.
+	 * @since 1.1.6
 	 */
 	void clearMessages();
 	
@@ -467,6 +473,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @return true if this message is handled.
 	 * @throws IllegalStateException if message is in use.
 	 * @throws NullPointerException if the target message is null.
+	 * @since 1.1.6
 	 */
     boolean sendMessage(Message msg, @PolicyType byte policy);
 
@@ -478,12 +485,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @return true if this message is handled.
 	 * @throws IllegalStateException if message is in use.
 	 * @throws NullPointerException if the target message is null.
+	 * @since 1.1.6
 	 */
     boolean sendMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
     
     /**
      * update the controller. At present only handle delay messages. this is often used by game.
      * @param deltaTime the delta time in mill second.
+     * @since 1.1.6
      */
     void update(long deltaTime);
     

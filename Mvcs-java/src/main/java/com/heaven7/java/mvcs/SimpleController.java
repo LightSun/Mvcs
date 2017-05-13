@@ -472,7 +472,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 		mGroup.dispose();
 
-		//destroy back state. and clear
+		//destroy back/cache state. and clear
 		final SparseArray<S> map = this.mStateMap;
 		for(int size = map.size() , i = size - 1 ; i >= 0 ;i --){
 			map.valueAt(i).dispose();
@@ -663,9 +663,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 			handled |= mGroup.handleMessage(msg, policy, includeCache);
 		}
 		//recycle
-		if(handled){
-			msg.recycleUnchecked();
-		}
+		msg.recycleUnchecked();
 		return handled;
 	}
 	
