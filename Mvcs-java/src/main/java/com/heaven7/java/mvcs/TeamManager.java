@@ -1,6 +1,5 @@
 package com.heaven7.java.mvcs;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.heaven7.java.mvcs.IController.StateListener;
@@ -8,7 +7,22 @@ import com.heaven7.java.mvcs.util.SparseArray;
 
 public class TeamManager<P> implements StateListener<P> {
 
-	private final SparseArray<DoubleGroupMember> mMap;
+	//final List<Member<P>> mTempList = new ArrayList<Member<P>>();
+	private final SparseArray<Team<P>> mMap;
+	private TeamCallback<P> mCallback;
+	
+	public static abstract class TeamCallback<P>{
+		
+		public void onTeamEnter(Team<P> team){
+			
+		}
+		public void onTeamExit(Team<P> team) {
+			
+		}
+		public void onTeamReenter(Team<P> team) {
+			
+		}
+	}
 
 	public TeamManager() {
 		mMap = new SparseArray<>();
@@ -17,36 +31,35 @@ public class TeamManager<P> implements StateListener<P> {
 	public static class Member<P> {
 		IController<? extends AbstractState<P>, P> controller;
 		int states; // can be multi
+		
+		IController<? extends AbstractState<P>, P> getController(){
+			return controller;
+		}
 	}
 
-	private class DoubleGroupMember {
-		final List<Member<P>> mTempList = new ArrayList<Member<P>>();
-		List<Member<P>> parents;
-		List<Member<P>> children;
-
-		public boolean hasTeamControllers(IController<?, P> target, int state) {
-			mTempList.addAll(parents);
-			boolean found = false;
+	public static class Team<P> {
+		List<Member<P>> parents ;
+		List<Member<P>> children ;
+		
+		private Team(){	}
+		boolean matches(IController<?, P> target, int state) {
 			for (Member<P> member : parents) {
-				if (member.controller == target) {
+				if (member.getController() == target) {
 					if ((member.states & state) != 0) {
-						//remove same member(controller).
-						mTempList.remove(member);
-						found = true;
+						return true;
 					}
 					break;
 				}
 			}
-			return found;
+			return false;
 		}
-
-		public List<Member<P>> getTeamControllers() {
-			return mTempList;
+		public List<Member<P>> getParentMembers() {
+			return parents;
 		}
-
-		public void clearCache() {
-			mTempList.clear();
+		public List<Member<P>> getChildMembers() {
+			return children;
 		}
+		
 	}
 
 	public void link(List<Member<P>> members) {
@@ -62,26 +75,48 @@ public class TeamManager<P> implements StateListener<P> {
 	@Override
 	public void onEnterState(int stateFlag, AbstractState<P> state) {
 		// if need of state?
-		IController<? extends AbstractState<P>, P> controller = state.getController();
+		if(matchTeam(stateFlag, state)){
+			final TeamCallback<P> mCallback = this.mCallback;
+			final int size = mMap.size();
+			for (int i = size - 1; i >= 0; i--) {
+				mCallback.onTeamEnter(mMap.valueAt(i));
+			}
+		}
+	}
 
+	private boolean matchTeam(int stateFlag, AbstractState<P> state) {
+		final IController<? extends AbstractState<P>, P> controller = state.getController();
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
-			DoubleGroupMember dMember = mMap.valueAt(i);
-			if (dMember.hasTeamControllers(controller, stateFlag)) {
-				
-                break;
+			Team<P> team = mMap.valueAt(i);
+			if (team.matches(controller, stateFlag)) {
+                return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void onExitState(int stateFlag, AbstractState<P> state) {
+		if(matchTeam(stateFlag, state)){
+			final TeamCallback<P> mCallback = this.mCallback;
+			final int size = mMap.size();
+			for (int i = size - 1; i >= 0; i--) {
+				mCallback.onTeamExit(mMap.valueAt(i));
 			}
 		}
 	}
 
 	@Override
-	public void onExitState(int stateFlag, AbstractState<P> state) {
-
-	}
-
-	@Override
 	public void onReenterState(int stateFlag, AbstractState<P> state) {
-
+		if(matchTeam(stateFlag, state)){
+			final TeamCallback<P> mCallback = this.mCallback;
+			final int size = mMap.size();
+			for (int i = size - 1; i >= 0; i--) {
+				mCallback.onTeamReenter(mMap.valueAt(i));
+			}
+		}
 	}
-
+	
+      
 }
