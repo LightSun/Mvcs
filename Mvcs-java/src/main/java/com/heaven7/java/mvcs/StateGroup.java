@@ -2,10 +2,16 @@ package com.heaven7.java.mvcs;
 
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.heaven7.java.base.anno.IntDef;
 import com.heaven7.java.mvcs.IController.StateFactory;
+import com.heaven7.java.mvcs.IController.StateListener;
 import com.heaven7.java.mvcs.util.MutexStateException;
 import com.heaven7.java.mvcs.util.SparseArray;
 
@@ -18,6 +24,22 @@ import com.heaven7.java.mvcs.util.SparseArray;
  * @author heaven7
  */
 /* public */ final class StateGroup<S extends AbstractState<P>, P> implements Disposeable {
+	
+	private static final byte ACTION_ENTER           = 1 ;
+	private static final byte ACTION_EXIT            = 2 ;
+	private static final byte ACTION_REENTER         = 3 ;
+	private static final byte ACTION_HANDLE_MESSAGE  = 4 ; //not use now
+	
+	@IntDef({
+		ACTION_ENTER, 
+		ACTION_EXIT,
+		ACTION_REENTER,
+		ACTION_HANDLE_MESSAGE,
+	})
+	@Retention(RetentionPolicy.SOURCE)
+	@Target({ElementType.PARAMETER})
+	@interface ActionType{
+	}
 
 	private int mCurrentStates;
 	private P mParam;
@@ -31,6 +53,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	
 	/** the list which is lazy load. */
 	private final List<Integer> sTempFlags = new ArrayList<Integer>(6);;
+	private StateListener<P> mStateListener;
 
 	public interface Callback<S extends AbstractState<P>, P> {
 		
@@ -48,6 +71,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 
 	// ========================== easy methods ===========================
+	
 	private P getStateParameter() {
 		return mParam;
 	}
@@ -72,6 +96,10 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		return mController.isStateCacheEnabled();
 	}
 	// ========================================================================
+	
+	public void setStateListener(StateListener<P> l){
+		this.mStateListener = l;
+	}
 
 	public int getCachedStateFlags() {
 		return mCachedState;
@@ -241,12 +269,13 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}*/
 
 	private void reenter0(int singleState) {
-		AbstractState<P> state = getStateMap().get(singleState);
+		S state = getStateMap().get(singleState);
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
 		state.onAttach(getController());
 		state.setId(singleState);
 		state.onReenter();
+		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
 	}
 
 	private void enter0(int singleState, S state) {
@@ -262,6 +291,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		state.onAttach(getController());
 		state.setId(singleState);
 		state.onEnter();
+		dispatchStateCallback(ACTION_ENTER, singleState, state, null);
 
 		// handle mutex states
 		int[] mutexStates = getController().getMutexState(singleState);
@@ -286,7 +316,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 
 	private void exit0(int singleState) {
 		final SparseArray<S> stateMap = getStateMap();
-		AbstractState<P> state = stateMap.get(singleState);
+		S state = stateMap.get(singleState);
 		// no cache ? remove from cache
 		if (!isStateCacheEnabled()) {
 			stateMap.remove(singleState);
@@ -297,6 +327,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
 		state.onExit();
+		dispatchStateCallback(ACTION_EXIT, singleState, state, null);
 		state.onDetach();
 	}
 	
@@ -364,7 +395,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		getFlagsInternal(mCurrentStates, sTempFlags);
 		for(int state : sTempFlags){
 			final S s = map.get(state);
-			// destroy foreground state.
+			//TODO should destroy foreground state.?
 			s.onExit();
 			s.onDetach();
 			s.dispose();
@@ -446,6 +477,29 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		//clear temp
 		sTempFlags.clear();
 		return handled;
+	}
+	
+	private void dispatchStateCallback(@ActionType byte action , int stateFlag, S state, Object param) {
+		if(mStateListener != null){
+			//final IController<S, P> controller = getController();
+			switch (action) {
+			case ACTION_ENTER:
+				mStateListener.onEnterState(stateFlag, state);
+				break;
+				
+			case ACTION_EXIT:
+				mStateListener.onExitState(stateFlag, state);
+				break;
+				
+			case ACTION_REENTER:
+				mStateListener.onReenterState(stateFlag, state);
+				break;
+
+			default:
+				System.out.println("StateGroup >>> called dispatchStateCallback(): but action can't be resolved.");
+				break;
+			}
+		}
 	}
 
 	/**

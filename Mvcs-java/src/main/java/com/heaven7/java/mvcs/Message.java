@@ -128,6 +128,25 @@ public final class Message {
     }
     
     /**
+     * obtain a message from pool and copy the target data to it.
+     * @param other the other message.
+     * @return the message.
+     */
+    public static Message obtain(Message other){
+    	Message msg = obtain();
+
+    	msg.what = other.what;
+    	msg.when = other.when;
+    	msg.arg1 = other.arg1;
+    	msg.arg2 = other.arg2;
+    	
+    	msg.data = other.data;
+    	msg.obj = other.obj;
+    	msg.replier = other.replier;
+    	return msg;
+    }
+    
+    /**
      * set the delay of this message to be handled.
      * @param delayMillseconds the delay in millseconds.
      */

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.heaven7.java.mvcs.util.SparseArray;
 
@@ -58,6 +59,8 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private StateTransactionImpl mTransaction;
 	/** the delay messages. */
 	private List<MessageInfo> mDelayMessages;
+	/** the list of {@linkplain StateListener} */
+	private GroupStateListener<P> mGroupStateListener;
 
 	private class StateNode{
 		int states;
@@ -463,6 +466,32 @@ public class SimpleController<S extends AbstractState<P>, P>
 		}
 		this.mMerger = merger;
 	}
+	
+	@Override
+	public final void addStateListener(StateListener<P> l, boolean includeGlobal) {
+		if(mGroupStateListener == null){
+			mGroupStateListener = new GroupStateListener<P>();
+		}
+		mGroupStateListener.addStateListener(l);
+		//register to state group
+		mGroup.setStateListener(mGroupStateListener);
+		if(includeGlobal && mGlobalGroup != null){
+			mGlobalGroup.setStateListener(mGroupStateListener);
+		}
+	}
+	
+	@Override
+	public final void removeStateListener(StateListener<P> l) {
+		if(mGroupStateListener != null){
+			mGroupStateListener.removeStateListener(l);
+		}
+	}
+	@Override
+	public final void clearStateListener() {
+		if(mGroupStateListener != null){
+			mGroupStateListener.clearStateListener();
+		}
+	}
 
 	@Override
 	public final void dispose() {
@@ -560,7 +589,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 	@Override
 	public void update(long deltaTime) {
-		
+		//TODO update state ?
 		final long now = System.currentTimeMillis() ;
 		MessageInfo info;
 		synchronized (this) {
@@ -725,6 +754,42 @@ public class SimpleController<S extends AbstractState<P>, P>
 			}		
 			return result;
 		} 
+	}
+	
+	private static class GroupStateListener<P> implements StateListener<P>{
+		
+		private final List<StateListener<P>> mList = new CopyOnWriteArrayList<>();
+		
+		public void addStateListener(StateListener<P> l){
+			mList.add(l);
+		}
+		public void removeStateListener(StateListener<P> l){
+			mList.remove(l);
+		}
+		public void clearStateListener(){
+			mList.clear();
+		}
+
+		@Override
+		public void onEnterState(int stateFlag, AbstractState<P> state) {
+			for(StateListener<P> l : mList){
+				l.onEnterState(stateFlag, state);
+			}
+		}
+
+		@Override
+		public void onExitState(int stateFlag, AbstractState<P> state) {
+			for(StateListener<P> l : mList){
+				l.onExitState( stateFlag, state);
+			}
+		}
+
+		@Override
+		public void onReenterState(int stateFlag, AbstractState<P> state) {
+			for(StateListener<P> l : mList){
+				l.onReenterState(stateFlag, state);
+			}
+		}
 		
 	}
 }

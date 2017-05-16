@@ -540,10 +540,17 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     void setStateFactory(StateFactory<S,P> factory);
 
     /**
-     * set the param merger.
+     * set the parameter merger.
      * @param merger the target merger.
      */
     void setParameterMerger(ParameterMerger<P> merger);
+    
+    
+    void addStateListener(StateListener<P> l, boolean includeGlobal);
+    
+    void removeStateListener(StateListener<P> l);
+    
+    void clearStateListener();
 
     /**
      * state factory help we create state.
@@ -606,5 +613,21 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     @interface StateFlags{
     	
     }
+    
+    /**
+     * the state listener 
+     * @author heaven7
+     *
+     * @param <P> the parameter
+     * @since 1.1.8
+     */
+	public interface StateListener<P>{
+	
+		void onEnterState(int stateFlag, AbstractState<P> state);
+	
+		void onExitState(int stateFlag, AbstractState<P> state);
+		
+		void onReenterState(int stateFlag, AbstractState<P> state);
+	}
 
 }
