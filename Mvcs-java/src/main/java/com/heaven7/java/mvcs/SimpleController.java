@@ -468,32 +468,6 @@ public class SimpleController<S extends AbstractState<P>, P>
 	}
 	
 	@Override
-	public final void addStateListener(StateListener<P> l, boolean includeGlobal) {
-		if(mGroupStateListener == null){
-			mGroupStateListener = new GroupStateListener<P>();
-		}
-		mGroupStateListener.addStateListener(l);
-		//register to state group
-		mGroup.setStateListener(mGroupStateListener);
-		if(includeGlobal && mGlobalGroup != null){
-			mGlobalGroup.setStateListener(mGroupStateListener);
-		}
-	}
-	
-	@Override
-	public final void removeStateListener(StateListener<P> l) {
-		if(mGroupStateListener != null){
-			mGroupStateListener.removeStateListener(l);
-		}
-	}
-	@Override
-	public final void clearStateListener() {
-		if(mGroupStateListener != null){
-			mGroupStateListener.clearStateListener();
-		}
-	}
-
-	@Override
 	public final void dispose() {
 		//destroy foreground states.
 		if(mGlobalGroup != null){
@@ -695,6 +669,39 @@ public class SimpleController<S extends AbstractState<P>, P>
 		msg.recycleUnchecked();
 		return handled;
 	}
+	
+	//======================== start internal method =============================
+	
+	//internal method
+	void setEnableStateCallback(boolean enable){
+		mGroup.setEnableStateCallback(enable);
+		if(mGlobalGroup != null){
+			mGlobalGroup.setEnableStateCallback(enable);
+		}
+	}
+	void addStateListener(StateListener<P> l, boolean includeGlobal) {
+		if(mGroupStateListener == null){
+			mGroupStateListener = new GroupStateListener<P>();
+		}
+		mGroupStateListener.addStateListener(l);
+		//register to state group
+		mGroup.setStateListener(mGroupStateListener);
+		if(includeGlobal && mGlobalGroup != null){
+			mGlobalGroup.setStateListener(mGroupStateListener);
+		}
+	}
+	void removeStateListener(StateListener<P> l) {
+		if(mGroupStateListener != null){
+			mGroupStateListener.removeStateListener(l);
+		}
+	}
+	void clearStateListener() {
+		if(mGroupStateListener != null){
+			mGroupStateListener.clearStateListener();
+		}
+	}
+	
+	//======================== end internal method =============================
 	
 	private static class MessageInfo{
 		Message msg;

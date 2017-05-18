@@ -27,12 +27,25 @@ import com.heaven7.java.base.anno.Deprecated;
  *            the state parameter type.
  */
 public abstract class AbstractState<P> implements Disposeable {
+	
+	/** flag of detached state. */
+	public static final int FLAG_ATTACH = 0x0001;
+	/** flag of triggered by mutex */
+	public static final int FLAG_MUTEX  = 0x0002;
 
 	/** the id of this state. often is the stateFlag of this state. */
 	private int mId;
 	private IController<?, P> mController;
 	private P mParam;
-	private boolean mDetached;
+	/**
+	 * @since 1.1.8
+	 */
+	private int mFlags;
+	/** the whole enter count. if state was exited the count will be zero.
+	 * @see AbstractState#onEnter()
+	 * @see AbstractState#onReenter()
+	 **/
+	private int mRealEnterCount;
 
 	/**
 	 * called on attach this state. you shouldn't call it.
@@ -42,7 +55,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	 */
 	void onAttach(IController<?, P> controller) {
 		this.mController = controller;
-		this.mDetached = false;
+		this.mFlags |= FLAG_ATTACH;
 	}
 
 	/**
@@ -50,7 +63,8 @@ public abstract class AbstractState<P> implements Disposeable {
 	 */
 	void onDetach() {
 		this.mController = null;
-		this.mDetached = true;
+		//clear attach flag and mutex flag.
+		this.mFlags = 0; 
 	}
 
 	/**
@@ -64,13 +78,50 @@ public abstract class AbstractState<P> implements Disposeable {
 	void setId(int id) {
 		this.mId = id;
 	}
-
+	
+	void addFlags(int flags){
+		this.mFlags |= flags;
+	}
+	void enter(){
+		mRealEnterCount ++;
+		onEnter();
+	}
+	void reenter(){
+		mRealEnterCount ++;
+		onReenter();
+	}
+	void exit(int flags){
+		mRealEnterCount = 0;
+		if(flags != 0){
+		    addFlags(flags);
+		}
+		onExit();
+	}
+	
+	/**
+	 * indicate  this state has some flags or not
+	 * @param flags the target flags
+	 * @return true if has the flags
+	 */
+	public final boolean hasFlags(int flags){
+		return (mFlags & flags ) != 0;
+	}
+	
+	/**
+	 * get the whole enter count, include enter and reenter.
+	 * @return the whole enter count.
+	 * @since 1.1.8
+	 */
+	public final int getEnterCount(){
+		return mRealEnterCount;
+	}
+	
 	/**
 	 * Return true if the state has been explicitly detached from the
 	 * controller. That is, {@link #onDetach} have been called.
 	 */
 	public final boolean isDetached() {
-		return mDetached;
+		return (mFlags & FLAG_ATTACH) != FLAG_ATTACH;
 	}
 
 	/**
@@ -133,20 +184,17 @@ public abstract class AbstractState<P> implements Disposeable {
 	/**
 	 * this is called on enter this state.
 	 */
-	@CalledInternal
-	public abstract void onEnter();
+	protected abstract void onEnter();
 
 	/**
 	 * this is called on reenter this state.
 	 */
-	@CalledInternal
-	public abstract void onReenter();
+	protected abstract void onReenter();
 
 	/**
 	 * this is called on exit this state.
 	 */
-	@CalledInternal
-	public abstract void onExit();
+	protected abstract void onExit();
 
 	/**
 	 * called on update this state. often called by

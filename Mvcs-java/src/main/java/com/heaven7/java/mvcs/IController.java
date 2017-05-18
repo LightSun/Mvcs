@@ -545,13 +545,6 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      */
     void setParameterMerger(ParameterMerger<P> merger);
     
-    
-    void addStateListener(StateListener<P> l, boolean includeGlobal);
-    
-    void removeStateListener(StateListener<P> l);
-    
-    void clearStateListener();
-
     /**
      * state factory help we create state.
      * @param <S> the state type

@@ -28,13 +28,12 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	private static final byte ACTION_ENTER           = 1 ;
 	private static final byte ACTION_EXIT            = 2 ;
 	private static final byte ACTION_REENTER         = 3 ;
-	private static final byte ACTION_HANDLE_MESSAGE  = 4 ; //not use now
+	//private static final byte ACTION_HANDLE_MESSAGE  = 4 ; //not use now
 	
 	@IntDef({
 		ACTION_ENTER, 
 		ACTION_EXIT,
 		ACTION_REENTER,
-		ACTION_HANDLE_MESSAGE,
 	})
 	@Retention(RetentionPolicy.SOURCE)
 	@Target({ElementType.PARAMETER})
@@ -52,8 +51,11 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	private int mCachedState;
 	
 	/** the list which is lazy load. */
-	private final List<Integer> sTempFlags = new ArrayList<Integer>(6);;
+	private final List<Integer> sTempFlags = new ArrayList<Integer>(6);
+	
 	private StateListener<P> mStateListener;
+	/** if false. {@linkplain StateListener} will never call back. default is true.*/
+	private boolean mEnableStateCallback = true;
 
 	public interface Callback<S extends AbstractState<P>, P> {
 		
@@ -74,6 +76,10 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	
 	private P getStateParameter() {
 		return mParam;
+	}
+
+	public void setEnableStateCallback(boolean enable) {
+		this.mEnableStateCallback = enable;
 	}
 
 	private StateFactory<S, P> getStateFactory() {
@@ -241,7 +247,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		for (; exitFlags > 0;) {
 			maxKey = max2K(exitFlags);
 			if (maxKey > 0) {
-				exit0(maxKey);
+				exit0(maxKey, false);
 				exitFlags -= maxKey;
 			}
 		}
@@ -272,9 +278,9 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		S state = getStateMap().get(singleState);
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
-		state.onAttach(getController());
+		//state.onAttach(getController());
 		state.setId(singleState);
-		state.onReenter();
+		state.reenter();
 		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
 	}
 
@@ -290,7 +296,8 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		state.setStateParameter(p);
 		state.onAttach(getController());
 		state.setId(singleState);
-		state.onEnter();
+		state.enter();
+		//dispatch callback
 		dispatchStateCallback(ACTION_ENTER, singleState, state, null);
 
 		// handle mutex states
@@ -302,7 +309,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 				// state is not the main state.
 				if (s != singleState && stateMap.get(s) != null) {
 					oppositeState |= s;
-					exit0(s);
+					exit0(s, true);
 				}
 			}
 			this.mCurrentStates &= ~oppositeState;
@@ -314,7 +321,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 	}
 
-	private void exit0(int singleState) {
+	private void exit0(int singleState, boolean byMutex) {
 		final SparseArray<S> stateMap = getStateMap();
 		S state = stateMap.get(singleState);
 		// no cache ? remove from cache
@@ -326,7 +333,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
-		state.onExit();
+		state.exit(byMutex ? AbstractState.FLAG_MUTEX : 0);
 		dispatchStateCallback(ACTION_EXIT, singleState, state, null);
 		state.onDetach();
 	}
@@ -396,7 +403,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		for(int state : sTempFlags){
 			final S s = map.get(state);
 			//TODO should destroy foreground state.?
-			s.onExit();
+			s.exit(0);
 			s.onDetach();
 			s.dispose();
 			map.remove(state);
@@ -480,7 +487,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 	
 	private void dispatchStateCallback(@ActionType byte action , int stateFlag, S state, Object param) {
-		if(mStateListener != null){
+		if(mEnableStateCallback && mStateListener != null){
 			//final IController<S, P> controller = getController();
 			switch (action) {
 			case ACTION_ENTER:
