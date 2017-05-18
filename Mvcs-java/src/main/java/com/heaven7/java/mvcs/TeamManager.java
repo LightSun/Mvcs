@@ -92,8 +92,7 @@ public class TeamManager<P> implements StateListener<P> {
 		List<Member<P>> outer;
 		TeamCallback<P> callback;
 
-		Team() {
-		}
+		Team() {}
 
 		public List<Member<P>> getFormalMembers() {
 			return formal;
