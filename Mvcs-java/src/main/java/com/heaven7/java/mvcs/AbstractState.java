@@ -198,6 +198,19 @@ public abstract class AbstractState<P> implements Disposeable {
 	 */
 	protected abstract void onExit();
 
+	
+	/**
+	 * called on update this state. often called by
+	 * {@linkplain IController#notifyStateUpdate(Object)} .
+	 * 
+	 * @param deltaTime the delta time between last update and now.
+	 * @param param
+	 *            the extra parameter.
+	 */
+	@CalledInternal
+	public void onUpdate(long deltaTime, P param) {
+		onUpdate(param);
+	}
 	/**
 	 * called on update this state. often called by
 	 * {@linkplain IController#notifyStateUpdate(Object)} .
@@ -205,8 +218,9 @@ public abstract class AbstractState<P> implements Disposeable {
 	 * @param param
 	 *            the extra parameter.
 	 */
+	@Deprecated("please use #onUpdate(long deltaTime, P param) instead.")
 	@CalledInternal
-	public void onUpdate(P param) {
+	protected void onUpdate(P param) {
 	}
 
 	@CalledInternal

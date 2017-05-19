@@ -587,7 +587,11 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	}
 	@Override
 	public void update(long deltaTime) {
-		//TODO update state ?
+		update(deltaTime, null);
+	}
+	@Override
+	public void update(long deltaTime, P param) {
+		
 		final long now = System.currentTimeMillis() ;
 		MessageInfo info;
 		synchronized (this) {
@@ -602,6 +606,19 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 				}
 			}
 		}
+		
+		//update state
+		if(mTempStates == null){
+			mTempStates = new ArrayList<>();
+		}
+		final List<S> mTempStates = this.mTempStates;
+		
+		getGlobalStates(mTempStates);
+		getCurrentStates(mTempStates);
+		for(S state : mTempStates){
+			state.onUpdate(deltaTime, param);
+		}
+		mTempStates.clear();
 	}
 	
 	@Override
@@ -713,6 +730,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		for(S s : mTempStates){
 			s.reenter();//TODO need state parameter ?
 		}
+		mTempStates.clear();
 	}
 	@Override
 	void notifyStateExit(int states) {
