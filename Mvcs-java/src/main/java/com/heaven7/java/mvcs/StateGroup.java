@@ -51,7 +51,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	private int mCachedState;
 	
 	/** the list which is lazy load. */
-	private final List<Integer> sTempFlags = new ArrayList<Integer>(6);
+	final List<Integer> sTempFlags = new ArrayList<Integer>(6);
 	
 	private StateListener<P> mStateListener;
 	/** if false. {@linkplain StateListener} will never call back. default is true.*/
@@ -111,6 +111,10 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		return mCachedState;
 	}
 
+	/**
+	 * get current state flags
+	 * @return current state flags. 
+	 *  */
 	public int getStateFlags() {
 		return mCurrentStates;
 	}
@@ -279,7 +283,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
 		//state.onAttach(getController());
-		state.setId(singleState);
+		//state.setId(singleState);
 		state.reenter();
 		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
 	}
@@ -339,24 +343,43 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 	
 	/**
-	 *  get all current state instance.
+	 *  get all foreground states instance.
 	 * @param outStates can be null
 	 * @return the states list
 	 */
-	public List<S> getStates(List<S> outStates) {
-		if (mCurrentStates == 0) {
-			return null;
-		}
-		if(outStates == null){
-			outStates = new ArrayList<S>();
-		}
-		final SparseArray<S> stateMap = getStateMap();
-		getFlagsInternal(mCachedState, sTempFlags);
-		for(int state : sTempFlags){
-			outStates.add(stateMap.get(state));
-		}
-		sTempFlags.clear();
-		return outStates;
+	public List<S> getForegroundStates(List<S> outStates) {
+		return getForegroundStates(mCurrentStates, outStates);
+	}
+	/**
+	 *  get the foreground states instance which is assigned by target states.
+	 * @param targetStates the target states .must be overlap with current states.
+	 * @param outStates can be null
+	 * @return the states list
+	 */
+	public List<S> getForegroundStates(int targetStates, List<S> outStates) {
+		//overlap state
+		targetStates = mCurrentStates & targetStates;
+		return getTargetStates(targetStates, outStates);
+	}
+	/**
+	 *  get the background states instance which is assigned by target states.
+	 * @param targetStates the target states .must be overlap with cached states.
+	 * @param outStates can be null
+	 * @return the states list
+	 */
+	public List<S> getBackgroundStates(int targetStates, List<S> outStates) {
+		//overlap state
+		targetStates = mCachedState & targetStates;
+		return getTargetStates(targetStates, outStates);
+	}
+
+	/**
+	 *  get all background/cache states instance.
+	 * @param outStates can be null
+	 * @return the states list
+	 */
+	public List<S> getBackgroundStates(List<S> outStates) {
+		return getBackgroundStates(mCachedState, outStates);
 	}
 
 	/**
@@ -373,7 +396,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	}
 
 	public void notifyStateUpdate(P param) {
-		final List<S> states = getStates(null);
+		final List<S> states = getForegroundStates(null);
 		if (states != null) {
 			for (S s : states) {
 				s.onUpdate(param);
@@ -542,6 +565,26 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			flags -= key;
 		}
 	}
+	private List<S> getTargetStates(int targetStates, List<S> outStates) {
+		if (targetStates == 0) {
+			return null;
+		}
+		if(outStates == null){
+			outStates = new ArrayList<S>();
+		}
+		final SparseArray<S> stateMap = getStateMap();
+		getFlagsInternal(targetStates, sTempFlags);
+		for(int state : sTempFlags){
+			S s = stateMap.get(state);
+			if(s != null){
+			   outStates.add(s);
+			}else{
+				System.err.println("[WARN] StateGroup >>> called [ getTargetStates()] : state not exit. state =" + state);
+			}
+		}
+		sTempFlags.clear();
+		return outStates;
+	}
 	private static List<Integer> getFlagsInternal(int targetFlags, List<Integer> outStates) {
 		if(outStates == null){
 			outStates = new ArrayList<Integer>();
@@ -558,7 +601,6 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		}
 		return outStates;
 	}
-
 
 
 }

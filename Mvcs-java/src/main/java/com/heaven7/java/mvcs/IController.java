@@ -359,7 +359,16 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     S getTargetState(int state);
     
     /**
-     * get the target state which is assigned by target int flag. And the state can from 
+     * get the target state which is assigned by target state flags. null if not found.
+     * @param states the target state flags.
+     * @param scopeFlags the flags of scope. {@linkplain #FLAG_SCOPE_CACHED}/{@linkplain #FLAG_SCOPE_CURRENT}/{@linkplain #FLAG_SCOPE_GLOBAL}
+     * @param outStates the out states. optional, can be null.
+     * @return the target states.
+     * @since 1.1.8
+     */
+    List<S> getTargetStates(int states, int scopeFlags, List<S> outStates);
+    /**
+     * get the target state which is assigned by target state flags. And the state can from 
      * current state or cached state or global state , or null if not found.
      * @param states the target state flags.
      * @param outStates the out states. optional, can be null.

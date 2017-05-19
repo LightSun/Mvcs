@@ -174,6 +174,38 @@ public class MvcsTests extends TestCase {
         mController.setState(STATE_MOVING, "moving");
         mController.notifyStateUpdate("testGlobalState");
     }
+    
+    public void testStateScope(){
+    	mController.setStateCacheEnabled(true);
+    	mController.setGlobalState(STATE_SLEEP);
+        mController.setState(STATE_MOVING, "moving");
+        mController.setState(STATE_EAT | STATE_EAT_MUTEX);
+        
+        /**
+         * global: STATE_SLEEP
+         * cache: STATE_MOVING
+         * current: STATE_EAT | STATE_EAT_MUTEX
+         */
+        List<SimpleState<String>> list = mController.getTargetStates(STATE_SLEEP, IController.FLAG_SCOPE_GLOBAL, null);
+        assertEquals(1, list.size());
+        list = mController.getTargetStates(STATE_SLEEP, IController.FLAG_SCOPE_CURRENT, null);
+        assertEquals(0, list.size());
+        list = mController.getTargetStates(STATE_SLEEP, IController.FLAG_SCOPE_CACHED, null);
+        assertEquals(0, list.size());
+        list = mController.getTargetStates(STATE_SLEEP, IController.FLAG_SCOPE_ALL, null);
+        assertEquals(1, list.size());
+        
+        int target = STATE_SLEEP | STATE_MOVING | STATE_EAT | STATE_EAT_MUTEX;
+        list = mController.getTargetStates(target, IController.FLAG_SCOPE_GLOBAL, null);
+        assertEquals(1, list.size());
+        list = mController.getTargetStates(target, IController.FLAG_SCOPE_CURRENT, null);
+        assertEquals(2, list.size());
+        list = mController.getTargetStates(target, IController.FLAG_SCOPE_CACHED, null);
+        assertEquals(1, list.size());
+        list = mController.getTargetStates(target, IController.FLAG_SCOPE_ALL, null);
+        assertEquals(4, list.size());
+        
+    }
 
     public void testState(){
         mController.setStateStackEnable(true);

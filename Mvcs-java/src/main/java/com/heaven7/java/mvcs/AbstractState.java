@@ -37,6 +37,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	private int mId;
 	private IController<?, P> mController;
 	private P mParam;
+	//TODO team param
 	/**
 	 * @since 1.1.8
 	 */
@@ -215,7 +216,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	}
 
 	@CalledInternal
-	public void onDispose() {
+	protected void onDispose() {
 
 	}
 

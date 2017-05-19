@@ -18,7 +18,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  * @see AbstractState
  * @see ParameterMerger
  */
-public class SimpleController<S extends AbstractState<P>, P>
+public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegate
 		implements IController<S,P> {
 
 	/** current state group/ */
@@ -61,6 +61,9 @@ public class SimpleController<S extends AbstractState<P>, P>
 	private List<MessageInfo> mDelayMessages;
 	/** the list of {@linkplain StateListener} */
 	private GroupStateListener<P> mGroupStateListener;
+	
+	/** temp states */
+	private List<S> mTempStates;
 
 	private class StateNode{
 		int states;
@@ -346,11 +349,11 @@ public class SimpleController<S extends AbstractState<P>, P>
 
 	@Override
 	public final List<S> getGlobalStates(List<S> outStates) {
-		return mGlobalGroup !=null ? mGlobalGroup.getStates(outStates) : null;
+		return mGlobalGroup !=null ? mGlobalGroup.getForegroundStates(outStates) : null;
 	}
 	@Override
 	public final List<S> getGlobalStates() {
-		return mGlobalGroup !=null ? mGlobalGroup.getStates(null) : null;
+		return mGlobalGroup !=null ? mGlobalGroup.getForegroundStates(null) : null;
 	}
 	@Override
 	public final S getGlobalState() {
@@ -377,7 +380,7 @@ public class SimpleController<S extends AbstractState<P>, P>
 	@Override
 	public final List<S> getCurrentStates(List<S> outStates) {
 		checkMemberState();
-		return  mGroup.getStates(outStates);
+		return  mGroup.getForegroundStates(outStates);
 	}
 
 	@Override
@@ -535,6 +538,27 @@ public class SimpleController<S extends AbstractState<P>, P>
 		return outStates;
 	}
 	@Override
+	public List<S> getTargetStates(int states, int scopeFlags, List<S> outStates) {
+		if(outStates == null){
+			outStates = new ArrayList<S>();
+		}
+		
+		//TODO should handle double state between mGroup and mGlobalGroup?
+		if((scopeFlags & FLAG_SCOPE_CURRENT) == FLAG_SCOPE_CURRENT){
+			mGroup.getForegroundStates(states, outStates);
+		}
+		if((scopeFlags & FLAG_SCOPE_GLOBAL) == FLAG_SCOPE_GLOBAL && mGlobalGroup != null){
+			mGlobalGroup.getForegroundStates(states, outStates);
+		}
+		if((scopeFlags & FLAG_SCOPE_CACHED) == FLAG_SCOPE_CACHED){
+			mGroup.getBackgroundStates(states,outStates);
+			if(mGlobalGroup != null){
+				mGlobalGroup.getBackgroundStates(states, outStates);
+			}
+		}
+		return outStates;
+	}
+	@Override
 	public boolean sendMessage(Message msg,@PolicyType byte policy) {
 		return sendMessage(msg, policy, FLAG_SCOPE_CURRENT);
 	}
@@ -672,13 +696,35 @@ public class SimpleController<S extends AbstractState<P>, P>
 	
 	//======================== start internal method =============================
 	
-	//internal method
+	@Override
 	void setEnableStateCallback(boolean enable){
 		mGroup.setEnableStateCallback(enable);
 		if(mGlobalGroup != null){
 			mGlobalGroup.setEnableStateCallback(enable);
 		}
 	}
+	
+	@Override
+	void notifyStateEnter(int states) {
+		if(mTempStates == null){
+			mTempStates = new ArrayList<>();
+		}
+		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
+		for(S s : mTempStates){
+			s.reenter();//TODO need state parameter ?
+		}
+	}
+	@Override
+	void notifyStateExit(int states) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	void notifyStateReenter(int states) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	void addStateListener(StateListener<P> l, boolean includeGlobal) {
 		if(mGroupStateListener == null){
 			mGroupStateListener = new GroupStateListener<P>();
