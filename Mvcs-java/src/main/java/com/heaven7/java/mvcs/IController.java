@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import com.heaven7.java.base.anno.IntDef;
+import com.heaven7.java.base.util.Disposeable;
 import com.heaven7.java.mvcs.util.MutexStateException;
 
 /**

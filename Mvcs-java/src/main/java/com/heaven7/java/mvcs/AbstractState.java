@@ -2,6 +2,7 @@ package com.heaven7.java.mvcs;
 
 import com.heaven7.java.base.anno.CalledInternal;
 import com.heaven7.java.base.anno.Deprecated;
+import com.heaven7.java.base.util.Disposeable;
 
 /**
  * the abstract state which is controlled by {@link IController}.

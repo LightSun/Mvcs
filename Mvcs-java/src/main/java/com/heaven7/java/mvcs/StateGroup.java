@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.heaven7.java.base.anno.IntDef;
+import com.heaven7.java.base.util.Disposeable;
 import com.heaven7.java.mvcs.IController.StateFactory;
 import com.heaven7.java.mvcs.IController.StateListener;
 import com.heaven7.java.mvcs.util.MutexStateException;
