@@ -500,14 +500,14 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     boolean sendMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
     
     /**
-     * update the controller. At present only handle delay messages. this is often used by game.
+     * update the controller. this is often used by game.
      * @param deltaTime the delta time in mill second.
      * @since 1.1.6
      */
     void update(long deltaTime);
     
     /**
-     * update the controller. At present only handle delay messages. this is often used by game.
+     * update the controller.  this is often used by game.
      * @param deltaTime the delta time in mill second.
      * @param param  the parameter to update.
      * @since 1.1.8

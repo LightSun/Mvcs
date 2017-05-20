@@ -79,7 +79,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		return mParam;
 	}
 
-	public void setEnableStateCallback(boolean enable) {
+	public void setStateCallbackEnabled(boolean enable) {
 		this.mEnableStateCallback = enable;
 	}
 
@@ -531,6 +531,8 @@ import com.heaven7.java.mvcs.util.SparseArray;
 				break;
 			}
 		}
+		//TODO clear temp flags of State
+		state.clearOnceFlags();
 	}
 
 	/**

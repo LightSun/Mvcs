@@ -22,46 +22,46 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 	@Override
 	public void onTeamEnter(Team<P> team, AbstractState<P> trigger) {
 		final boolean byMutex = trigger.hasFlags(AbstractState.FLAG_MUTEX);
-		final IController<?, P> triCon = trigger.getController();
 
-		enterImpl(byMutex, triCon, team.getFormalMembers());
+		enterImpl(byMutex, trigger, team.getFormalMembers());
 
 		List<Member<P>> outers = team.getOuterMembers();
 		if (outers != null) {
-			enterImpl(byMutex, triCon, outers);
+			enterImpl(byMutex, trigger, outers);
 		}
 	}
 
 	@Override
 	public void onTeamExit(Team<P> team, AbstractState<P> trigger) {
 		final boolean byMutex = trigger.hasFlags(AbstractState.FLAG_MUTEX);
-		final IController<?, P> triCon = trigger.getController();
 
-		exitImpl(byMutex, triCon, team.getFormalMembers());
+		exitImpl(byMutex, trigger, team.getFormalMembers());
 
 		List<Member<P>> outers = team.getOuterMembers();
 		if (outers != null) {
-			exitImpl(byMutex, triCon, outers);
+			exitImpl(byMutex, trigger, outers);
 		}
 	}
 
 	@Override
 	public void onTeamReenter(Team<P> team, AbstractState<P> trigger) {
 		final boolean byMutex = trigger.hasFlags(AbstractState.FLAG_MUTEX);
-		final IController<?, P> triCon = trigger.getController();
 
-		reenterImpl(byMutex, triCon, team.getFormalMembers());
+		reenterImpl(byMutex, trigger, team.getFormalMembers());
 
 		List<Member<P>> outers = team.getOuterMembers();
 		if (outers != null) {
-			reenterImpl(byMutex, triCon, outers);
+			reenterImpl(byMutex, trigger, outers);
 		}
 	}
 	
-	private void reenterImpl(final boolean byMutex, IController<?, P> triCon, List<Member<P>> members) {
-
+	@SuppressWarnings("unchecked")
+	private void enterImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
+		
+		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
-		TeamDelegate delegate;
+		
+		TeamDelegate<P> delegate;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
 
@@ -77,9 +77,9 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				continue;
 			}
 
-			delegate = (TeamDelegate) controller;
+			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setEnableStateCallback(false);
+			delegate.setStateCallbackEnabled(false);
 
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
@@ -89,23 +89,25 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateReenter(member.getStates());
+				delegate.notifyStateEnter(member.getStates(), trigger.getStateParameter());
 				break;
 
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setEnableStateCallback(true);
+			delegate.setStateCallbackEnabled(true);
 		}
 	}
-
-	private void exitImpl(final boolean byMutex, IController<?, P> triCon, List<Member<P>> members) {
-
+	@SuppressWarnings("unchecked")
+	private void exitImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
+		
+		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
-		TeamDelegate delegate;
+		
+		TeamDelegate<P> delegate;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
-
+		
 		for (; it.hasNext();) {
 			member = it.next();
 			controller = member.getController();
@@ -117,11 +119,11 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				// same controller . ignore
 				continue;
 			}
-
-			delegate = (TeamDelegate) controller;
+			
+			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setEnableStateCallback(false);
-
+			delegate.setStateCallbackEnabled(false);
+			
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
 				// in base: mutex trigger do nothing.
@@ -130,23 +132,25 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateExit(member.getStates());
+				delegate.notifyStateExit(member.getStates(), trigger.getStateParameter());
 				break;
-
+				
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setEnableStateCallback(true);
+			delegate.setStateCallbackEnabled(true);
 		}
 	}
-
-	private void enterImpl(final boolean byMutex, IController<?, P> triCon, List<Member<P>> members) {
-
+	@SuppressWarnings("unchecked")
+	private void reenterImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
+		
+		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
-		TeamDelegate delegate;
+		
+		TeamDelegate<P> delegate;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
-
+		
 		for (; it.hasNext();) {
 			member = it.next();
 			controller = member.getController();
@@ -158,11 +162,11 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				// same controller . ignore
 				continue;
 			}
-
-			delegate = (TeamDelegate) controller;
+			
+			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setEnableStateCallback(false);
-
+			delegate.setStateCallbackEnabled(false);
+			
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
 				// in base: mutex trigger do nothing.
@@ -171,13 +175,13 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateEnter(member.getStates());
+				delegate.notifyStateReenter(member.getStates(), trigger.getStateParameter());
 				break;
-
+				
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setEnableStateCallback(true);
+			delegate.setStateCallbackEnabled(true);
 		}
 	}
 }

@@ -29,16 +29,20 @@ import com.heaven7.java.base.util.Disposeable;
  */
 public abstract class AbstractState<P> implements Disposeable {
 	
-	/** flag of detached state. */
+	/** flag of detached state. long time flag */
 	public static final int FLAG_ATTACH = 0x0001;
-	/** flag of triggered by mutex */
+	/** flag of triggered by mutex. once flag. */
 	public static final int FLAG_MUTEX  = 0x0002;
+	/** flag of this state is notify(enter/exit/reenter) from a team, once flag.*/
+	public static final int FLAG_TEAM   = 0x0004;
 
 	/** the id of this state. often is the stateFlag of this state. */
 	private int mId;
 	private IController<?, P> mController;
 	private P mParam;
-	//TODO team param
+	/** indicate the param is from team callbak. */
+	private P mTeamParam;
+	
 	/**
 	 * @since 1.1.8
 	 */
@@ -99,6 +103,12 @@ public abstract class AbstractState<P> implements Disposeable {
 		}
 		onExit();
 	}
+	/**
+	 * clear the temp/once flags.
+	 */
+	void clearOnceFlags(){
+		mFlags &= ~(FLAG_MUTEX | FLAG_TEAM);
+	}
 	
 	/**
 	 * indicate  this state has some flags or not
@@ -110,7 +120,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	}
 	
 	/**
-	 * get the whole enter count, include enter and reenter.
+	 * get the whole enter count, include enter and reenter. if is exited it will be zero.
 	 * @return the whole enter count.
 	 * @since 1.1.8
 	 */
@@ -163,6 +173,25 @@ public abstract class AbstractState<P> implements Disposeable {
 		}
 		return mController;
 	}
+	
+	/**
+	 * get the team parameter.
+	 * 
+	 * @return the state parameter.
+	 */
+	public P getTeamParameter() {
+		return mTeamParam;
+	}
+
+	/**
+	 * set the team parameter
+	 * 
+	 * @param p
+	 *            the parameter.
+	 */
+	public void setTeamParameter(P p) {
+		this.mTeamParam = p;
+	}
 
 	/**
 	 * get the state parameter.
@@ -206,9 +235,9 @@ public abstract class AbstractState<P> implements Disposeable {
 	 * @param deltaTime the delta time between last update and now.
 	 * @param param
 	 *            the extra parameter.
+	 * @since 1.1.8           
 	 */
-	@CalledInternal
-	public void onUpdate(long deltaTime, P param) {
+	protected void onUpdate(long deltaTime, P param) {
 		onUpdate(param);
 	}
 	/**
@@ -219,17 +248,19 @@ public abstract class AbstractState<P> implements Disposeable {
 	 *            the extra parameter.
 	 */
 	@Deprecated("please use #onUpdate(long deltaTime, P param) instead.")
-	@CalledInternal
 	protected void onUpdate(P param) {
 	}
 
 	@CalledInternal
 	@Deprecated("use #onDispose() instead, this will be delete in 2.x version.")
 	@Override
-	public void dispose() {
+	public final void dispose() {
 		onDispose();
 	}
 
+	/**
+	 * called on dispose this state.
+	 */
 	@CalledInternal
 	protected void onDispose() {
 

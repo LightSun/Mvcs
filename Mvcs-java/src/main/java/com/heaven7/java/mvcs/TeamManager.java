@@ -41,13 +41,64 @@ public class TeamManager<P> implements StateListener<P> {
 		mMap = new SparseArray<>();
 	}
 
+	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states,
+			byte cooperateMethod) {
+		return new Member<P>(controller, states, cooperateMethod);
+	}
+
+	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states) {
+		return new Member<P>(controller, states, COOPERATE_METHOD_BASE);
+	}
+
+	public void createTeam(List<Member<P>> members) {
+
+	}
+
+	// 主，从. 只有主的才能通知从的。
+	public int createTeam(List<Member<P>> formal, List<Member<P>> outer) {
+		Team<P> team = new Team<P>();
+		team.formal = formal;
+		team.outer = outer;
+		mMap.put(++mId, team);
+		return mId;
+	}
+
+	public void update(long deltaTime, P param) {
+
+	}
+
+	@Override
+	public void onEnterState(int stateFlag, AbstractState<P> state) {
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			mMap.valueAt(i).onEnter(stateFlag, state);
+		}
+	}
+
+	@Override
+	public void onExitState(int stateFlag, AbstractState<P> state) {
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			mMap.valueAt(i).onExit(stateFlag, state);
+		}
+	}
+
+	@Override
+	public void onReenterState(int stateFlag, AbstractState<P> state) {
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			mMap.valueAt(i).onReenter(stateFlag, state);
+		}
+	}
+
 	/**
 	 * one controller one member.
 	 * 
 	 * @author heaven7
 	 *
-	 * @param <P>
-	 *            the paramter type
+	 * @param
+	 * 			<P>
+	 *            the parameter type
 	 */
 	public static class Member<P> {
 		WeakReference<IController<? extends AbstractState<P>, P>> WeakController;
@@ -92,7 +143,8 @@ public class TeamManager<P> implements StateListener<P> {
 		List<Member<P>> outer;
 		TeamCallback<P> callback;
 
-		Team() {}
+		Team() {
+		}
 
 		public List<Member<P>> getFormalMembers() {
 			return formal;
@@ -103,20 +155,23 @@ public class TeamManager<P> implements StateListener<P> {
 		}
 
 		void onEnter(int state, AbstractState<P> trigger) {
-			if(hasMember(trigger.getController(), state)){
-			     callback.onTeamEnter(this, trigger);
+			if (hasMember(trigger.getController(), state)) {
+				callback.onTeamEnter(this, trigger);
 			}
 		}
+
 		void onExit(int state, AbstractState<P> trigger) {
-			if(hasMember(trigger.getController(), state)){
+			if (hasMember(trigger.getController(), state)) {
 				callback.onTeamExit(this, trigger);
 			}
 		}
+
 		void onReenter(int state, AbstractState<P> trigger) {
-			if(hasMember(trigger.getController(), state)){
+			if (hasMember(trigger.getController(), state)) {
 				callback.onTeamReenter(this, trigger);
 			}
 		}
+
 		private boolean hasMember(IController<?, P> target, int state) {
 			for (Member<P> member : formal) {
 				if (member.getController() == target) {
@@ -127,52 +182,6 @@ public class TeamManager<P> implements StateListener<P> {
 				}
 			}
 			return false;
-		}
-	}
-
-	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states,
-			byte cooperateMethod) {
-		return new Member<P>(controller, states, cooperateMethod);
-	}
-
-	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states) {
-		return new Member<P>(controller, states, COOPERATE_METHOD_BASE);
-	}
-
-	public void createTeam(List<Member<P>> members) {
-
-	}
-
-	// 主，从. 只有主的才能通知从的。
-	public int createTeam(List<Member<P>> formal, List<Member<P>> outer) {
-		Team<P> team = new Team<P>();
-		team.formal = formal;
-		team.outer = outer;
-		mMap.put(++mId, team);
-		return mId;
-	}
-
-	@Override
-	public void onEnterState(int stateFlag, AbstractState<P> state) {
-		final int size = mMap.size();
-		for (int i = size - 1; i >= 0; i--) {
-			 mMap.valueAt(i).onEnter(stateFlag, state);
-		}
-	}
-
-	@Override
-	public void onExitState(int stateFlag, AbstractState<P> state) {
-		final int size = mMap.size();
-		for (int i = size - 1; i >= 0; i--) {
-			 mMap.valueAt(i).onExit(stateFlag, state);
-		}
-	}
-
-	@Override
-	public void onReenterState(int stateFlag, AbstractState<P> state) {
-		final int size = mMap.size();
-		for (int i = size - 1; i >= 0; i--) {
-			 mMap.valueAt(i).onReenter(stateFlag, state);
 		}
 	}
 

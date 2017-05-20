@@ -18,7 +18,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  * @see AbstractState
  * @see ParameterMerger
  */
-public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegate
+public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegate<P>
 		implements IController<S,P> {
 
 	/** current state group/ */
@@ -607,7 +607,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 			}
 		}
 		
-		//update state
+		//update active state
 		if(mTempStates == null){
 			mTempStates = new ArrayList<>();
 		}
@@ -703,7 +703,11 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		if( (scope & FLAG_SCOPE_GLOBAL) != 0  && mGlobalGroup != null){
 			handled |= mGlobalGroup.handleMessage(msg, policy, includeCache);
 		}
-		if( (scope & FLAG_SCOPE_CURRENT) != 0 ){
+		if(policy == POLICY_CONSUME  && handled){
+			msg.recycleUnchecked();
+			return true;
+		}
+		if((scope & FLAG_SCOPE_CURRENT) != 0 ){
 			handled |= mGroup.handleMessage(msg, policy, includeCache);
 		}
 		//recycle
@@ -714,15 +718,15 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	//======================== start internal method =============================
 	
 	@Override
-	void setEnableStateCallback(boolean enable){
-		mGroup.setEnableStateCallback(enable);
+	void setStateCallbackEnabled(boolean enable){
+		mGroup.setStateCallbackEnabled(enable);
 		if(mGlobalGroup != null){
-			mGlobalGroup.setEnableStateCallback(enable);
+			mGlobalGroup.setStateCallbackEnabled(enable);
 		}
 	}
 	
 	@Override
-	void notifyStateEnter(int states) {
+	void notifyStateEnter(int states, P param) {
 		if(mTempStates == null){
 			mTempStates = new ArrayList<>();
 		}
@@ -733,24 +737,22 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		mTempStates.clear();
 	}
 	@Override
-	void notifyStateExit(int states) {
+	void notifyStateExit(int states,P param) {
 		// TODO Auto-generated method stub
 		
 	}
 	@Override
-	void notifyStateReenter(int states) {
-		// TODO Auto-generated method stub
-		
+	void notifyStateReenter(int states,P param) {
 	}
 	
-	void addStateListener(StateListener<P> l, boolean includeGlobal) {
+	void addStateListener(StateListener<P> l) {
 		if(mGroupStateListener == null){
 			mGroupStateListener = new GroupStateListener<P>();
 		}
 		mGroupStateListener.addStateListener(l);
 		//register to state group
 		mGroup.setStateListener(mGroupStateListener);
-		if(includeGlobal && mGlobalGroup != null){
+		if(mGlobalGroup != null){
 			mGlobalGroup.setStateListener(mGroupStateListener);
 		}
 	}

@@ -1,21 +1,33 @@
 package com.heaven7.java.mvcs;
 
-/*public*/  abstract class TeamDelegate{
+/*public*/  abstract class TeamDelegate<P>{
 
-	void setEnableStateCallback(boolean enable){
+	/**
+	 * set the state callback enabled or not.
+	 * @param enable true to enable , false to disable
+	 */
+	void setStateCallbackEnabled(boolean enable){
 		
 	}
 	/**
-	 * notify state enter from a team.
+	 * notify state enter which is from a team.
 	 * @param states the states to handle
 	 */
-	void notifyStateEnter(int states){
+	void notifyStateEnter(int states, P param){
 		
 	}
-	void notifyStateExit(int states){
+	/**
+	 * notify state exit which is from a team.
+	 * @param states the states to handle
+	 */
+	void notifyStateExit(int states, P param){
 		
 	}
-	void notifyStateReenter(int states){
+	/**
+	 * notify state reenter which is from a team.
+	 * @param states the states to handle
+	 */
+	void notifyStateReenter(int states, P param){
 		
 	}
 }
