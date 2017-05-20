@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.heaven7.java.mvcs.util.SparseArray;
 
@@ -59,8 +58,6 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	private StateTransactionImpl mTransaction;
 	/** the delay messages. */
 	private List<MessageInfo> mDelayMessages;
-	/** the list of {@linkplain StateListener} */
-	private GroupStateListener<P> mGroupStateListener;
 	
 	/** temp states */
 	private List<S> mTempStates;
@@ -622,6 +619,22 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	}
 	
 	@Override
+	public void update(int activeStates, long deltaTime, P param) {
+		if(mTempStates ==null){
+			mTempStates = new ArrayList<>();
+		}
+		final List<S> mTempStates = this.mTempStates;
+		getTargetStates(activeStates, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
+		
+		for(S state : mTempStates){
+			state.addFlags(AbstractState.FLAG_TEAM);
+			state.onUpdate(deltaTime, param);
+			state.clearOnceFlags();
+		}
+		mTempStates.clear();
+	}
+	
+	@Override
 	public void clearMessages() {
 		synchronized (this) {
 			if(mDelayMessages != null){
@@ -727,46 +740,43 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	
 	@Override
 	void notifyStateEnter(int states, P param) {
+		//enter. only online AbstractState can receive team callback. so just reenter.
+		notifyStateReenter(states, param);
+	}
+	@Override
+	void notifyStateExit(int states,P param) {
 		if(mTempStates == null){
 			mTempStates = new ArrayList<>();
 		}
 		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
 		for(S s : mTempStates){
-			s.reenter();//TODO need state parameter ?
+			s.setTeamParameter(param);
+			s.exit(AbstractState.FLAG_TEAM);
+			s.clearOnceFlags();
 		}
 		mTempStates.clear();
 	}
 	@Override
-	void notifyStateExit(int states,P param) {
-		// TODO Auto-generated method stub
-		
+	void notifyStateReenter(int states, P param) {
+		if(mTempStates == null){
+			mTempStates = new ArrayList<>();
+		}
+		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
+		for(S s : mTempStates){
+			s.setTeamParameter(param);
+			s.reenter(AbstractState.FLAG_TEAM);
+			s.clearOnceFlags();
+		}
+		mTempStates.clear();
 	}
 	@Override
-	void notifyStateReenter(int states,P param) {
-	}
-	
-	void addStateListener(StateListener<P> l) {
-		if(mGroupStateListener == null){
-			mGroupStateListener = new GroupStateListener<P>();
-		}
-		mGroupStateListener.addStateListener(l);
-		//register to state group
-		mGroup.setStateListener(mGroupStateListener);
+	void setStateListener(StateListener<P> l) {
+		//register to state group(curren and global)
+		mGroup.setStateListener(l);
 		if(mGlobalGroup != null){
-			mGlobalGroup.setStateListener(mGroupStateListener);
+			mGlobalGroup.setStateListener(l);
 		}
 	}
-	void removeStateListener(StateListener<P> l) {
-		if(mGroupStateListener != null){
-			mGroupStateListener.removeStateListener(l);
-		}
-	}
-	void clearStateListener() {
-		if(mGroupStateListener != null){
-			mGroupStateListener.clearStateListener();
-		}
-	}
-	
 	//======================== end internal method =============================
 	
 	private static class MessageInfo{
@@ -827,42 +837,5 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 			}		
 			return result;
 		} 
-	}
-	
-	private static class GroupStateListener<P> implements StateListener<P>{
-		
-		private final List<StateListener<P>> mList = new CopyOnWriteArrayList<>();
-		
-		public void addStateListener(StateListener<P> l){
-			mList.add(l);
-		}
-		public void removeStateListener(StateListener<P> l){
-			mList.remove(l);
-		}
-		public void clearStateListener(){
-			mList.clear();
-		}
-
-		@Override
-		public void onEnterState(int stateFlag, AbstractState<P> state) {
-			for(StateListener<P> l : mList){
-				l.onEnterState(stateFlag, state);
-			}
-		}
-
-		@Override
-		public void onExitState(int stateFlag, AbstractState<P> state) {
-			for(StateListener<P> l : mList){
-				l.onExitState( stateFlag, state);
-			}
-		}
-
-		@Override
-		public void onReenterState(int stateFlag, AbstractState<P> state) {
-			for(StateListener<P> l : mList){
-				l.onReenterState(stateFlag, state);
-			}
-		}
-		
 	}
 }

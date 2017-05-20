@@ -12,7 +12,7 @@ import java.util.List;
 import com.heaven7.java.base.anno.IntDef;
 import com.heaven7.java.base.util.Disposeable;
 import com.heaven7.java.mvcs.IController.StateFactory;
-import com.heaven7.java.mvcs.IController.StateListener;
+import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 import com.heaven7.java.mvcs.util.MutexStateException;
 import com.heaven7.java.mvcs.util.SparseArray;
 
@@ -285,8 +285,9 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		state.setStateParameter(p);
 		//state.onAttach(getController());
 		//state.setId(singleState);
-		state.reenter();
+		state.reenter(0);
 		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
+		state.clearOnceFlags();
 	}
 
 	private void enter0(int singleState, S state) {
@@ -301,9 +302,10 @@ import com.heaven7.java.mvcs.util.SparseArray;
 		state.setStateParameter(p);
 		state.onAttach(getController());
 		state.setId(singleState);
-		state.enter();
+		state.enter(0);
 		//dispatch callback
 		dispatchStateCallback(ACTION_ENTER, singleState, state, null);
+		state.clearOnceFlags();
 
 		// handle mutex states
 		int[] mutexStates = getController().getMutexState(singleState);
@@ -531,8 +533,6 @@ import com.heaven7.java.mvcs.util.SparseArray;
 				break;
 			}
 		}
-		//TODO clear temp flags of State
-		state.clearOnceFlags();
 	}
 
 	/**

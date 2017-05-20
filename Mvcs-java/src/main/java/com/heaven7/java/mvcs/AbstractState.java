@@ -85,29 +85,57 @@ public abstract class AbstractState<P> implements Disposeable {
 		this.mId = id;
 	}
 	
-	void addFlags(int flags){
-		this.mFlags |= flags;
-	}
-	void enter(){
+	/**
+	 * enter this state with target flags.
+	 * @param flags the target flags
+	 * @since 1.1.8
+	 */
+	void enter(int flags){
 		mRealEnterCount ++;
+		if(flags > 0){
+		    addFlags(flags);
+		}
 		onEnter();
 	}
-	void reenter(){
+	/**
+	 * reenter this state with target flags.
+	 * @param flags the target flags
+	 * @since 1.1.8
+	 */
+	void reenter(int flags){
 		mRealEnterCount ++;
+		if(flags > 0){
+		    addFlags(flags);
+		}
 		onReenter();
 	}
+	/**
+	 * exit this state with target flags.
+	 * @param flags the target flags
+	 * @since 1.1.8
+	 */
 	void exit(int flags){
 		mRealEnterCount = 0;
-		if(flags != 0){
+		if(flags > 0){
 		    addFlags(flags);
 		}
 		onExit();
 	}
 	/**
 	 * clear the temp/once flags.
+	 * @since 1.1.8
 	 */
 	void clearOnceFlags(){
 		mFlags &= ~(FLAG_MUTEX | FLAG_TEAM);
+	}
+	
+	/**
+	 * add some flags for this state. this is often called internal.
+	 * @param flags the flags to add.
+	 * @since 1.1.8
+	 */
+	/*public*/ final void addFlags(int flags){
+		this.mFlags |= flags;
 	}
 	
 	/**

@@ -6,6 +6,7 @@ import com.heaven7.java.mvcs.IController;
 import com.heaven7.java.mvcs.Message;
 import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
+import com.heaven7.java.mvcs.TeamManager;
 import com.heaven7.java.mvcs.util.ResultAction;
 
 import junit.framework.TestCase;

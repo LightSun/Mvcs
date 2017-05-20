@@ -17,8 +17,8 @@ import com.heaven7.java.mvcs.TeamManager.TeamCallback;;
  * @param <P> the parameter 
  * @since 1.1.8
  */
-public class SimpleTeamCllback<P> extends TeamCallback<P> {
-
+/*public*/ class SimpleTeamCllback<P> extends TeamCallback<P> {
+	
 	@Override
 	public void onTeamEnter(Team<P> team, AbstractState<P> trigger) {
 		final boolean byMutex = trigger.hasFlags(AbstractState.FLAG_MUTEX);
@@ -98,6 +98,7 @@ public class SimpleTeamCllback<P> extends TeamCallback<P> {
 			delegate.setStateCallbackEnabled(true);
 		}
 	}
+	
 	@SuppressWarnings("unchecked")
 	private void exitImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
 		

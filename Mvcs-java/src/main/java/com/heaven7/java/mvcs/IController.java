@@ -514,6 +514,17 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      */
     void update(long deltaTime,  P param);
     
+    /**
+     * update the controller for target active states.  this is often used by game.
+     * 
+     * @param activeStates the active states to update
+     * @param deltaTime the delta time in mill second.
+     * @param param  the parameter to update.
+     * @since 1.1.8
+     */
+    void update(int activeStates,long deltaTime,  P param);
+    
+    
 
     //============================== lock event ==================================
 	  /**
@@ -625,20 +636,4 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     	
     }
     
-    /**
-     * the state listener 
-     * @author heaven7
-     *
-     * @param <P> the parameter
-     * @since 1.1.8
-     */
-	public interface StateListener<P>{
-	
-		void onEnterState(int stateFlag, AbstractState<P> state);
-	
-		void onExitState(int stateFlag, AbstractState<P> state);
-		
-		void onReenterState(int stateFlag, AbstractState<P> state);
-	}
-
 }
