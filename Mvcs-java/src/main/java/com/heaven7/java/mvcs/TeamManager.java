@@ -12,7 +12,7 @@ import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 import com.heaven7.java.mvcs.util.SparseArray;
 
 /**
- * the team manager. which can communication with multi controller.
+ * the team manager of state, across multi {@linkplain IController}. which can communication with multi controller.
  * 
  * @author heaven7
  *
