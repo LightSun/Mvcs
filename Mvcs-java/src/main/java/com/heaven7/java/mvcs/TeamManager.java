@@ -8,6 +8,7 @@ import java.util.List;
 import com.heaven7.java.base.anno.CalledInternal;
 import com.heaven7.java.base.anno.Nullable;
 import com.heaven7.java.base.util.Throwables;
+import com.heaven7.java.mvcs.IController.PolicyType;
 import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 import com.heaven7.java.mvcs.util.SparseArray;
 
@@ -21,7 +22,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
  *            the parameter type
  * @since 1.1.8
  */
-public final class TeamManager<P> implements StateListener<P> {
+public class TeamManager<P> implements StateListener<P> {
 
 	/***
 	 * the cooperate method: just base. (can't listen mutex state, but include
@@ -536,6 +537,15 @@ public final class TeamManager<P> implements StateListener<P> {
 			mMap.valueAt(i).update(deltaTime, param);
 		}
 	}
+	
+	public boolean sendMessage(int teamId, Message msg, @PolicyType byte policy,
+			int memberFlags){
+		Team<P> team = getTeam(teamId);
+		if(team == null){
+			return false;
+		}
+		return team.dispatchMessage(msg, policy, memberFlags);
+	}
 
 	// =============================================================
 	@CalledInternal
@@ -717,7 +727,7 @@ public final class TeamManager<P> implements StateListener<P> {
 		void update(long deltaTime, P param) {
 			IController<? extends AbstractState<P>, P> controller = getController();
 			if (controller != null) {
-				controller.update(states, deltaTime, param);
+				controller.updateActiveStates(states, deltaTime, param);
 			}
 		}
 
@@ -806,6 +816,32 @@ public final class TeamManager<P> implements StateListener<P> {
 		 */
 		public List<Member<P>> getOuterMembers() {
 			return outer;
+		}
+
+		public boolean dispatchMessage(Message msg,@PolicyType byte policy, int memberFlags) {
+			// TODO Auto-generated method stub
+			
+			return false;
+		}
+		private  boolean handleMessage(Message msg, @PolicyType byte policy, 
+				List<Member<P>> members){
+			
+			switch (policy) {
+			case IController.POLICY_BROADCAST:
+				for(Member<P> m : members){
+					//TODO
+				}
+				break;
+				
+			case IController.POLICY_CONSUME:
+				
+				break;
+
+			default:
+				break;
+			}
+			
+			return false;
 		}
 
 		/**

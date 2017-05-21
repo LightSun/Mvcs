@@ -522,7 +522,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param param  the parameter to update.
      * @since 1.1.8
      */
-    void update(int activeStates,long deltaTime,  P param);
+    void updateActiveStates(int activeStates, long deltaTime,  P param);
     
     
 

@@ -1,5 +1,7 @@
 package com.heaven7.java.mvcs;
 
+import com.heaven7.java.base.anno.Hide;
+
 /**
  * the team delegate
  * @author heaven7
@@ -7,8 +9,8 @@ package com.heaven7.java.mvcs;
  * @param <P> the parameter type.
  * @since 1.1.8
  */
+@Hide
 /*public*/  abstract class TeamDelegate<P>{
-	
 	
 	 /**
      * the state listener 

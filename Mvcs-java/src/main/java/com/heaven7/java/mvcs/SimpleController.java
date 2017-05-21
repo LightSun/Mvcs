@@ -619,7 +619,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	}
 	
 	@Override
-	public void update(int activeStates, long deltaTime, P param) {
+	public void updateActiveStates(int activeStates, long deltaTime, P param) {
 		if(mTempStates ==null){
 			mTempStates = new ArrayList<>();
 		}
