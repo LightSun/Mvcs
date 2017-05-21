@@ -574,11 +574,13 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		return outStates;
 	}
 
+	@Deprecated
 	@Override
 	public boolean sendMessage(Message msg, @PolicyType byte policy) {
 		return sendMessage(msg, policy, FLAG_SCOPE_CURRENT);
 	}
 
+	@Deprecated
 	@Override
 	public boolean sendMessage(Message msg, @PolicyType byte policy, @ScopeFlags byte scope) {
 		return dispatchMessageImpl(-1, msg, policy, scope);
