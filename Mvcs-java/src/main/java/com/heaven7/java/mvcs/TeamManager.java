@@ -537,14 +537,48 @@ public class TeamManager<P> implements StateListener<P> {
 			mMap.valueAt(i).update(deltaTime, param);
 		}
 	}
-	
-	public boolean sendMessage(int teamId, Message msg, @PolicyType byte policy,
+	/**
+	 * send a message to a team which is assigned by target team id.
+	 * @param teamId the team id
+	 * @param msg the message
+	 * @param policy the policy. {@linkplain IController#POLICY_BROADCAST} or 
+	 *                {@linkplain IController#POLICY_CONSUME}
+	 * @param memberFlags the member flags. see {@linkplain TeamManager#FLAG_MEMBER_FORMAL}, 
+	 *               {@linkplain TeamManager#FLAG_MEMBER_OUTER}
+	 * @return true the message if handled. false otherwise
+	 */
+	public boolean dispatchMessage(int teamId, Message msg, @PolicyType byte policy,
 			int memberFlags){
 		Team<P> team = getTeam(teamId);
 		if(team == null){
 			return false;
 		}
 		return team.dispatchMessage(msg, policy, memberFlags);
+	}
+	
+	/**
+	 * dispatch a message to all teams which is assigned by target team id.
+	 * @param msg the message
+	 * @param policy the policy. {@linkplain IController#POLICY_BROADCAST} or 
+	 *                {@linkplain IController#POLICY_CONSUME}
+	 * @param memberFlags the member flags. see {@linkplain TeamManager#FLAG_MEMBER_FORMAL}, 
+	 *               {@linkplain TeamManager#FLAG_MEMBER_OUTER}
+	 * @return true the message if handled. false otherwise
+	 */
+	public boolean dispatchMessage(Message msg, @PolicyType byte policy,
+			int memberFlags){
+		final boolean hasConsumed = policy == IController.POLICY_CONSUME;
+		final int size = mMap.size();
+		
+		boolean handled = false;
+		for(int i = size-1 ; i>=0 ; i--){
+			if(hasConsumed && 
+					(handled |= mMap.valueAt(i).dispatchMessage(msg, policy, memberFlags))
+					){
+				return true;
+			}
+		}
+		return handled;
 	}
 
 	// =============================================================
@@ -757,6 +791,14 @@ public class TeamManager<P> implements StateListener<P> {
 				return false;
 			return true;
 		}
+
+		public boolean dispatchMessage(Message msg,@PolicyType byte policy) {
+			IController<? extends AbstractState<P>, P> controller = getController();
+			if(controller != null){
+				return controller.dispatchMessage(states, msg, policy);
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -819,29 +861,43 @@ public class TeamManager<P> implements StateListener<P> {
 		}
 
 		public boolean dispatchMessage(Message msg,@PolicyType byte policy, int memberFlags) {
-			// TODO Auto-generated method stub
-			
-			return false;
+			boolean handled = false;
+			if((memberFlags & FLAG_MEMBER_FORMAL) != 0){
+				handled |= dispatchMessage(msg, policy, formal);
+			}
+			if(handled && policy == IController.POLICY_CONSUME){
+				return true;
+			}
+			if((memberFlags & FLAG_MEMBER_OUTER) != 0){
+				if(outer != null && !outer.isEmpty()){
+				   handled |= dispatchMessage(msg, policy, outer);
+				}
+			}
+			return handled;
 		}
-		private  boolean handleMessage(Message msg, @PolicyType byte policy, 
+		private static <P> boolean dispatchMessage(Message msg, @PolicyType byte policy, 
 				List<Member<P>> members){
 			
+			boolean handled = false;
 			switch (policy) {
 			case IController.POLICY_BROADCAST:
 				for(Member<P> m : members){
-					//TODO
+					handled |= m.dispatchMessage(msg,  policy);
 				}
 				break;
 				
 			case IController.POLICY_CONSUME:
-				
+				for(Member<P> m : members){
+					if(m.dispatchMessage(msg,  policy)){
+						return true;
+					}
+				}
 				break;
 
 			default:
-				break;
+				throw new RuntimeException("wrong policy = " + policy);
 			}
-			
-			return false;
+			return handled;
 		}
 
 		/**

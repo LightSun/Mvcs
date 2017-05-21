@@ -476,6 +476,31 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	void clearMessages();
 	
 	/**
+	 * dispatch the target message to the target state by the target policy.
+	 * And the default scope is {@linkplain IController#FLAG_SCOPE_CURRENT} | {@linkplain IController#FLAG_SCOPE_GLOBAL}.
+	 * @param states the target states to receive message, must be active state.
+	 * @param msg the target message 
+	 * @param policy the policy of send message 
+	 * @return true if this message is handled.
+	 * @throws IllegalStateException if message is in use.
+	 * @throws NullPointerException if the target message is null.
+	 * @since 1.1.8
+	 */
+    boolean dispatchMessage(int states, Message msg, @PolicyType byte policy);
+    
+    /**
+	 * dispatch the target message to the all state by the target policy.
+	 * @param msg the target message 
+	 * @param policy the policy of send message 
+	 * @param scopeFlags the scope flags of this message apply to.
+	 * @return true if this message is handled.
+	 * @throws IllegalStateException if message is in use.
+	 * @throws NullPointerException if the target message is null.
+	 * @since 1.1.8
+	 */
+    boolean dispatchMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
+    
+	/**
 	 * send the target message to the all state by the target policy.
 	 * And the default scope is {@linkplain IController#FLAG_SCOPE_CURRENT}.
 	 * @param msg the target message 
@@ -483,12 +508,26 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @return true if this message is handled.
 	 * @throws IllegalStateException if message is in use.
 	 * @throws NullPointerException if the target message is null.
-	 * @since 1.1.6
+	 * @since 1.1.8
 	 */
+    boolean dispatchMessage(Message msg, @PolicyType byte policy);
+    /**
+     * send the target message to the all state by the target policy.
+     * And the default scope is {@linkplain IController#FLAG_SCOPE_CURRENT}.
+     * <p>use {@linkplain IController#dispatchMessage(Message, byte)} instead.</p>
+     * @param msg the target message 
+     * @param policy the policy of send message 
+     * @return true if this message is handled.
+     * @throws IllegalStateException if message is in use.
+     * @throws NullPointerException if the target message is null.
+     * @since 1.1.6
+     */
+    @Deprecated
     boolean sendMessage(Message msg, @PolicyType byte policy);
 
 	/**
 	 * send the target message to the all state by the target policy.
+	 * <p>use {@linkplain IController#dispatchMessage(Message, byte, byte)} instead.</p>
 	 * @param msg the target message 
 	 * @param policy the policy of send message 
 	 * @param scopeFlags the scope flags of this message apply to.
@@ -497,6 +536,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	 * @throws NullPointerException if the target message is null.
 	 * @since 1.1.6
 	 */
+    @Deprecated
     boolean sendMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
     
     /**

@@ -458,15 +458,17 @@ import com.heaven7.java.mvcs.util.SparseArray;
 	
 	/**
 	 * handle the target message now.
+	 * @param states the target states to handle message. -1 means all.
 	 * @param msg the message to handle
 	 * @param policy the handle policy
 	 * @param includeCache true to include cache
 	 * @return true if handled the message.
 	 * @since 1.1.6
 	 */
-	public boolean handleMessage(Message msg, byte policy, boolean includeCache) {
+	public boolean handleMessage(int states, Message msg, byte policy, boolean includeCache) {
 		final SparseArray<S> map = getStateMap();
-		getFlagsInternal(mCurrentStates, sTempFlags);
+		states = states == -1 ? mCurrentStates : mCurrentStates & states;
+		getFlagsInternal(states, sTempFlags);
 		
 		boolean handled = false;
 		
@@ -481,7 +483,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			}
 			if(includeCache){
 				sTempFlags.clear();
-				getFlagsInternal(mCachedState, sTempFlags);
+				getFlagsInternal(states == -1 ? mCachedState : mCachedState & states, sTempFlags);
 				for(int state : sTempFlags){
 					if(map.get(state).handleMessage(msg)){
 						handled = true;
@@ -497,7 +499,7 @@ import com.heaven7.java.mvcs.util.SparseArray;
 			}
 			if(includeCache){
 				sTempFlags.clear();
-				getFlagsInternal(mCachedState, sTempFlags);
+				getFlagsInternal(states == -1 ? mCachedState : mCachedState & states, sTempFlags);
 				for(int state : sTempFlags){
 					handled |= map.get(state).handleMessage(msg);
 				}
