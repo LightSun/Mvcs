@@ -32,11 +32,11 @@ public final class TeamManager<P> implements StateListener<P> {
 	 * the cooperate method: all.
 	 */
 	public static final byte COOPERATE_METHOD_ALL = 3;
-	
-	/** the member scope of formal member*/
+
+	/** the member scope of formal member */
 	public static final byte FLAG_MEMBER_FORMAL = 0x0001;
-	/** the member scope of outer member*/
-	public static final byte FLAG_MEMBER_OUTER  = 0x0002;
+	/** the member scope of outer member */
+	public static final byte FLAG_MEMBER_OUTER = 0x0002;
 
 	private static final SimpleTeamCllback<Object> sDEFAULT_CALLBACK = new SimpleTeamCllback<Object>();
 
@@ -96,29 +96,70 @@ public final class TeamManager<P> implements StateListener<P> {
 	public TeamManager() {
 		mMap = new SparseArray<>();
 	}
+	
+	/**
+	 * create a team with default callback.
+	 * @param formal the formal members
+	 * @param outer the outer members, can be null
+	 * @param callback the team callback.
+	 * @return a team.
+	 * @see SimpleTeamCllback
+	 */
+	@SuppressWarnings("unchecked")
+	public static <P> Team<P> createTeam(List<Member<P>> formal, @Nullable List<Member<P>> outer) {
+		return createTeam(formal, outer, (TeamCallback<P>)sDEFAULT_CALLBACK);
+	}
+	
+	/**
+	 * create a team.
+	 * @param formal the formal members
+	 * @param outer the outer members, can be null
+	 * @param callback the team callback.
+	 * @return a team.
+	 */
+	public static <P> Team<P> createTeam(List<Member<P>> formal, @Nullable List<Member<P>> outer, 
+			TeamCallback<P> callback) {
+		Throwables.checkEmpty(formal);
+		Throwables.checkNull(callback);
+		Team<P> team = new Team<P>();
+		team.formal = formal;
+		team.outer = outer;
+		team.callback = callback;
+		return team;
+	}
 
 	/**
 	 * create a member .
-	 * @param <P> the parameter type.
-	 * @param controller the target controller
-	 * @param states the target states.
-	 * @param cooperateMethod the cooperate method between member and team.
+	 * 
+	 * @param
+	 * 			<P>
+	 *            the parameter type.
+	 * @param controller
+	 *            the target controller
+	 * @param states
+	 *            the target states.
+	 * @param cooperateMethod
+	 *            the cooperate method between member and team.
 	 * @return the member.
 	 */
-	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, 
-			int states, byte cooperateMethod) {
+	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states,
+			byte cooperateMethod) {
 		return new Member<P>(controller, states, cooperateMethod);
 	}
 
 	/**
 	 * create a member .
-	 * @param <P> the parameter type.
-	 * @param controller the target controller
-	 * @param states the target states.
+	 * 
+	 * @param
+	 * 			<P>
+	 *            the parameter type.
+	 * @param controller
+	 *            the target controller
+	 * @param states
+	 *            the target states.
 	 * @return the member.
 	 */
-	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, 
-			int states) {
+	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states) {
 		return new Member<P>(controller, states, COOPERATE_METHOD_BASE);
 	}
 
@@ -151,7 +192,7 @@ public final class TeamManager<P> implements StateListener<P> {
 	 */
 	@SuppressWarnings("unchecked")
 	public int registerTeam(List<Member<P>> formal, @Nullable List<Member<P>> outer) {
-		return registerTeam(formal, outer, (TeamCallback<P>)sDEFAULT_CALLBACK);
+		return registerTeam(formal, outer, (TeamCallback<P>) sDEFAULT_CALLBACK);
 	}
 
 	/**
@@ -169,268 +210,318 @@ public final class TeamManager<P> implements StateListener<P> {
 	 * @return the id of the team. >0
 	 */
 	public int registerTeam(List<Member<P>> formal, @Nullable List<Member<P>> outer, TeamCallback<P> callback) {
-		Throwables.checkEmpty(formal);
-		Throwables.checkNull(callback);
-		Team<P> team = new Team<P>();
-		team.formal = formal;
-		team.outer = outer;
-		team.callback = callback;
-		mMap.put(++mLastTeamId, team);
-		return mLastTeamId;
+		return registerTeam(createTeam(formal, outer, callback));
 	}
 	/**
-	 * unregister the team which is assigned by target team id.
-	 * @param teamId the target team id.
+	 * register a team to manager.
+	 * @param team the target team
+	 * @return the id of target team
 	 */
-	public void unregisterTeam(int teamId){
+	public int registerTeam(Team<P> team){
+		mMap.put( ++mLastTeamId, team );
+		return mLastTeamId;
+	}
+
+	/**
+	 * unregister the team which is assigned by target team id.
+	 * 
+	 * @param teamId
+	 *            the target team id.
+	 */
+	public void unregisterTeam(int teamId) {
 		mMap.remove(teamId);
 	}
 	
 	/**
-	 * delete formal member which is indicated by target controller. And default member flags is 
+	 * unregister the team.
+	 * 
+	 * @param teamId
+	 *            the target team id.
+	 */
+	public void unregisterTeam(Team<P> team) {
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			Team<P> t = mMap.valueAt(i);
+			if(t == team){
+				mMap.remove(mMap.keyAt(i));
+				break;
+			}
+		}
+	}
+
+	/**
+	 * delete formal member which is indicated by target controller. And default
+	 * member flags is
 	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
 	 * @return true of delete member success. or false if don't have.
 	 */
-	public boolean deleteOuterMember(int teamId, IController<? extends AbstractState<P>, P> controller){
+	public boolean deleteOuterMember(int teamId, IController<? extends AbstractState<P>, P> controller) {
 		return deleteMember(teamId, controller, FLAG_MEMBER_OUTER);
 	}
+
 	/**
-	 * delete formal member which is indicated by target controller. And default member flags is 
+	 * delete formal member which is indicated by target controller. And default
+	 * member flags is
 	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
 	 * @return true of delete member success. or false if don't have.
 	 */
-	public boolean deleteFormalMember(int teamId, IController<? extends AbstractState<P>, P> controller){
+	public boolean deleteFormalMember(int teamId, IController<? extends AbstractState<P>, P> controller) {
 		return deleteMember(teamId, controller, FLAG_MEMBER_FORMAL);
 	}
+
 	/**
-	 * delete the member which is indicated by target controller. And default member flags is 
+	 * delete the member which is indicated by target controller. And default
+	 * member flags is
 	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
 	 * @return true of delete member success. or false if don't have.
 	 */
-	public boolean deleteMember(int teamId, IController<? extends AbstractState<P>, P> controller){
-		return deleteMember(teamId, controller,(byte) (FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER));
+	public boolean deleteMember(int teamId, IController<? extends AbstractState<P>, P> controller) {
+		return deleteMember(teamId, controller, (byte) (FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER));
 	}
-	/**
-	 * delete the member which is indicated by target controller.
-	 * @param teamId the team id.
-	 * @param controller the controller
-	 * @param memberFlags the member flags .see {@linkplain TeamManager#FLAG_MEMBER_FORMAL} 
-	 *              and {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
-	 * @return true of delete member success. or false if don't have.
-	 */
-	private boolean deleteMember(int teamId, IController<? extends AbstractState<P>, P> controller,
-			byte memberFlags){
-		Throwables.checkNull(controller);
-		Team<P> team = mMap.get(teamId);
-		if(team == null){
-			return false;
-		}
-		return team.deleteMember(controller, -1, memberFlags);
-	}
+
 	
+
 	/**
-	 * delete the outer member states which is indicated by target controller and states.
-	 * And default member flags is "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
-	 * @param targetStates the target states to delete. must >0
+	 * delete the outer member states which is indicated by target controller
+	 * and states. And default member flags is
+	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
+	 * @param targetStates
+	 *            the target states to delete. must >0
 	 * @return true of delete member state success. or false if don't have.
 	 */
-	public boolean deleteOuterMembeStates(int teamId, IController<? extends AbstractState<P>, P> 
-	        controller, int targetStates){
+	public boolean deleteOuterMembeStates(int teamId, IController<? extends AbstractState<P>, P> controller,
+			int targetStates) {
 		return deleteMembeStates(teamId, controller, targetStates, FLAG_MEMBER_OUTER);
 	}
+
 	/**
-	 * delete the formal member states which is indicated by target controller and states.
-	 * And default member flags is "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
-	 * @param targetStates the target states to delete. must >0
+	 * delete the formal member states which is indicated by target controller
+	 * and states. And default member flags is
+	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
+	 * @param targetStates
+	 *            the target states to delete. must >0
 	 * @return true of delete member state success. or false if don't have.
 	 */
-	public boolean deleteFormalMembeStates(int teamId, IController<? extends AbstractState<P>, P> 
-	        controller, int targetStates){
+	public boolean deleteFormalMembeStates(int teamId, IController<? extends AbstractState<P>, P> controller,
+			int targetStates) {
 		return deleteMembeStates(teamId, controller, targetStates, FLAG_MEMBER_FORMAL);
 	}
-	
+
 	/**
-	 * delete the member states which is indicated by target controller and states.
-	 * And default member flags is "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
-	 * @param teamId the team id.
-	 * @param controller the controller
-	 * @param targetStates the target states to delete. must >0
+	 * delete the member states which is indicated by target controller and
+	 * states. And default member flags is
+	 * "{@linkplain FLAG_MEMBER_FORMAL} | {@linkplain FLAG_MEMBER_OUTER}"
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
+	 * @param targetStates
+	 *            the target states to delete. must >0
 	 * @return true of delete member state success. or false if don't have.
 	 */
-	public boolean deleteMembeStates(int teamId, IController<? extends AbstractState<P>, P> 
-	        controller, int targetStates){
-		return deleteMembeStates(teamId, controller, targetStates, 
-				(byte)(FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER));
+	public boolean deleteMembeStates(int teamId, IController<? extends AbstractState<P>, P> controller,
+			int targetStates) {
+		return deleteMembeStates(teamId, controller, targetStates, (byte) (FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER));
 	}
-	/**
-	 * delete the member states which is indicated by target controller and states.
-	 * @param teamId the team id.
-	 * @param controller the controller
-	 * @param targetStates the target states to delete. must >0
-	 * @param memberFlags the member flags .see {@linkplain TeamManager#FLAG_MEMBER_FORMAL} 
-	 *              and {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
-	 * @return true of delete member state success. or false if don't have.
-	 */
-	private boolean deleteMembeStates(int teamId, IController<? extends AbstractState<P>, P> 
-	        controller, int targetStates, byte memberFlags){
-		Throwables.checkNull(controller);
-		if(targetStates <= 0 ){
-			throw new IllegalArgumentException("targetStates must be positive.");
-		}
-		Team<P> team = mMap.get(teamId);
-		if(team == null){
-			return false;
-		}
-		return team.deleteMember(controller, targetStates, memberFlags);
-	}
-	
+
 	/**
 	 * add a formal member for team which is assigned by target teamId.
-	 * @param teamId the team id
-	 * @param member the formal member
+	 * 
+	 * @param teamId
+	 *            the team id
+	 * @param member
+	 *            the formal member
 	 * @return true if add success.
 	 */
-	public boolean addFormalMember(int teamId, Member<P> member){
+	public boolean addFormalMember(int teamId, Member<P> member) {
 		Throwables.checkNull(member);
 		Team<P> team = mMap.get(teamId);
-		if(team == null){
+		if (team == null) {
 			return false;
 		}
 		return team.formal.add(member);
 	}
+
 	/**
 	 * add a outer member for team which is assigned by target teamId.
-	 * @param teamId the team id
-	 * @param member the outer member
+	 * 
+	 * @param teamId
+	 *            the team id
+	 * @param member
+	 *            the outer member
 	 * @return true if add success.
 	 */
-	public boolean addOuterMember(int teamId, Member<P> member){
+	public boolean addOuterMember(int teamId, Member<P> member) {
 		Throwables.checkNull(member);
 		Team<P> team = mMap.get(teamId);
-		if(team == null){
+		if (team == null) {
 			return false;
 		}
-		if(team.outer == null){
+		if (team.outer == null) {
 			team.outer = new ArrayList<>(4);
 		}
 		return team.outer.add(member);
 	}
+
 	/**
-	 * add a formal member states for team which is assigned by target teamId  and controller.
-	 * @param teamId the team id
-	 * @param controller the controller
-	 * @param states the states to add.
+	 * add a formal member states for team which is assigned by target teamId
+	 * and controller.
+	 * 
+	 * @param teamId
+	 *            the team id
+	 * @param controller
+	 *            the controller
+	 * @param states
+	 *            the states to add.
 	 * @return true if add success.
 	 */
-	public boolean addFormalMemberStates(int teamId, IController<? extends AbstractState<P>, P>
-	    controller, int states){
-		if(states <= 0 ){
+	public boolean addFormalMemberStates(int teamId, IController<? extends AbstractState<P>, P> controller,
+			int states) {
+		if (states <= 0) {
 			throw new IllegalArgumentException("targetStates must be positive.");
 		}
 		Team<P> team = mMap.get(teamId);
-		if(team == null){
+		if (team == null) {
 			return false;
 		}
 		return team.addMemberStates(controller, states, FLAG_MEMBER_FORMAL);
 	}
+
 	/**
-	 * add a outer member states for team which is assigned by target teamId and controller.
-	 * @param teamId the team id
-	 * @param controller the controller
-	 * @param states the states to add.
+	 * add a outer member states for team which is assigned by target teamId and
+	 * controller.
+	 * 
+	 * @param teamId
+	 *            the team id
+	 * @param controller
+	 *            the controller
+	 * @param states
+	 *            the states to add.
 	 * @return true if add success.
 	 */
-	public boolean addOuterMemberStates(int teamId, IController<? extends AbstractState<P>, P>
-	    controller, int states){
-		if(states <= 0 ){
+	public boolean addOuterMemberStates(int teamId, IController<? extends AbstractState<P>, P> controller, int states) {
+		if (states <= 0) {
 			throw new IllegalArgumentException("targetStates must be positive.");
 		}
 		Team<P> team = mMap.get(teamId);
-		if(team == null){
+		if (team == null) {
 			return false;
 		}
 		return team.addMemberStates(controller, states, FLAG_MEMBER_OUTER);
 	}
+
 	/**
 	 * get the team for target team id.
-	 * @param teamId the team id.
+	 * 
+	 * @param teamId
+	 *            the team id.
 	 * @return the team.
 	 */
-	public Team<P> getTeam(int teamId){
+	public Team<P> getTeam(int teamId) {
 		return mMap.get(teamId);
 	}
-	
+
 	/**
-	 * indicate the target member is a formal member or not. 
-	 * @param member the member
+	 * indicate the target member is a formal member or not.
+	 * 
+	 * @param member
+	 *            the member
 	 * @return true if is in a team and is formal member.
 	 */
-	public boolean isFormalMember(Member<P> member){
+	public boolean isFormalMember(Member<P> member) {
 		Throwables.checkNull(member);
 		final int size = mMap.size();
-		for(int i = size - 1 ; i >= 0 ; i --){
-			if(mMap.get(i).isFormalMember(member)){
+		for (int i = size - 1; i >= 0; i--) {
+			if (mMap.get(i).isFormalMember(member)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 	/**
-	 * indicate the target member is a outer member or not. 
-	 * @param member the member
+	 * indicate the target member is a outer member or not.
+	 * 
+	 * @param member
+	 *            the member
 	 * @return true if is in a team and is outer member.
 	 */
-	public boolean isOuterMember(Member<P> member){
+	public boolean isOuterMember(Member<P> member) {
 		Throwables.checkNull(member);
 		final int size = mMap.size();
-		for(int i = size - 1 ; i >= 0 ; i --){
-			if(mMap.get(i).isOuterMember(member)){
+		for (int i = size - 1; i >= 0; i--) {
+			if (mMap.get(i).isOuterMember(member)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * get teams for target formal member.
-	 * @param member the member
-	 * @param outList the out list, can be null
-	 * @return the teams 
+	 * 
+	 * @param member
+	 *            the member
+	 * @param outList
+	 *            the out list, can be null
+	 * @return the teams
 	 */
-	public List<Team<P>> getTeamsAsFormal(Member<P> member, @Nullable List<Team<P>> outList){
+	public List<Team<P>> getTeamsAsFormal(Member<P> member, @Nullable List<Team<P>> outList) {
 		return getTeams(member, FLAG_MEMBER_FORMAL, outList);
 	}
-	
+
 	/**
 	 * get teams for target outer member.
-	 * @param member the member
-	 * @param outList the out list, can be null
-	 * @return the teams 
+	 * 
+	 * @param member
+	 *            the member
+	 * @param outList
+	 *            the out list, can be null
+	 * @return the teams
 	 */
-	public List<Team<P>> getTeamsAsOuter(Member<P> member, @Nullable List<Team<P>> outList){
+	public List<Team<P>> getTeamsAsOuter(Member<P> member, @Nullable List<Team<P>> outList) {
 		return getTeams(member, FLAG_MEMBER_OUTER, outList);
 	}
 
 	/**
 	 * get teams for target member(may be formal or outer member).
-	 * @param member the member
-	 * @param outList the out list, can be null
-	 * @return the teams 
+	 * 
+	 * @param member
+	 *            the member
+	 * @param outList
+	 *            the out list, can be null
+	 * @return the teams
 	 */
-	public List<Team<P>> getTeams(Member<P> member, @Nullable List<Team<P>> outList){
+	public List<Team<P>> getTeams(Member<P> member, @Nullable List<Team<P>> outList) {
 		return getTeams(member, FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER, outList);
 	}
-	
+
 	/**
 	 * update the all teams.
 	 * 
@@ -473,39 +564,90 @@ public final class TeamManager<P> implements StateListener<P> {
 			mMap.valueAt(i).onReenter(stateFlag, state);
 		}
 	}
+
+	// =============================================================================
+
+	// ================ start private method ===============
 	
-	//=============================================================================
+	/**
+	 * delete the member states which is indicated by target controller and
+	 * states.
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
+	 * @param targetStates
+	 *            the target states to delete. must >0
+	 * @param memberFlags
+	 *            the member flags .see
+	 *            {@linkplain TeamManager#FLAG_MEMBER_FORMAL} and
+	 *            {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
+	 * @return true of delete member state success. or false if don't have.
+	 */
+	private boolean deleteMembeStates(int teamId, IController<? extends AbstractState<P>, P> controller,
+			int targetStates, byte memberFlags) {
+		Throwables.checkNull(controller);
+		if (targetStates <= 0) {
+			throw new IllegalArgumentException("targetStates must be positive.");
+		}
+		Team<P> team = mMap.get(teamId);
+		if (team == null) {
+			return false;
+		}
+		return team.deleteMember(controller, targetStates, memberFlags);
+	}
 	
-	//=========================== start private method ==============================
-	
-	private List<Team<P>> getTeams(Member<P> member, int memberFlags, @Nullable List<Team<P>> outList){
+	/**
+	 * delete the member which is indicated by target controller.
+	 * 
+	 * @param teamId
+	 *            the team id.
+	 * @param controller
+	 *            the controller
+	 * @param memberFlags
+	 *            the member flags .see
+	 *            {@linkplain TeamManager#FLAG_MEMBER_FORMAL} and
+	 *            {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
+	 * @return true of delete member success. or false if don't have.
+	 */
+	private boolean deleteMember(int teamId, IController<? extends AbstractState<P>, P> controller, byte memberFlags) {
+		Throwables.checkNull(controller);
+		Team<P> team = mMap.get(teamId);
+		if (team == null) {
+			return false;
+		}
+		return team.deleteMember(controller, -1, memberFlags);
+	}
+
+	private List<Team<P>> getTeams(Member<P> member, int memberFlags, @Nullable List<Team<P>> outList) {
 		Throwables.checkNull(member);
-		
+
 		final boolean hasFormal = (memberFlags & FLAG_MEMBER_FORMAL) == FLAG_MEMBER_FORMAL;
 		final boolean hasOuter = (memberFlags & FLAG_MEMBER_OUTER) == FLAG_MEMBER_OUTER;
-		//no formal and no outer.
-		if(!hasFormal && !hasOuter){
+		// no formal and no outer.
+		if (!hasFormal && !hasOuter) {
 			return null;
 		}
-		if(outList == null){
+		if (outList == null) {
 			outList = new ArrayList<>(5);
 		}
 		final int size = mMap.size();
 		Team<P> team;
-		for(int i = size - 1 ; i >= 0 ; i --){
+		for (int i = size - 1; i >= 0; i--) {
 			team = mMap.get(i);
-			if(hasFormal && team.isFormalMember(member)){
+			if (hasFormal && team.isFormalMember(member)) {
 				outList.add(team);
-			}else{
-				if(hasOuter && team.isOuterMember(member)){
+			} else {
+				if (hasOuter && team.isOuterMember(member)) {
 					outList.add(team);
 				}
 			}
 		}
 		return outList;
 	}
-	
-	//============================ end private method =============================
+
+	// ============ end private method =====================
 
 	/**
 	 * one controller corresponding one member. But can have multi states.
@@ -518,8 +660,9 @@ public final class TeamManager<P> implements StateListener<P> {
 	 * @since 1.1.8
 	 */
 	public static class Member<P> {
-		WeakReference<IController<? extends AbstractState<P>, P>> WeakController;
-		int states; // can be multi
+		WeakReference<IController<? extends AbstractState<P>, P>> weakController;
+		/** the multi states*/
+		int states; 
 		/** the cooperate method with other member(or whole team). */
 		byte cooperateMethod = COOPERATE_METHOD_BASE;
 
@@ -537,21 +680,23 @@ public final class TeamManager<P> implements StateListener<P> {
 			if (states <= 0) {
 				throw new IllegalArgumentException("caused by states is error. states = " + states);
 			}
-			this.WeakController = new WeakReference<IController<? extends AbstractState<P>, P>>(controller);
+			this.weakController = new WeakReference<IController<? extends AbstractState<P>, P>>(controller);
 			this.states = states;
 			this.cooperateMethod = cooperateMethod;
 		}
 
 		/**
 		 * get the controller
+		 * 
 		 * @return the controller
 		 */
 		public IController<? extends AbstractState<P>, P> getController() {
-			return WeakController.get();
+			return weakController.get();
 		}
 
 		/**
 		 * get the states
+		 * 
 		 * @return the states
 		 */
 		public int getStates() {
@@ -560,6 +705,7 @@ public final class TeamManager<P> implements StateListener<P> {
 
 		/**
 		 * get the cooperate method.
+		 * 
 		 * @return the cooperate method.
 		 * @see TeamManager#COOPERATE_METHOD_ALL
 		 * @see TeamManager#COOPERATE_METHOD_BASE
@@ -574,6 +720,7 @@ public final class TeamManager<P> implements StateListener<P> {
 				controller.update(states, deltaTime, param);
 			}
 		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean equals(Object obj) {
@@ -583,15 +730,15 @@ public final class TeamManager<P> implements StateListener<P> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			
+
 			Member<P> other = (Member<P>) obj;
-			if(getController()== null){
+			if (getController() == null) {
 				return false;
 			}
-			if(other.getController() == null){
+			if (other.getController() == null) {
 				return false;
 			}
-			if(getController() != other.getController()){
+			if (getController() != other.getController()) {
 				return false;
 			}
 			if (cooperateMethod != other.cooperateMethod)
@@ -620,17 +767,23 @@ public final class TeamManager<P> implements StateListener<P> {
 
 		Team() {
 		}
+
 		/**
 		 * indicate the target member is a formal member or not.
-		 * @param member the member.
+		 * 
+		 * @param member
+		 *            the member.
 		 * @return true if is formal member.
 		 */
 		public boolean isFormalMember(Member<P> member) {
 			return formal.contains(member);
 		}
+
 		/**
 		 * indicate the target member is a outer member or not.
-		 * @param member the member.
+		 * 
+		 * @param member
+		 *            the member.
 		 * @return true if is outer member.
 		 */
 		public boolean isOuterMember(Member<P> member) {
@@ -639,6 +792,7 @@ public final class TeamManager<P> implements StateListener<P> {
 
 		/**
 		 * get the formal members
+		 * 
 		 * @return the formal members
 		 */
 		public List<Member<P>> getFormalMembers() {
@@ -647,105 +801,118 @@ public final class TeamManager<P> implements StateListener<P> {
 
 		/**
 		 * get the outer members
+		 * 
 		 * @return the outer members
 		 */
 		public List<Member<P>> getOuterMembers() {
 			return outer;
 		}
-		
+
 		/**
 		 * add member states.
-		 * @param controller the controller.
-		 * @param states the states
-		 * @param memberFlags the member flags
+		 * 
+		 * @param controller
+		 *            the controller.
+		 * @param states
+		 *            the states
+		 * @param memberFlags
+		 *            the member flags
 		 * @return true if add success. false otherwise.
 		 */
-		public boolean addMemberStates(IController<? extends AbstractState<P>, P> controller, 
-				int states, byte memberFlags) {
+		public boolean addMemberStates(IController<? extends AbstractState<P>, P> controller, int states,
+				byte memberFlags) {
 			boolean success = false;
-			if((memberFlags & FLAG_MEMBER_FORMAL) == FLAG_MEMBER_FORMAL ){
+			if ((memberFlags & FLAG_MEMBER_FORMAL) == FLAG_MEMBER_FORMAL) {
 				success |= addMemberStates0(controller, states, formal);
 			}
 			/**
 			 * formal and outer member may use same controller.
 			 */
-			if((memberFlags & FLAG_MEMBER_OUTER) == FLAG_MEMBER_OUTER ){
-				if(outer != null && !outer.isEmpty()){
-				    success |= addMemberStates0(controller, states, outer);
+			if ((memberFlags & FLAG_MEMBER_OUTER) == FLAG_MEMBER_OUTER) {
+				if (outer != null && !outer.isEmpty()) {
+					success |= addMemberStates0(controller, states, outer);
 				}
 			}
 			return success;
 		}
 
-		private boolean addMemberStates0(IController<? extends AbstractState<P>, P> controller, 
-				int states, List<Member<P>> members) {
+		private boolean addMemberStates0(IController<? extends AbstractState<P>, P> controller, int states,
+				List<Member<P>> members) {
 			IController<? extends AbstractState<P>, P> temp;
 			Member<P> member;
-			
-			Iterator<Member<P>>  it = members.iterator();
-			for(; it.hasNext() ;){
+
+			Iterator<Member<P>> it = members.iterator();
+			for (; it.hasNext();) {
 				member = it.next();
 				temp = member.getController();
-				//if controller is empty or controller is the target want to delete.
-				if(temp == null ){
+				// if controller is empty or controller is the target want to
+				// delete.
+				if (temp == null) {
 					it.remove();
 					continue;
 				}
-				if(temp == controller){
+				if (temp == controller) {
 					member.states |= states;
 					return true;
 				}
 			}
 			return false;
 		}
+
 		/**
-		 * delete member by target controller and states. May just delete states.
-		 * @param controller the controller
-		 * @param states the states to delete, if == -1. means remove whole member of controller
-		 * @param memberFlags the member flags
+		 * delete member by target controller and states. May just delete
+		 * states.
+		 * 
+		 * @param controller
+		 *            the controller
+		 * @param states
+		 *            the states to delete, if == -1. means remove whole member
+		 *            of controller
+		 * @param memberFlags
+		 *            the member flags
 		 * @return true if delete success.
 		 * @see TeamManager#FLAG_MEMBER_FORMAL
 		 * @see TeamManager#FLAG_MEMBER_OUTER
 		 */
-		boolean deleteMember(IController<? extends AbstractState<P>, P> controller, 
-				int states, byte memberFlags) {
-			
+		boolean deleteMember(IController<? extends AbstractState<P>, P> controller, int states, byte memberFlags) {
+
 			boolean success = false;
-			if((memberFlags & FLAG_MEMBER_FORMAL) == FLAG_MEMBER_FORMAL ){
+			if ((memberFlags & FLAG_MEMBER_FORMAL) == FLAG_MEMBER_FORMAL) {
 				success |= deleteMember0(controller, states, formal);
 			}
-			
+
 			/**
 			 * formal and outer member may use same controller.
 			 */
-			if((memberFlags & FLAG_MEMBER_OUTER) == FLAG_MEMBER_OUTER ){
-				if(outer != null && !outer.isEmpty()){
-				    success |= deleteMember0(controller, states, outer);
+			if ((memberFlags & FLAG_MEMBER_OUTER) == FLAG_MEMBER_OUTER) {
+				if (outer != null && !outer.isEmpty()) {
+					success |= deleteMember0(controller, states, outer);
 				}
 			}
 			return success;
 		}
 
-		private static <P> boolean deleteMember0(IController<? extends AbstractState<P>, P> controller, 
-				int states, List<Member<P>> members) {
+		private static <P> boolean deleteMember0(IController<? extends AbstractState<P>, P> controller, int states,
+				List<Member<P>> members) {
 			IController<? extends AbstractState<P>, P> temp;
 			Member<P> member;
-			
-			Iterator<Member<P>>  it = members.iterator();
-			for(; it.hasNext() ;){
+
+			Iterator<Member<P>> it = members.iterator();
+			for (; it.hasNext();) {
 				member = it.next();
 				temp = member.getController();
-				//if controller is empty or controller is the target want to delete.
-				if(temp == null ){
+				// if controller is empty or controller is the target want to
+				// delete.
+				if (temp == null) {
 					it.remove();
 					continue;
 				}
-				if(temp == controller){
-					if(states == -1){
+				if (temp == controller) {
+					if (states == -1) {
 						it.remove();
-					}else{
+					} else {
 						member.states &= ~states;
-						if(member.states <= 0){
+						if (member.states <= 0) {
 							it.remove();
 						}
 					}

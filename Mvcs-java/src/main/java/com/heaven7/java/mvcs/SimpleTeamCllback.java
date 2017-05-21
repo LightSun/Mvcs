@@ -11,7 +11,7 @@ import com.heaven7.java.mvcs.TeamManager.Team;
 import com.heaven7.java.mvcs.TeamManager.TeamCallback;;
 
 /**
- * the simple impl of {@linkplain TeamCallback}.
+ * a simple implement of {@linkplain TeamCallback}.
  * @author heaven7
  *
  * @param <P> the parameter 
