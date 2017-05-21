@@ -587,7 +587,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	}
 	
 	@Override
-	public boolean dispatchMessage(Message msg, byte policy) {
+	public boolean dispatchMessage(Message msg, @PolicyType byte policy) {
 		return dispatchMessage(msg, policy, FLAG_SCOPE_CURRENT);
 	}
 	
@@ -597,11 +597,11 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 	}
 
 	@Override
-	public boolean dispatchMessage(int states, Message msg, byte policy) {
+	public boolean dispatchMessage(int states, Message msg,@PolicyType byte policy) {
 		return dispatchMessageImpl(states, msg, policy, (byte) (FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL));
 	}
 
-	private boolean dispatchMessageImpl(int states, Message msg, byte policy, byte scope) {
+	private boolean dispatchMessageImpl(int states, Message msg,@PolicyType byte policy,@ScopeFlags byte scope) {
 		// check in use or mark it.
 		if (msg.isInUse()) {
 			throw new IllegalStateException(msg + " This message is already in use.");
