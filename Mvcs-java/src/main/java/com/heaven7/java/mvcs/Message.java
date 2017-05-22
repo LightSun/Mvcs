@@ -59,6 +59,8 @@ public final class Message {
      * It is an error to attempt to enqueue or recycle a message that is already in use.
      */
     private static final int FLAG_IN_USE = 1 << 0;
+    /** a flag which indicate message comes from team .*/
+    private static final int FLAG_FROM_TEAM   = 1 << 2;
     
     private int flags;
     
@@ -194,12 +196,17 @@ public final class Message {
             }
         }
     }
-    
+    public boolean isFromTeam(){
+    	return (flags & FLAG_FROM_TEAM) != 0;
+    }
 	public boolean isInUse(){
     	return (flags & FLAG_IN_USE) != 0;
     }
     /*package*/ void markInUse() {
         flags |= FLAG_IN_USE;
+    }
+    /*package*/ void markFromTeam() {
+    	flags |= FLAG_FROM_TEAM;
     }
     
 	@Override
@@ -247,6 +254,7 @@ public final class Message {
     	 .add("data", data)
     	 .add("replier", replier)
     	 .add("in-use", isInUse())
+    	 .add("from-team", isFromTeam())
     	 .toString();
     }
     

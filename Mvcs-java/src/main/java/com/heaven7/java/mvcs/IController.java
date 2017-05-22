@@ -501,7 +501,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     boolean dispatchMessage(Message msg, @PolicyType byte policy,@ScopeFlags byte scopeFlags);
     
 	/**
-	 * send the target message to the all state by the target policy.
+	 * dispatch the target message to the all state by the target policy.
 	 * And the default scope is {@linkplain IController#FLAG_SCOPE_CURRENT}.
 	 * @param msg the target message 
 	 * @param policy the policy of send message 

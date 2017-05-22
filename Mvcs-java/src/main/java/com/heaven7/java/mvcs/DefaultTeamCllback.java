@@ -1,14 +1,14 @@
 package com.heaven7.java.mvcs;
 
-import static com.heaven7.java.mvcs.TeamManager.COOPERATE_METHOD_ALL;
-import static com.heaven7.java.mvcs.TeamManager.COOPERATE_METHOD_BASE;
+import static com.heaven7.java.mvcs.StateTeamManager.COOPERATE_METHOD_ALL;
+import static com.heaven7.java.mvcs.StateTeamManager.COOPERATE_METHOD_BASE;
 
 import java.util.Iterator;
 import java.util.List;
 
-import com.heaven7.java.mvcs.TeamManager.Member;
-import com.heaven7.java.mvcs.TeamManager.Team;
-import com.heaven7.java.mvcs.TeamManager.TeamCallback;;
+import com.heaven7.java.mvcs.StateTeamManager.Member;
+import com.heaven7.java.mvcs.StateTeamManager.Team;
+import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 
 /**
  * a simple implement of {@linkplain TeamCallback}.
@@ -17,7 +17,7 @@ import com.heaven7.java.mvcs.TeamManager.TeamCallback;;
  * @param <P> the parameter 
  * @since 1.1.8
  */
-/*public*/ class SimpleTeamCllback<P> extends TeamCallback<P> {
+/*public*/ class DefaultTeamCllback<P> extends TeamCallback<P> {
 	
 	@Override
 	public void onTeamEnter(Team<P> team, AbstractState<P> trigger) {

@@ -13,7 +13,7 @@ import com.heaven7.java.mvcs.IController.PolicyType;
 import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 
 /**
- * the team manager of state, across multi {@linkplain IController}. which can communication with multi controller.
+ * the state team manager, across multi {@linkplain IController}. which can communication with multi controller.
  * 
  * @author heaven7
  *
@@ -22,7 +22,7 @@ import com.heaven7.java.mvcs.TeamDelegate.StateListener;
  *            the parameter type
  * @since 1.1.8
  */
-public class TeamManager<P> implements StateListener<P> {
+public class StateTeamManager<P> implements StateListener<P> {
 
 	/***
 	 * the cooperate method: just base. (can't listen mutex state, but include
@@ -39,7 +39,7 @@ public class TeamManager<P> implements StateListener<P> {
 	/** the member scope of outer member */
 	public static final byte FLAG_MEMBER_OUTER = 0x0002;
 
-	private static final SimpleTeamCllback<Object> sDEFAULT_CALLBACK = new SimpleTeamCllback<Object>();
+	private static final DefaultTeamCllback<Object> sDEFAULT_CALLBACK = new DefaultTeamCllback<Object>();
 
 	/** a map contains multi teams. */
 	private final SparseArray<Team<P>> mMap;
@@ -94,7 +94,7 @@ public class TeamManager<P> implements StateListener<P> {
 		}
 	}
 
-	public TeamManager() {
+	public StateTeamManager() {
 		mMap = new SparseArray<>();
 	}
 	
@@ -104,7 +104,7 @@ public class TeamManager<P> implements StateListener<P> {
 	 * @param outer the outer members, can be null
 	 * @param callback the team callback.
 	 * @return a team.
-	 * @see SimpleTeamCllback
+	 * @see DefaultTeamCllback
 	 */
 	@SuppressWarnings("unchecked")
 	public static <P> Team<P> createTeam(List<Member<P>> formal, @Nullable List<Member<P>> outer) {
@@ -543,8 +543,8 @@ public class TeamManager<P> implements StateListener<P> {
 	 * @param msg the message
 	 * @param policy the policy. {@linkplain IController#POLICY_BROADCAST} or 
 	 *                {@linkplain IController#POLICY_CONSUME}
-	 * @param memberFlags the member flags. see {@linkplain TeamManager#FLAG_MEMBER_FORMAL}, 
-	 *               {@linkplain TeamManager#FLAG_MEMBER_OUTER}
+	 * @param memberFlags the member flags. see {@linkplain StateTeamManager#FLAG_MEMBER_FORMAL}, 
+	 *               {@linkplain StateTeamManager#FLAG_MEMBER_OUTER}
 	 * @return true the message if handled. false otherwise
 	 */
 	public boolean dispatchMessage(int teamId, Message msg, @PolicyType byte policy,
@@ -561,8 +561,8 @@ public class TeamManager<P> implements StateListener<P> {
 	 * @param msg the message
 	 * @param policy the policy. {@linkplain IController#POLICY_BROADCAST} or 
 	 *                {@linkplain IController#POLICY_CONSUME}
-	 * @param memberFlags the member flags. see {@linkplain TeamManager#FLAG_MEMBER_FORMAL}, 
-	 *               {@linkplain TeamManager#FLAG_MEMBER_OUTER}
+	 * @param memberFlags the member flags. see {@linkplain StateTeamManager#FLAG_MEMBER_FORMAL}, 
+	 *               {@linkplain StateTeamManager#FLAG_MEMBER_OUTER}
 	 * @return true the message if handled. false otherwise
 	 */
 	public boolean dispatchMessage(Message msg, @PolicyType byte policy,
@@ -625,8 +625,8 @@ public class TeamManager<P> implements StateListener<P> {
 	 *            the target states to delete. must >0
 	 * @param memberFlags
 	 *            the member flags .see
-	 *            {@linkplain TeamManager#FLAG_MEMBER_FORMAL} and
-	 *            {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
+	 *            {@linkplain StateTeamManager#FLAG_MEMBER_FORMAL} and
+	 *            {@linkplain StateTeamManager#FLAG_MEMBER_OUTER}.
 	 * @return true of delete member state success. or false if don't have.
 	 */
 	private boolean deleteMembeStates(int teamId, IController<? extends AbstractState<P>, P> controller,
@@ -651,8 +651,8 @@ public class TeamManager<P> implements StateListener<P> {
 	 *            the controller
 	 * @param memberFlags
 	 *            the member flags .see
-	 *            {@linkplain TeamManager#FLAG_MEMBER_FORMAL} and
-	 *            {@linkplain TeamManager#FLAG_MEMBER_OUTER}.
+	 *            {@linkplain StateTeamManager#FLAG_MEMBER_FORMAL} and
+	 *            {@linkplain StateTeamManager#FLAG_MEMBER_OUTER}.
 	 * @return true of delete member success. or false if don't have.
 	 */
 	private boolean deleteMember(int teamId, IController<? extends AbstractState<P>, P> controller, byte memberFlags) {
@@ -751,8 +751,8 @@ public class TeamManager<P> implements StateListener<P> {
 		 * get the cooperate method.
 		 * 
 		 * @return the cooperate method.
-		 * @see TeamManager#COOPERATE_METHOD_ALL
-		 * @see TeamManager#COOPERATE_METHOD_BASE
+		 * @see StateTeamManager#COOPERATE_METHOD_ALL
+		 * @see StateTeamManager#COOPERATE_METHOD_BASE
 		 */
 		public byte getCooperateMethod() {
 			return cooperateMethod;
@@ -792,9 +792,10 @@ public class TeamManager<P> implements StateListener<P> {
 			return true;
 		}
 
-		public boolean dispatchMessage(Message msg,@PolicyType byte policy) {
+		public boolean dispatchMessage(Message msg, @PolicyType byte policy) {
 			IController<? extends AbstractState<P>, P> controller = getController();
 			if(controller != null){
+				msg.markFromTeam();
 				return controller.dispatchMessage(states, msg, policy);
 			}
 			return false;
@@ -963,8 +964,8 @@ public class TeamManager<P> implements StateListener<P> {
 		 * @param memberFlags
 		 *            the member flags
 		 * @return true if delete success.
-		 * @see TeamManager#FLAG_MEMBER_FORMAL
-		 * @see TeamManager#FLAG_MEMBER_OUTER
+		 * @see StateTeamManager#FLAG_MEMBER_FORMAL
+		 * @see StateTeamManager#FLAG_MEMBER_OUTER
 		 */
 		boolean deleteMember(IController<? extends AbstractState<P>, P> controller, int states, byte memberFlags) {
 

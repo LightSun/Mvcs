@@ -6,7 +6,7 @@ import com.heaven7.java.mvcs.IController;
 import com.heaven7.java.mvcs.Message;
 import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
-import com.heaven7.java.mvcs.TeamManager;
+import com.heaven7.java.mvcs.StateTeamManager;
 import com.heaven7.java.mvcs.util.ResultAction;
 
 import junit.framework.TestCase;
@@ -50,13 +50,14 @@ public class MvcsTests extends TestCase {
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
     
-    public void testDelayMessage(){
+    @SuppressWarnings("deprecation")
+	public void testDelayMessage(){
     	final int what = 99;
     	mController.setStateCacheEnabled(true);
     	mController.addState(STATE_EAT | STATE_MOVING);
     	Message msg = Message.obtain(what, "testDelayMessage");
     	msg.setDelay(2000);
-    	assertFalse(mController.sendMessage(msg, IController.POLICY_BROADCAST));
+    	assertFalse(mController.dispatchMessage(msg, IController.POLICY_BROADCAST));
 
         assertTrue(mController.hasMessage(what)); 
         assertTrue(mController.hasMessage(Message.obtain(what, "testDelayMessage"))); 
