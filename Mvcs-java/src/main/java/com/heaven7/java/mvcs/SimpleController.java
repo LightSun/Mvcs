@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.heaven7.java.mvcs.util.SparseArray;
+import com.heaven7.java.base.util.SparseArray;
 
 /**
  * a simple implements of {@linkplain IController}

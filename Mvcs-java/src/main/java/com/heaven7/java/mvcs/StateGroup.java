@@ -11,10 +11,10 @@ import java.util.List;
 
 import com.heaven7.java.base.anno.IntDef;
 import com.heaven7.java.base.util.Disposeable;
+import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.mvcs.IController.StateFactory;
 import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 import com.heaven7.java.mvcs.util.MutexStateException;
-import com.heaven7.java.mvcs.util.SparseArray;
 
 /**
  * the state group . manage a group of state.

@@ -7,10 +7,10 @@ import java.util.List;
 
 import com.heaven7.java.base.anno.CalledInternal;
 import com.heaven7.java.base.anno.Nullable;
+import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.base.util.Throwables;
 import com.heaven7.java.mvcs.IController.PolicyType;
 import com.heaven7.java.mvcs.TeamDelegate.StateListener;
-import com.heaven7.java.mvcs.util.SparseArray;
 
 /**
  * the team manager of state, across multi {@linkplain IController}. which can communication with multi controller.
@@ -244,7 +244,7 @@ public class TeamManager<P> implements StateListener<P> {
 		for (int i = size - 1; i >= 0; i--) {
 			Team<P> t = mMap.valueAt(i);
 			if(t == team){
-				mMap.remove(mMap.keyAt(i));
+				mMap.removeAt(i);
 				break;
 			}
 		}
