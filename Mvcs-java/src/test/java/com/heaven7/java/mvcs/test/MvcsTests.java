@@ -84,12 +84,12 @@ public class MvcsTests extends TestCase {
     	
     	//test consume
     	msg = Message.obtain(99, "testMessage1__1");
-    	assertTrue(mController.sendMessage(msg, IController.POLICY_CONSUME, 
+    	assertTrue(mController.dispatchMessage(msg, IController.POLICY_CONSUME, 
     			IController.FLAG_SCOPE_ALL));
     	
     	//test broadcast
     	msg = Message.obtain(99, "testMessage1__1");
-    	assertTrue(mController.sendMessage(msg, IController.POLICY_BROADCAST, 
+    	assertTrue(mController.dispatchMessage(msg, IController.POLICY_BROADCAST, 
     			IController.FLAG_SCOPE_ALL));
     }
     

@@ -402,7 +402,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		final List<S> states = getForegroundStates(null);
 		if (states != null) {
 			for (S s : states) {
-				s.onUpdate(param);
+				s.onUpdate(-1, param);
 			}
 		}
 	}
@@ -467,8 +467,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	 */
 	public boolean handleMessage(int states, Message msg, byte policy, boolean includeCache) {
 		final SparseArray<S> map = getStateMap();
-		states = states == -1 ? mCurrentStates : mCurrentStates & states;
-		getFlagsInternal(states, sTempFlags);
+		final int curState = states == -1 ? mCurrentStates : mCurrentStates & states;
+		getFlagsInternal(curState, sTempFlags);
 		
 		boolean handled = false;
 		

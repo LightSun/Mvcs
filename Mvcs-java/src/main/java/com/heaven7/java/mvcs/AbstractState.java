@@ -258,9 +258,10 @@ public abstract class AbstractState<P> implements Disposeable {
 	
 	/**
 	 * called on update this state. often called by
-	 * {@linkplain IController#notifyStateUpdate(Object)} .
+	 * {@linkplain IController#notifyStateUpdate(Object)} . this method is very useful in game.
 	 * 
-	 * @param deltaTime the delta time between last update and now.
+	 * @param deltaTime the delta time between last update and now. -1 indicate unknown delta time,
+	 *        eg in android platform.
 	 * @param param
 	 *            the extra parameter.
 	 * @since 1.1.8           
