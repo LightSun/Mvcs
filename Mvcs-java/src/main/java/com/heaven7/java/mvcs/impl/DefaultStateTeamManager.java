@@ -8,17 +8,17 @@ import com.heaven7.java.mvcs.StateTeamManager;
  * @author heaven7
  * @since 1.1.8
  */
-public final class JavaStateTeamManager extends StateTeamManager<PropertyBundle>{
+public final class DefaultStateTeamManager extends StateTeamManager<PropertyBundle>{
 	
 	private static class Creator{
-		static final JavaStateTeamManager INSTANCE = new JavaStateTeamManager();
+		static final DefaultStateTeamManager INSTANCE = new DefaultStateTeamManager();
 	}
 
 	/**
 	 * get default team manager.
 	 * @return a team manager.
 	 */
-	public static JavaStateTeamManager getDefault(){
+	public static DefaultStateTeamManager getDefault(){
 		return Creator.INSTANCE;
 	}
 }

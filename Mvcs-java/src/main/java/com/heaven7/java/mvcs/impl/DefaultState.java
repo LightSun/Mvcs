@@ -9,6 +9,6 @@ import com.heaven7.java.mvcs.SimpleState;
  * @author heaven7
  * @since 1.1.8
  */
-public class JavaState extends SimpleState<PropertyBundle>{
+public class DefaultState extends SimpleState<PropertyBundle>{
 
 }

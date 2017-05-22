@@ -72,14 +72,15 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()
+					|| !(controller instanceof TeamDelegate)) {
 				// same controller . ignore
 				continue;
 			}
 
 			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setStateCallbackEnabled(false);
+			controller.setTeamEnabled(false);
 
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
@@ -95,7 +96,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setStateCallbackEnabled(true);
+			controller.setTeamEnabled(true);
 		}
 	}
 	
@@ -116,14 +117,15 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()
+					|| !(controller instanceof TeamDelegate)) {
 				// same controller . ignore
 				continue;
 			}
 			
 			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setStateCallbackEnabled(false);
+			controller.setTeamEnabled(false);
 			
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
@@ -139,7 +141,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setStateCallbackEnabled(true);
+			controller.setTeamEnabled(true);
 		}
 	}
 	@SuppressWarnings("unchecked")
@@ -159,14 +161,15 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()
+					|| !(controller instanceof TeamDelegate)) {
 				// same controller . ignore
 				continue;
 			}
 			
 			delegate = (TeamDelegate<P>) controller;
 			// disable dispatch recursion callback
-			delegate.setStateCallbackEnabled(false);
+			controller.setTeamEnabled(false);
 			
 			switch (member.getCooperateMethod()) {
 			case COOPERATE_METHOD_BASE:
@@ -182,7 +185,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 			default:
 				System.err.println("unknown cooperate method: " + member.getCooperateMethod());
 			}
-			delegate.setStateCallbackEnabled(true);
+			controller.setTeamEnabled(true);
 		}
 	}
 }

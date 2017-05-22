@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.heaven7.java.base.anno.CalledInternal;
 import com.heaven7.java.base.anno.Nullable;
 import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.base.util.Throwables;
 import com.heaven7.java.mvcs.IController.PolicyType;
-import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 
 /**
  * the state team manager, across multi {@linkplain IController}. which can communication with multi controller.
@@ -22,7 +20,7 @@ import com.heaven7.java.mvcs.TeamDelegate.StateListener;
  *            the parameter type
  * @since 1.1.8
  */
-public class StateTeamManager<P> implements StateListener<P> {
+public class StateTeamManager<P>{
 
 	/***
 	 * the cooperate method: just base. (can't listen mutex state, but include
@@ -219,6 +217,7 @@ public class StateTeamManager<P> implements StateListener<P> {
 	 * @return the id of target team
 	 */
 	public int registerTeam(Team<P> team){
+		team.setStateListener(this);
 		mMap.put( ++mLastTeamId, team );
 		return mLastTeamId;
 	}
@@ -230,7 +229,11 @@ public class StateTeamManager<P> implements StateListener<P> {
 	 *            the target team id.
 	 */
 	public void unregisterTeam(int teamId) {
-		mMap.remove(teamId);
+		Team<P> team = mMap.get(teamId);
+		if(team != null){
+			team.setStateListener(null);
+		    mMap.remove(teamId);
+		}
 	}
 	
 	/**
@@ -244,10 +247,21 @@ public class StateTeamManager<P> implements StateListener<P> {
 		for (int i = size - 1; i >= 0; i--) {
 			Team<P> t = mMap.valueAt(i);
 			if(t == team){
+				team.setStateListener(null);
 				mMap.removeAt(i);
 				break;
 			}
 		}
+	}
+	/**
+	 * unregister all teams.
+	 */
+	public void unregisterAllTeam(){
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			mMap.valueAt(i).setStateListener(null);
+		}
+		mMap.clear();
 	}
 
 	/**
@@ -582,27 +596,21 @@ public class StateTeamManager<P> implements StateListener<P> {
 	}
 
 	// =============================================================
-	@CalledInternal
-	@Override
-	public void onEnterState(int stateFlag, AbstractState<P> state) {
+	/*public*/ void onEnterState(int stateFlag, AbstractState<P> state) {
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
 			mMap.valueAt(i).onEnter(stateFlag, state);
 		}
 	}
 
-	@CalledInternal
-	@Override
-	public void onExitState(int stateFlag, AbstractState<P> state) {
+	/*public*/ void onExitState(int stateFlag, AbstractState<P> state) {
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
 			mMap.valueAt(i).onExit(stateFlag, state);
 		}
 	}
 
-	@CalledInternal
-	@Override
-	public void onReenterState(int stateFlag, AbstractState<P> state) {
+	/*public*/ void onReenterState(int stateFlag, AbstractState<P> state) {
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
 			mMap.valueAt(i).onReenter(stateFlag, state);
@@ -1054,6 +1062,14 @@ public class StateTeamManager<P> implements StateListener<P> {
 				}
 			}
 			return false;
+		}
+		void setStateListener(StateTeamManager<P> stm) {
+			for(Member<P> member : formal){
+				IController<? extends AbstractState<P>, P> controller = member.getController();
+				if(controller != null && controller instanceof TeamDelegate){
+					controller.setStateTeamManager(stm);
+				}
+			}
 		}
 	}
 

@@ -2,9 +2,9 @@ package com.heaven7.java.mvcs.test.teamstate;
 
 import com.heaven7.java.base.util.PropertyBundle;
 import com.heaven7.java.mvcs.Message;
-import com.heaven7.java.mvcs.impl.JavaState;
+import com.heaven7.java.mvcs.impl.DefaultState;
 
-public abstract class BaseTeamState extends JavaState {
+public abstract class BaseTeamState extends DefaultState {
 
 	@Override
 	public void onEnter() {

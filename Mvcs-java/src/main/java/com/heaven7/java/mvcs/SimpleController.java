@@ -771,17 +771,30 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		msg.recycleUnchecked();
 		return handled;
 	}
+	
+	@Override
+	public final void setTeamEnabled(boolean enable) {
+		mGroup.setTeamEnabled(enable);
+		if (mGlobalGroup != null) {
+			mGlobalGroup.setTeamEnabled(enable);
+		}
+	}
+	
+	@Override
+	public boolean isTeamEnabled() {
+		return mGroup.isTeamEnabled();
+	}
+	
+	@Override
+	public void setStateTeamManager(StateTeamManager<P> stm) {
+		mGroup.setStateTeamManager(stm);
+		if (mGlobalGroup != null) {
+			mGlobalGroup.setStateTeamManager(stm);
+		}
+	}
 
 	// ======================== start internal method
 	// =============================
-
-	@Override
-	void setStateCallbackEnabled(boolean enable) {
-		mGroup.setStateCallbackEnabled(enable);
-		if (mGlobalGroup != null) {
-			mGlobalGroup.setStateCallbackEnabled(enable);
-		}
-	}
 
 	@Override
 	void notifyStateEnter(int states, P param) {
@@ -812,20 +825,14 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
 		for (S s : mTempStates) {
 			s.setTeamParameter(param);
+			s.onAttach(this);
+			//s.setId(singleState);
 			s.reenter(AbstractState.FLAG_TEAM);
 			s.clearOnceFlags();
 		}
 		mTempStates.clear();
 	}
 
-	@Override
-	void setStateListener(StateListener<P> l) {
-		// register to state group(curren and global)
-		mGroup.setStateListener(l);
-		if (mGlobalGroup != null) {
-			mGlobalGroup.setStateListener(l);
-		}
-	}
 	// ======================== end internal method
 	// =============================
 

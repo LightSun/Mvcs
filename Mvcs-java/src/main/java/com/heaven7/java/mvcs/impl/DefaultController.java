@@ -6,7 +6,7 @@ import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
 
 /**
- * a controller of java platform. that default set parameter merger({@linkplain JavaBundleMeger})
+ * a controller of java platform. that default set parameter merger({@linkplain DefaultBundleMeger})
  * which use {@linkplain PropertyBundle} and {@linkplain #setParameterMerger(ParameterMerger)}. 
  * so often you just need to set factory({@linkplain #setStateFactory(com.heaven7.java.mvcs.IController.StateFactory)}). then can use controller. 
  * Created by heaven7 on 2017/4/24.
@@ -14,15 +14,15 @@ import com.heaven7.java.mvcs.SimpleState;
  * @see #setStateFactory(com.heaven7.java.mvcs.IController.StateFactory)
  * @author heaven7
  */
-public class JavaController extends SimpleController<SimpleState<PropertyBundle>, PropertyBundle> {
+public class DefaultController extends SimpleController<SimpleState<PropertyBundle>, PropertyBundle> {
 
-	public JavaController() {
+	public DefaultController() {
 		super();
-		setParameterMerger(JavaBundleMeger.getInstance());
+		setParameterMerger(DefaultBundleMeger.getInstance());
 	}
-	public JavaController(Object owner) {
+	public DefaultController(Object owner) {
 		super(owner);
-		setParameterMerger(JavaBundleMeger.getInstance());
+		setParameterMerger(DefaultBundleMeger.getInstance());
 	}
 	
 	

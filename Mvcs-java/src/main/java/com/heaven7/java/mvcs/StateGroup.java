@@ -13,7 +13,6 @@ import com.heaven7.java.base.anno.IntDef;
 import com.heaven7.java.base.util.Disposeable;
 import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.mvcs.IController.StateFactory;
-import com.heaven7.java.mvcs.TeamDelegate.StateListener;
 import com.heaven7.java.mvcs.util.MutexStateException;
 
 /**
@@ -54,9 +53,9 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	/** the list which is lazy load. */
 	final List<Integer> sTempFlags = new ArrayList<Integer>(6);
 	
-	private StateListener<P> mStateListener;
+	private StateTeamManager<P> mTeamM;;
 	/** if false. {@linkplain StateListener} will never call back. default is true.*/
-	private boolean mEnableStateCallback = true;
+	private boolean mTeamEnabled = true;
 
 	public interface Callback<S extends AbstractState<P>, P> {
 		
@@ -79,8 +78,11 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		return mParam;
 	}
 
-	public void setStateCallbackEnabled(boolean enable) {
-		this.mEnableStateCallback = enable;
+	public void setTeamEnabled(boolean enable) {
+		this.mTeamEnabled = enable;
+	}
+	public boolean isTeamEnabled() {
+		return mTeamEnabled;
 	}
 
 	private StateFactory<S, P> getStateFactory() {
@@ -104,8 +106,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	}
 	// ========================================================================
 	
-	public void setStateListener(StateListener<P> l){
-		this.mStateListener = l;
+	public void setStateTeamManager(StateTeamManager<P> l){
+		this.mTeamM = l;
 	}
 
 	public int getCachedStateFlags() {
@@ -283,8 +285,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		S state = getStateMap().get(singleState);
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
-		//state.onAttach(getController());
-		//state.setId(singleState);
+		state.onAttach(getController());
+		state.setId(singleState);
 		state.reenter(0);
 		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
 		state.clearOnceFlags();
@@ -515,19 +517,19 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	}
 	
 	private void dispatchStateCallback(@ActionType byte action , int stateFlag, S state, Object param) {
-		if(mEnableStateCallback && mStateListener != null){
+		if(mTeamEnabled && mTeamM != null){
 			//final IController<S, P> controller = getController();
 			switch (action) {
 			case ACTION_ENTER:
-				mStateListener.onEnterState(stateFlag, state);
+				mTeamM.onEnterState(stateFlag, state);
 				break;
 				
 			case ACTION_EXIT:
-				mStateListener.onExitState(stateFlag, state);
+				mTeamM.onExitState(stateFlag, state);
 				break;
 				
 			case ACTION_REENTER:
-				mStateListener.onReenterState(stateFlag, state);
+				mTeamM.onReenterState(stateFlag, state);
 				break;
 
 			default:
@@ -582,6 +584,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		for(int state : sTempFlags){
 			S s = stateMap.get(state);
 			if(s != null){
+				s.setId(state);
 			   outStates.add(s);
 			}else{
 				System.err.println("[WARN] StateGroup >>> called [ getTargetStates()] : state not exit. state =" + state);
@@ -606,6 +609,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		}
 		return outStates;
 	}
+
 
 
 }

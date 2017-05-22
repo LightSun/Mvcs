@@ -8,18 +8,18 @@ import com.heaven7.java.mvcs.ParameterMerger;
  * @author heaven7
  * @since 1.1.8
  */
-public class JavaBundleMeger implements ParameterMerger<PropertyBundle>{
+public class DefaultBundleMeger implements ParameterMerger<PropertyBundle>{
 	
-	private static JavaBundleMeger sInstance;
+	private static DefaultBundleMeger sInstance;
 	
-	private JavaBundleMeger(){}
+	private DefaultBundleMeger(){}
 	
 	/**
 	 * get the default instance of PropertyBundleMeger
 	 * @return an instance of PropertyBundleMeger.
 	 */
-	public static JavaBundleMeger getInstance(){
-		return sInstance !=null ? sInstance : (sInstance = new JavaBundleMeger());
+	public static DefaultBundleMeger getInstance(){
+		return sInstance !=null ? sInstance : (sInstance = new DefaultBundleMeger());
 	}
 
 	@Override

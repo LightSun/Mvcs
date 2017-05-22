@@ -109,7 +109,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.SOURCE)
 	@interface ScopeFlags{		}
-
+	
 	/**
 	 * begin the state transaction with current states.
 	 * @return the state transaction.
@@ -613,6 +613,27 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @param merger the target merger.
      */
     void setParameterMerger(ParameterMerger<P> merger);
+    
+    /**
+     * set state team manager.
+     * @param stm the team manager
+     * @since 1.1.8
+     */
+    void setStateTeamManager(StateTeamManager<P> stm);
+	
+	/**
+	 * set the team enabled or not. default is enabled..
+	 * @param enable true to enable , false to disable
+	 * @since 1.1.8
+	 */
+	void setTeamEnabled(boolean enable);
+	
+	/**
+	 * indicate team is enabled or not.
+	 * @return true if is enabled. default is true.
+	 * @since 1.1.8
+	 */
+	boolean isTeamEnabled();
     
     /**
      * state factory help we create state.
