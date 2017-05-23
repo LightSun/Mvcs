@@ -95,15 +95,20 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 			public ParameterMerger<P> getMerger() {
 				return mMerger;
 			}
-
 			@Override
 			public StateFactory<S, P> getStateFactory() {
 				return mFactory;
 			}
-
 			@Override
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
+			}
+			@Override
+			public List<S> ensureAndGetTempList() {
+				if(mTempStates == null){
+					mTempStates = new ArrayList<>(5);
+				}
+				return mTempStates;
 			}
 		};
 		this.mGroup = new StateGroup<S, P>(this, mCallback);
@@ -808,13 +813,14 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		if (mTempStates == null) {
 			mTempStates = new ArrayList<>();
 		}
-		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
+		//TODO mGroup.removeStateFromTeam(states, param);
+		/*getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
 		for (S s : mTempStates) {
 			s.setTeamParameter(param);
 			s.exit(AbstractState.FLAG_TEAM);
 			s.clearOnceFlags();
 		}
-		mTempStates.clear();
+		mTempStates.clear();*/
 	}
 
 	@Override

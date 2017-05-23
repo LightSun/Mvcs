@@ -173,7 +173,7 @@ public final class Message {
 
     /**
      * Recycles a Message that may be in-use.
-     * Used internally by the MessageQueue and Looper when disposing of queued Messages.
+     * Used internally .
      */
     /*public*/ void recycleUnchecked() {
         // Mark the message as in use while it remains in the recycled object pool.

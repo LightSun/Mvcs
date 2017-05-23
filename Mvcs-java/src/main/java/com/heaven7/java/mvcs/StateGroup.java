@@ -42,6 +42,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 
 	private int mCurrentStates;
 	private P mParam;
+	private P mTeamParam;
+	
 	private final Callback<S, P> mCallback;
 	private final IController<S, P> mController;
 	/**
@@ -65,6 +67,8 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 
 		SparseArray<S> getStateMap();
 		// boolean shouldSaveStateParam();
+
+		List<S> ensureAndGetTempList();
 	}
 
 	public StateGroup(IController<S, P> controller, Callback<S, P> callback) {
@@ -76,13 +80,6 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	
 	private P getStateParameter() {
 		return mParam;
-	}
-
-	public void setTeamEnabled(boolean enable) {
-		this.mTeamEnabled = enable;
-	}
-	public boolean isTeamEnabled() {
-		return mTeamEnabled;
 	}
 
 	private StateFactory<S, P> getStateFactory() {
@@ -106,6 +103,17 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	}
 	// ========================================================================
 	
+	public void setTeamParameter(P param){
+		this.mTeamParam = param;
+	}
+	
+	public void setTeamEnabled(boolean enable) {
+		this.mTeamEnabled = enable;
+	}
+	public boolean isTeamEnabled() {
+		return mTeamEnabled;
+	}
+
 	public void setStateTeamManager(StateTeamManager<P> l){
 		this.mTeamM = l;
 	}
@@ -162,6 +170,32 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		dispatchStateChange(0, 0, shareFlags);
 		this.mParam = null;
 		return shareFlags == states;
+	}
+	
+	public void removeForgroundStateFromTeam(int states, P teamP){
+		final List<S> tempList = mCallback.ensureAndGetTempList();
+		getForegroundStates(states, tempList);
+		for (S s : tempList) {
+			s.setTeamParameter(teamP);
+			s.exit(AbstractState.FLAG_TEAM);
+			s.clearOnceFlags();
+		}
+		tempList.clear();
+	}
+	
+	public boolean removeStateDirectly(S state) {
+		final int id = state.getId();
+		if((mCurrentStates & id) != 0 ){
+			mCurrentStates &= ~id;
+			if(isStateCacheEnabled()){
+				mCachedState |= id;
+			}else{
+				mCachedState &= ~id;
+				getStateMap().remove(id);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public boolean addState(int states, P extra) {
@@ -584,7 +618,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		for(int state : sTempFlags){
 			S s = stateMap.get(state);
 			if(s != null){
-				s.setId(state);
+			   s.setId(state);
 			   outStates.add(s);
 			}else{
 				System.err.println("[WARN] StateGroup >>> called [ getTargetStates()] : state not exit. state =" + state);
@@ -609,7 +643,6 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		}
 		return outStates;
 	}
-
 
 
 }
