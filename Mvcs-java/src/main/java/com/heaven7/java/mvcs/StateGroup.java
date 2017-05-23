@@ -42,7 +42,6 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 
 	private int mCurrentStates;
 	private P mParam;
-	private P mTeamParam;
 	
 	private final Callback<S, P> mCallback;
 	private final IController<S, P> mController;
@@ -55,7 +54,6 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	/** the list which is lazy load. */
 	final List<Integer> sTempFlags = new ArrayList<Integer>(6);
 	
-	private StateTeamManager<P> mTeamM;;
 	/** if false. {@linkplain StateListener} will never call back. default is true.*/
 	private boolean mTeamEnabled = true;
 
@@ -66,7 +64,6 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		StateFactory<S, P> getStateFactory();
 
 		SparseArray<S> getStateMap();
-		// boolean shouldSaveStateParam();
 
 		List<S> ensureAndGetTempList();
 	}
@@ -103,19 +100,11 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	}
 	// ========================================================================
 	
-	public void setTeamParameter(P param){
-		this.mTeamParam = param;
-	}
-	
 	public void setTeamEnabled(boolean enable) {
 		this.mTeamEnabled = enable;
 	}
 	public boolean isTeamEnabled() {
 		return mTeamEnabled;
-	}
-
-	public void setStateTeamManager(StateTeamManager<P> l){
-		this.mTeamM = l;
 	}
 
 	public int getCachedStateFlags() {
@@ -172,30 +161,35 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		return shareFlags == states;
 	}
 	
+	//TODO should trigger mutex ?
 	public void removeForgroundStateFromTeam(int states, P teamP){
+		final int share = mCurrentStates & states;
+		if(share == 0){
+			return ;
+		}
+		final boolean cacheEnabled = isStateCacheEnabled();
+		//handle state exit
+		final SparseArray<S> stateMap = getStateMap();
 		final List<S> tempList = mCallback.ensureAndGetTempList();
-		getForegroundStates(states, tempList);
+		getForegroundStates(share, tempList);
 		for (S s : tempList) {
 			s.setTeamParameter(teamP);
 			s.exit(AbstractState.FLAG_TEAM);
 			s.clearOnceFlags();
+			s.onDetach();
+			//remove state instance if need
+			if(!cacheEnabled){
+				stateMap.remove(s.getId());
+			}
 		}
 		tempList.clear();
-	}
-	
-	public boolean removeStateDirectly(S state) {
-		final int id = state.getId();
-		if((mCurrentStates & id) != 0 ){
-			mCurrentStates &= ~id;
-			if(isStateCacheEnabled()){
-				mCachedState |= id;
-			}else{
-				mCachedState &= ~id;
-				getStateMap().remove(id);
-			}
-			return true;
+		//handle current state and cache state.
+		mCurrentStates &= ~ share;
+		if(cacheEnabled){
+			mCachedState |= share;
+		}else{
+			mCachedState &= ~share;
 		}
-		return false;
 	}
 
 	public boolean addState(int states, P extra) {
@@ -319,7 +313,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 		S state = getStateMap().get(singleState);
 		final P p = getMerger().merge(state.getStateParameter(), getStateParameter());
 		state.setStateParameter(p);
-		state.onAttach(getController());
+		//state.onAttach(getController());
 		state.setId(singleState);
 		state.reenter(0);
 		dispatchStateCallback(ACTION_REENTER, singleState, state, null);
@@ -551,6 +545,7 @@ import com.heaven7.java.mvcs.util.MutexStateException;
 	}
 	
 	private void dispatchStateCallback(@ActionType byte action , int stateFlag, S state, Object param) {
+		final StateTeamManager<P> mTeamM = getController().getTeamMediator().getStateTeamManager();
 		if(mTeamEnabled && mTeamM != null){
 			//final IController<S, P> controller = getController();
 			switch (action) {

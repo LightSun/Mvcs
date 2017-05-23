@@ -55,13 +55,12 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void enterImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
 		
 		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
 		
-		TeamDelegate<P> delegate;
+		TeamMediator<P> mediator;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
 
@@ -72,13 +71,12 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !controller.isTeamEnabled()
-					|| !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()) {
 				// same controller . ignore
 				continue;
 			}
 
-			delegate = (TeamDelegate<P>) controller;
+			mediator = controller.getTeamMediator();
 			// disable dispatch recursion callback
 			controller.setTeamEnabled(false);
 
@@ -90,7 +88,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateEnter(member.getStates(), trigger.getStateParameter());
+				mediator.notifyStateEnter(member.getStates(), trigger.getStateParameter());
 				break;
 
 			default:
@@ -100,13 +98,12 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void exitImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
 		
 		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
 		
-		TeamDelegate<P> delegate;
+		TeamMediator<P> mediator;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
 		
@@ -117,13 +114,11 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !controller.isTeamEnabled()
-					|| !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()) {
 				// same controller . ignore
 				continue;
 			}
-			
-			delegate = (TeamDelegate<P>) controller;
+			mediator = controller.getTeamMediator();
 			// disable dispatch recursion callback
 			controller.setTeamEnabled(false);
 			
@@ -135,7 +130,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateExit(member.getStates(), trigger.getStateParameter());
+				mediator.notifyStateExit(member.getStates(), trigger.getStateParameter());
 				break;
 				
 			default:
@@ -144,13 +139,12 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 			controller.setTeamEnabled(true);
 		}
 	}
-	@SuppressWarnings("unchecked")
 	private void reenterImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
 		
 		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
 		
-		TeamDelegate<P> delegate;
+		TeamMediator<P> mediator;
 		IController<? extends AbstractState<P>, P> controller;
 		Member<P> member;
 		
@@ -161,13 +155,12 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				// trim
 				it.remove();
 				continue;
-			} else if (controller == triCon || !controller.isTeamEnabled()
-					|| !(controller instanceof TeamDelegate)) {
+			} else if (controller == triCon || !controller.isTeamEnabled()) {
 				// same controller . ignore
 				continue;
 			}
 			
-			delegate = (TeamDelegate<P>) controller;
+			mediator = controller.getTeamMediator();
 			// disable dispatch recursion callback
 			controller.setTeamEnabled(false);
 			
@@ -179,7 +172,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				delegate.notifyStateReenter(member.getStates(), trigger.getStateParameter());
+				mediator.notifyStateReenter(member.getStates(), trigger.getStateParameter());
 				break;
 				
 			default:

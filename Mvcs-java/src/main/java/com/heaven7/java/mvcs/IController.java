@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 
+import com.heaven7.java.base.anno.CalledInternal;
+import com.heaven7.java.base.anno.Hide;
 import com.heaven7.java.base.anno.IntDef;
 import com.heaven7.java.base.util.Disposeable;
 import com.heaven7.java.mvcs.util.MutexStateException;
@@ -614,26 +616,30 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      */
     void setParameterMerger(ParameterMerger<P> merger);
     
-    /**
-     * set state team manager.
-     * @param stm the team manager
-     * @since 1.1.8
-     */
-    void setStateTeamManager(StateTeamManager<P> stm);
-	
 	/**
 	 * set the team enabled or not. default is enabled..
-	 * @param enable true to enable , false to disable
+	 * 
+	 * @param enable
+	 *            true to enable , false to disable
 	 * @since 1.1.8
 	 */
 	void setTeamEnabled(boolean enable);
-	
+
 	/**
 	 * indicate team is enabled or not.
+	 * 
 	 * @return true if is enabled. default is true.
 	 * @since 1.1.8
 	 */
 	boolean isTeamEnabled();
+	/**
+	 * get the mediator which can communicate with team.
+	 * @return the team mediator.
+	 * @since 1.1.8
+	 */
+	@Hide
+	@CalledInternal
+	TeamMediator<P> getTeamMediator();
     
     /**
      * state factory help we create state.

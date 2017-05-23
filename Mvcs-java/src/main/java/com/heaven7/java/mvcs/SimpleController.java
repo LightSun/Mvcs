@@ -21,7 +21,7 @@ import com.heaven7.java.base.util.SparseArray;
  * @see AbstractState
  * @see ParameterMerger
  */
-public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegate<P> implements IController<S, P> {
+public class SimpleController<S extends AbstractState<P>, P> implements IController<S, P> {
 
 	/** current state group/ */
 	private final StateGroup<S, P> mGroup;
@@ -67,6 +67,8 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 
 	/** temp states */
 	private List<S> mTempStates;
+	/** the team mediator, lazy load. */
+	private TeamMediator<P> mTeamMediator;
 
 	private class StateNode {
 		int states;
@@ -106,7 +108,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 			@Override
 			public List<S> ensureAndGetTempList() {
 				if(mTempStates == null){
-					mTempStates = new ArrayList<>(5);
+					mTempStates = new ArrayList<>(8);
 				}
 				return mTempStates;
 			}
@@ -749,6 +751,25 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 			}
 		}
 	}
+	@Override
+	public final void setTeamEnabled(boolean enable) {
+		mGroup.setTeamEnabled(enable);
+		if (mGlobalGroup != null) {
+			mGlobalGroup.setTeamEnabled(enable);
+		}
+	}
+	@Override
+	public final boolean isTeamEnabled() {
+		return mGroup.isTeamEnabled();
+	}
+	
+	@Override
+	public TeamMediator<P> getTeamMediator() {
+		if(mTeamMediator == null){
+			mTeamMediator =  new TeamMediatorImpl<P>(this);
+		}
+		return mTeamMediator;
+	}
 
 	private void checkMemberState() {
 		if (mFactory == null) {
@@ -777,53 +798,22 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		return handled;
 	}
 	
-	@Override
-	public final void setTeamEnabled(boolean enable) {
-		mGroup.setTeamEnabled(enable);
-		if (mGlobalGroup != null) {
-			mGlobalGroup.setTeamEnabled(enable);
-		}
-	}
-	
-	@Override
-	public boolean isTeamEnabled() {
-		return mGroup.isTeamEnabled();
-	}
-	
-	@Override
-	public void setStateTeamManager(StateTeamManager<P> stm) {
-		mGroup.setStateTeamManager(stm);
-		if (mGlobalGroup != null) {
-			mGlobalGroup.setStateTeamManager(stm);
-		}
-	}
-
 	// ======================== start internal method
 	// =============================
-
-	@Override
+	
 	void notifyStateEnter(int states, P param) {
 		// enter. only online AbstractState can receive team callback. so just
 		// reenter.
 		notifyStateReenter(states, param);
 	}
 
-	@Override
 	void notifyStateExit(int states, P param) {
-		if (mTempStates == null) {
-			mTempStates = new ArrayList<>();
+		mGroup.removeForgroundStateFromTeam(states, param);
+		if(mGlobalGroup != null){
+			mGlobalGroup.removeForgroundStateFromTeam(states, param);
 		}
-		//TODO mGroup.removeStateFromTeam(states, param);
-		/*getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
-		for (S s : mTempStates) {
-			s.setTeamParameter(param);
-			s.exit(AbstractState.FLAG_TEAM);
-			s.clearOnceFlags();
-		}
-		mTempStates.clear();*/
 	}
 
-	@Override
 	void notifyStateReenter(int states, P param) {
 		if (mTempStates == null) {
 			mTempStates = new ArrayList<>();
@@ -831,7 +821,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
 		for (S s : mTempStates) {
 			s.setTeamParameter(param);
-			s.onAttach(this);
+			//s.onAttach(this);
 			//s.setId(singleState);
 			s.reenter(AbstractState.FLAG_TEAM);
 			s.clearOnceFlags();
@@ -874,9 +864,7 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 				return false;
 			return true;
 		}
-
 	}
-
 	private class StateTransactionImpl extends StateTransaction<P> {
 		@Override
 		protected boolean performTransaction() {
@@ -905,3 +893,41 @@ public class SimpleController<S extends AbstractState<P>, P> extends TeamDelegat
 		}
 	}
 }
+class TeamMediatorImpl<P> implements TeamMediator<P>{
+	
+	final SimpleController<?, P> mController;
+	StateTeamManager<P> mStm;
+	
+
+	public TeamMediatorImpl(SimpleController<?, P> controller) {
+		super();
+		this.mController = controller;
+	}
+
+	@Override
+	public StateTeamManager<P> getStateTeamManager() {
+		return mStm;
+	}
+	@Override
+	public void setStateTeamManager(StateTeamManager<P> stm) {
+		this.mStm = stm;
+	}
+
+	@Override
+	public void notifyStateEnter(int states, P param) {
+		mController.notifyStateEnter(states, param);
+	}
+
+	@Override
+	public void notifyStateExit(int states, P param) {
+		mController.notifyStateExit(states, param);
+	}
+
+	@Override
+	public void notifyStateReenter(int states, P param) {
+		mController.notifyStateReenter(states, param);
+	}
+	
+}
+
+

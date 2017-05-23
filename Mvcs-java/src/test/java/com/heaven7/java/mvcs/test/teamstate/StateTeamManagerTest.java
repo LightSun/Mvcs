@@ -18,7 +18,7 @@ public class StateTeamManagerTest extends TestCase {
 	
 	public static final int STATE_ALL = STATE_MOVE| STATE_EAT | STATE_SLEEP;
 
-	DefaultStateTeamManager mJsTm ;
+	final DefaultStateTeamManager mJsTm = DefaultStateTeamManager.getDefault();
 	DefaultController mJC1 ;
 	DefaultController mJC2 ;
 	DefaultController mJC3 ;
@@ -27,7 +27,6 @@ public class StateTeamManagerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mJsTm = new DefaultStateTeamManager();
 		mJC1 = new DefaultController();
 		mJC2 = new DefaultController();
 		mJC3 = new DefaultController();
@@ -49,7 +48,15 @@ public class StateTeamManagerTest extends TestCase {
 	
 		System.out.println("============== start enable team ===========");
 		setTeamEnabled(true);
-		mJC1.setState(STATE_EAT);
+		/**
+		 * trigger the team state reenter.
+		 */
+		mJC1.addState(STATE_EAT);
+		
+		//trigger the team state exit.
+		PropertyBundle bundle = new PropertyBundle();
+		bundle.put("text", "trigger the team state exit");
+		mJC1.removeState(STATE_EAT, bundle);
 		System.out.println("dsfdsfsd");
 	}
 	

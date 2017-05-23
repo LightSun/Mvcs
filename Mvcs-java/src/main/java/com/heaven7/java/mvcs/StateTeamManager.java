@@ -217,7 +217,7 @@ public class StateTeamManager<P>{
 	 * @return the id of target team
 	 */
 	public int registerTeam(Team<P> team){
-		team.setStateListener(this);
+		team.setTeamManager(this);
 		mMap.put( ++mLastTeamId, team );
 		return mLastTeamId;
 	}
@@ -231,7 +231,7 @@ public class StateTeamManager<P>{
 	public void unregisterTeam(int teamId) {
 		Team<P> team = mMap.get(teamId);
 		if(team != null){
-			team.setStateListener(null);
+			team.setTeamManager(null);
 		    mMap.remove(teamId);
 		}
 	}
@@ -243,14 +243,10 @@ public class StateTeamManager<P>{
 	 *            the target team id.
 	 */
 	public void unregisterTeam(Team<P> team) {
-		final int size = mMap.size();
-		for (int i = size - 1; i >= 0; i--) {
-			Team<P> t = mMap.valueAt(i);
-			if(t == team){
-				team.setStateListener(null);
-				mMap.removeAt(i);
-				break;
-			}
+		final int index = mMap.indexOfValue(team);
+		if(index >=0 ){
+			team.setTeamManager(null);
+			mMap.removeAt(index);
 		}
 	}
 	/**
@@ -259,7 +255,7 @@ public class StateTeamManager<P>{
 	public void unregisterAllTeam(){
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
-			mMap.valueAt(i).setStateListener(null);
+			mMap.valueAt(i).setTeamManager(null);
 		}
 		mMap.clear();
 	}
@@ -1063,11 +1059,11 @@ public class StateTeamManager<P>{
 			}
 			return false;
 		}
-		void setStateListener(StateTeamManager<P> stm) {
+		void setTeamManager(StateTeamManager<P> stm) {
 			for(Member<P> member : formal){
 				IController<? extends AbstractState<P>, P> controller = member.getController();
-				if(controller != null && controller instanceof TeamDelegate){
-					controller.setStateTeamManager(stm);
+				if(controller != null){
+					controller.getTeamMediator().setStateTeamManager(stm);
 				}
 			}
 		}
