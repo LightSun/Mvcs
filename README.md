@@ -8,8 +8,10 @@
 这里的Mvcs中 mvc与其一致。 s代表状态state. 所以我才命名为mvcs.  另外设计模式中有个状态模式。实际上我这个框架就是由
 mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 
-## Mvcs概念
-相当于就是Mvc上多了一个 多功能的状态机。 
+## 概念理解
+- Mvcs:  相当于就是Mvc上多了一个 多功能的状态机。 
+- 团队： 这个框架里面每个controller可以包含多个state. 那么多个controller的多个状态如何通信？
+     这里就是用状态团队来解决这个问题的。团队管理器可以跨controller.在N个状态中通信。
 
 ## 核心特征 (java SE平台就支持)
 - ###  支持多状态共存和互斥。
@@ -46,13 +48,13 @@ in jcenter.
 
 ```
 
-## issue
+## Help us
    * if you have any question or good suggestion about this, please tell me... Thanks!
    
 ## Contribution
  * you can pull request, but your code must be a google style, eg:  google style.
    
-## About me
+## About Us
    * heaven7 
    * email: donshine723@gmail.com or 978136772@qq.com   
 
