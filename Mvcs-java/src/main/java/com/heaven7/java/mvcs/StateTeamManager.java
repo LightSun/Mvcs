@@ -548,6 +548,21 @@ public class StateTeamManager<P>{
 		}
 	}
 	/**
+	 * update the all teams.
+	 * 
+	 * @param teamId the team id.
+	 * @param deltaTime
+	 *            the delta time between last update and this.
+	 * @param param
+	 *            the parameter.
+	 */
+	public void update(int teamId, long deltaTime, P param) {
+		Team<P> team = getTeam(teamId);
+		if(team != null){
+			team.update(deltaTime, param);
+		}
+	}
+	/**
 	 * send a message to a team which is assigned by target team id.
 	 * @param teamId the team id
 	 * @param msg the message
@@ -563,7 +578,9 @@ public class StateTeamManager<P>{
 		if(team == null){
 			return false;
 		}
-		return team.dispatchMessage(msg, policy, memberFlags);
+		boolean result = team.dispatchMessage(msg, policy, memberFlags);
+		msg.recycleUnchecked();
+		return result;
 	}
 	
 	/**
@@ -585,9 +602,11 @@ public class StateTeamManager<P>{
 			if(hasConsumed && 
 					(handled |= mMap.valueAt(i).dispatchMessage(msg, policy, memberFlags))
 					){
-				return true;
+				handled = true;
+				break;
 			}
 		}
+		msg.recycleUnchecked();
 		return handled;
 	}
 
@@ -865,7 +884,7 @@ public class StateTeamManager<P>{
 			return outer;
 		}
 
-		public boolean dispatchMessage(Message msg,@PolicyType byte policy, int memberFlags) {
+		public boolean dispatchMessage(Message msg, @PolicyType byte policy, int memberFlags) {
 			boolean handled = false;
 			if((memberFlags & FLAG_MEMBER_FORMAL) != 0){
 				handled |= dispatchMessage(msg, policy, formal);
@@ -888,6 +907,7 @@ public class StateTeamManager<P>{
 			case IController.POLICY_BROADCAST:
 				for(Member<P> m : members){
 					handled |= m.dispatchMessage(msg,  policy);
+					msg.markInUse(false);
 				}
 				break;
 				
@@ -896,6 +916,7 @@ public class StateTeamManager<P>{
 					if(m.dispatchMessage(msg,  policy)){
 						return true;
 					}
+					msg.markInUse(false);
 				}
 				break;
 
@@ -1019,7 +1040,7 @@ public class StateTeamManager<P>{
 			return false;
 		}
 
-		void update(long deltaTime, P param) {
+		public void update(long deltaTime, P param) {
 			for (Member<P> member : formal) {
 				member.update(deltaTime, param);
 			}

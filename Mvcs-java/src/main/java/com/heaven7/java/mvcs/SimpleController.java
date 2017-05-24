@@ -14,8 +14,7 @@ import com.heaven7.java.base.util.SparseArray;
  * 
  * @param <S>
  *            the state type .
- * @param
- * 			<P>
+ * @param <P>
  *            the state parameter type
  * @see IController
  * @see AbstractState
@@ -97,17 +96,20 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			public ParameterMerger<P> getMerger() {
 				return mMerger;
 			}
+
 			@Override
 			public StateFactory<S, P> getStateFactory() {
 				return mFactory;
 			}
+
 			@Override
 			public SparseArray<S> getStateMap() {
 				return mStateMap;
 			}
+
 			@Override
 			public List<S> ensureAndGetTempList() {
-				if(mTempStates == null){
+				if (mTempStates == null) {
 					mTempStates = new ArrayList<>(8);
 				}
 				return mTempStates;
@@ -584,31 +586,35 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 	@Deprecated
 	@Override
 	public boolean sendMessage(Message msg, @PolicyType byte policy) {
-		return sendMessage(msg, policy, FLAG_SCOPE_CURRENT);
+		return dispatchMessage(msg, policy, FLAG_SCOPE_CURRENT);
 	}
 
 	@Deprecated
 	@Override
 	public boolean sendMessage(Message msg, @PolicyType byte policy, @ScopeFlags byte scope) {
-		return dispatchMessageImpl(-1, msg, policy, scope);
+		return dispatchMessage(msg, policy, scope);
 	}
-	
+
 	@Override
 	public boolean dispatchMessage(Message msg, @PolicyType byte policy) {
 		return dispatchMessage(msg, policy, FLAG_SCOPE_CURRENT);
 	}
-	
+
 	@Override
 	public boolean dispatchMessage(Message msg, @PolicyType byte policy, @ScopeFlags byte scope) {
-		return dispatchMessageImpl(-1, msg, policy, scope);
+		
+		boolean result = dispatchMessageImpl(-1, msg, policy, scope);
+		msg.recycleUnchecked();
+		return result;
+		//return dispatchMessageImpl(-1, msg, policy, scope);
 	}
 
 	@Override
-	public boolean dispatchMessage(int states, Message msg,@PolicyType byte policy) {
+	public boolean dispatchMessage(int states, Message msg, @PolicyType byte policy) {
 		return dispatchMessageImpl(states, msg, policy, (byte) (FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL));
 	}
 
-	private boolean dispatchMessageImpl(int states, Message msg,@PolicyType byte policy,@ScopeFlags byte scope) {
+	private boolean dispatchMessageImpl(int states, Message msg, @PolicyType byte policy, @ScopeFlags byte scope) {
 		// check in use or mark it.
 		if (msg.isInUse()) {
 			throw new IllegalStateException(msg + " This message is already in use.");
@@ -627,7 +633,7 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			return false;
 		}
 		// dispatch to states
-		return dispatchMessage(states, msg, policy, scope);
+		return dispatchMessage0(states, msg, policy, scope);
 	}
 
 	@Override
@@ -646,7 +652,8 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 				for (; it.hasNext();) {
 					info = it.next();
 					if (info.msg.when <= now) {
-						dispatchMessage(-1, info.msg, info.policy, info.scope);
+						dispatchMessage0(-1, info.msg, info.policy, info.scope);
+						info.msg.recycleUnchecked();
 						it.remove();
 					}
 				}
@@ -751,6 +758,7 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			}
 		}
 	}
+
 	@Override
 	public final void setTeamEnabled(boolean enable) {
 		mGroup.setTeamEnabled(enable);
@@ -758,15 +766,16 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			mGlobalGroup.setTeamEnabled(enable);
 		}
 	}
+
 	@Override
 	public final boolean isTeamEnabled() {
 		return mGroup.isTeamEnabled();
 	}
-	
+
 	@Override
 	public TeamMediator<P> getTeamMediator() {
-		if(mTeamMediator == null){
-			mTeamMediator =  new TeamMediatorImpl<P>(this);
+		if (mTeamMediator == null) {
+			mTeamMediator = new TeamMediatorImpl<P>(this);
 		}
 		return mTeamMediator;
 	}
@@ -780,27 +789,25 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		}
 	}
 
-	private boolean dispatchMessage(int states, Message msg, byte policy, byte scope) {
+	// may one method call this method twice.
+	private boolean dispatchMessage0(int states, Message msg, byte policy, byte scope) {
 		boolean handled = false;
 		final boolean includeCache = (scope & FLAG_SCOPE_CACHED) != 0;
 		if ((scope & FLAG_SCOPE_GLOBAL) != 0 && mGlobalGroup != null) {
 			handled |= mGlobalGroup.handleMessage(states, msg, policy, includeCache);
 		}
 		if (policy == POLICY_CONSUME && handled) {
-			msg.recycleUnchecked();
 			return true;
 		}
 		if ((scope & FLAG_SCOPE_CURRENT) != 0) {
 			handled |= mGroup.handleMessage(states, msg, policy, includeCache);
 		}
-		// recycle
-		msg.recycleUnchecked();
 		return handled;
 	}
-	
+
 	// ======================== start internal method
 	// =============================
-	
+
 	void notifyStateEnter(int states, P param) {
 		// enter. only online AbstractState can receive team callback. so just
 		// reenter.
@@ -809,7 +816,7 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 
 	void notifyStateExit(int states, P param) {
 		mGroup.removeForgroundStateFromTeam(states, param);
-		if(mGlobalGroup != null){
+		if (mGlobalGroup != null) {
 			mGlobalGroup.removeForgroundStateFromTeam(states, param);
 		}
 	}
@@ -821,8 +828,8 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		getTargetStates(states, FLAG_SCOPE_CURRENT | FLAG_SCOPE_GLOBAL, mTempStates);
 		for (S s : mTempStates) {
 			s.setTeamParameter(param);
-			//s.onAttach(this);
-			//s.setId(singleState);
+			// s.onAttach(this);
+			// s.setId(singleState);
 			s.reenter(AbstractState.FLAG_TEAM);
 			s.clearOnceFlags();
 		}
@@ -865,6 +872,7 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			return true;
 		}
 	}
+
 	private class StateTransactionImpl extends StateTransaction<P> {
 		@Override
 		protected boolean performTransaction() {
@@ -893,11 +901,11 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		}
 	}
 }
-class TeamMediatorImpl<P> implements TeamMediator<P>{
-	
+
+class TeamMediatorImpl<P> implements TeamMediator<P> {
+
 	final SimpleController<?, P> mController;
 	StateTeamManager<P> mStm;
-	
 
 	public TeamMediatorImpl(SimpleController<?, P> controller) {
 		super();
@@ -908,6 +916,7 @@ class TeamMediatorImpl<P> implements TeamMediator<P>{
 	public StateTeamManager<P> getStateTeamManager() {
 		return mStm;
 	}
+
 	@Override
 	public void setStateTeamManager(StateTeamManager<P> stm) {
 		this.mStm = stm;
@@ -927,7 +936,5 @@ class TeamMediatorImpl<P> implements TeamMediator<P>{
 	public void notifyStateReenter(int states, P param) {
 		mController.notifyStateReenter(states, param);
 	}
-	
+
 }
-
-

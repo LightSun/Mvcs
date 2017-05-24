@@ -63,6 +63,13 @@ public class CommonFactory implements DefaultStateFactory {
 				throw new RuntimeException();
 			}
 		}
+		
+		case StateTeamManagerTest.STATE_CONSUME:
+			if(teamIndex == 3){
+				return new Team3Consume();
+			}
+			throw new RuntimeException("unsupport index of comsume state.");
+		
 		default:
 			throw new RuntimeException();
 		}
