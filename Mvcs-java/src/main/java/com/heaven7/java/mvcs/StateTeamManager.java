@@ -192,7 +192,6 @@ public class StateTeamManager<P>{
 		return registerTeam(formal, null);
 	}
 
-	// 主，从. 只有主的才能通知从的。
 	/**
 	 * create team with formal members , outer members and default team
 	 * callback. then register it to team manager. . Among them, if state is in

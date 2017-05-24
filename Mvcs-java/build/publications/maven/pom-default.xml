@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.heaven7.java.mvcs</groupId>
   <artifactId>Mvcs-java</artifactId>
-  <version>1.1.7</version>
+  <version>1.2.0</version>
   <dependencies>
     <dependency>
       <groupId>com.heaven7.java.base</groupId>
       <artifactId>Java-base</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.4</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
