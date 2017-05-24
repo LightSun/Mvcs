@@ -1,4 +1,4 @@
-package com.heaven7.java.mvcs;
+package com.heaven7.java.mvcs.impl;
 
 import static com.heaven7.java.mvcs.StateTeamManager.COOPERATE_METHOD_ALL;
 import static com.heaven7.java.mvcs.StateTeamManager.COOPERATE_METHOD_BASE;
@@ -6,18 +6,21 @@ import static com.heaven7.java.mvcs.StateTeamManager.COOPERATE_METHOD_BASE;
 import java.util.Iterator;
 import java.util.List;
 
+import com.heaven7.java.mvcs.AbstractState;
+import com.heaven7.java.mvcs.IController;
 import com.heaven7.java.mvcs.StateTeamManager.Member;
 import com.heaven7.java.mvcs.StateTeamManager.Team;
-import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
+import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;
+import com.heaven7.java.mvcs.TeamMediator;;
 
 /**
- * a simple implement of {@linkplain TeamCallback}.
+ * a default implement of {@linkplain TeamCallback}.
  * @author heaven7
  *
  * @param <P> the parameter 
  * @since 1.1.8
  */
-/*public*/ class DefaultTeamCllback<P> extends TeamCallback<P> {
+public class DefaultTeamCllback<P> extends TeamCallback<P> {
 	
 	@Override
 	public void onTeamEnter(Team<P> team, AbstractState<P> trigger) {
@@ -88,7 +91,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				mediator.notifyStateEnter(member.getStates(), trigger.getStateParameter());
+				onNotifyStateEnter(mediator, member.getStates(), trigger.getStateParameter());
 				break;
 
 			default:
@@ -130,7 +133,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				mediator.notifyStateExit(member.getStates(), trigger.getStateParameter());
+				onNotifyStateExit(mediator, member.getStates(), trigger.getStateParameter());
 				break;
 				
 			default:
@@ -140,7 +143,6 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 		}
 	}
 	private void reenterImpl(final boolean byMutex, AbstractState<P> trigger, List<Member<P>> members) {
-		
 		final IController<? extends AbstractState<P>, P> triCon =trigger.getController();
 		final Iterator<Member<P>> it = members.iterator();
 		
@@ -172,7 +174,7 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 				}
 				
 			case COOPERATE_METHOD_ALL:
-				mediator.notifyStateReenter(member.getStates(), trigger.getStateParameter());
+				onNotifyStateReenter(mediator, member.getStates(), trigger.getStateParameter());
 				break;
 				
 			default:
@@ -180,5 +182,33 @@ import com.heaven7.java.mvcs.StateTeamManager.TeamCallback;;
 			}
 			controller.setTeamEnabled(true);
 		}
+	}
+	
+	/**
+	 * called on notify team state exit.
+	 * @param mediator the team mediator.
+	 * @param states the states which is already added to the team.
+	 * @param param the team parameter.
+	 */
+	protected void onNotifyStateExit(TeamMediator<P> mediator, int states, P param){
+		mediator.notifyStateExit(states, param);
+	}
+	/**
+	 * called on notify team state enter.
+	 * @param mediator the team mediator.
+	 * @param states the states which is already added to the team.
+	 * @param param the team parameter.
+	 */
+	protected void onNotifyStateEnter(TeamMediator<P> mediator, int states, P param){
+		mediator.notifyStateEnter(states, param);
+	}
+	/**
+	 * called on notify team state reenter.
+	 * @param mediator the team mediator.
+	 * @param states the states which is already added to the team.
+	 * @param param the team parameter.
+	 */
+	protected void onNotifyStateReenter(TeamMediator<P> mediator, int states, P param){
+		mediator.notifyStateReenter(states, param);
 	}
 }

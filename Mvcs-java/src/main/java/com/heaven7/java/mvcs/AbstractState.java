@@ -33,7 +33,9 @@ public abstract class AbstractState<P> implements Disposeable {
 	public static final int FLAG_ATTACH = 0x0001;
 	/** flag of triggered by mutex. once flag. */
 	public static final int FLAG_MUTEX  = 0x0002;
-	/** flag of this state is notify(enter/exit/reenter) from a team, once flag.*/
+	/** flag of this state is notify(enter/exit/reenter) from a team, once flag.
+	 * if in {@linkplain #handleMessage(Message)} from where. just use {@linkplain Message#isFromTeam()}.
+	 * */
 	public static final int FLAG_TEAM   = 0x0004;
 
 	/** the id of this state. often is the stateFlag of this state. */

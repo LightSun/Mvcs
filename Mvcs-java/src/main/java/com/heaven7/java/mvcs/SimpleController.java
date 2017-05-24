@@ -902,24 +902,13 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 	}
 }
 
-class TeamMediatorImpl<P> implements TeamMediator<P> {
+class TeamMediatorImpl<P> extends TeamMediator<P> {
 
 	final SimpleController<?, P> mController;
-	StateTeamManager<P> mStm;
 
 	public TeamMediatorImpl(SimpleController<?, P> controller) {
 		super();
 		this.mController = controller;
-	}
-
-	@Override
-	public StateTeamManager<P> getStateTeamManager() {
-		return mStm;
-	}
-
-	@Override
-	public void setStateTeamManager(StateTeamManager<P> stm) {
-		this.mStm = stm;
 	}
 
 	@Override

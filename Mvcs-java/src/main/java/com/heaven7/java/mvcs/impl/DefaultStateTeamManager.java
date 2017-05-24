@@ -13,6 +13,10 @@ public final class DefaultStateTeamManager extends StateTeamManager<PropertyBund
 	private static class Creator{
 		static final DefaultStateTeamManager INSTANCE = new DefaultStateTeamManager();
 	}
+	
+	private DefaultStateTeamManager(){
+		super();
+	}
 
 	/**
 	 * get default team manager.
@@ -21,4 +25,12 @@ public final class DefaultStateTeamManager extends StateTeamManager<PropertyBund
 	public static DefaultStateTeamManager getDefault(){
 		return Creator.INSTANCE;
 	}
+	/**
+	 * create a default team manager.
+	 * @return a team manager.
+	 */
+	public static DefaultStateTeamManager create(){
+		return new DefaultStateTeamManager();
+	}
+	
 }

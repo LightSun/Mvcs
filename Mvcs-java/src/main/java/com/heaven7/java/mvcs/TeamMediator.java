@@ -1,13 +1,22 @@
 package com.heaven7.java.mvcs;
+
+import com.heaven7.java.base.anno.CalledInternal;
+import com.heaven7.java.base.anno.Hide;
+import com.heaven7.java.mvcs.impl.DefaultStateTeamManager;
+
 /**
- * the team mediator.
+ * the team mediator. it can communicate with {@linkplain IController} and {@link StateTeamManager}.
  * @author heaven7
  *
  * @param <P> the parameter
  * @since 1.1.8
+ * @see IController
+ * @see StateTeamManager
+ * @see DefaultStateTeamManager
  */
-public interface TeamMediator<P> {
+public abstract class TeamMediator<P> {
 
+	private StateTeamManager<P> mStm ;
 	/*
 	 * the state listener
 	 * 
@@ -25,18 +34,24 @@ public interface TeamMediator<P> {
 	 * void onReenterState(int stateFlag, AbstractState<P> state); }
 	 */
 	/**
-	 * set state team manager.
-	 * 
+	 * set state team manager. 
+	 * <h1>Note: you must not call this method. this is called by Framework.</h1>
 	 * @param stm
 	 *            the team manager
 	 */
-	void setStateTeamManager(StateTeamManager<P> stm);
+	@Hide
+	@CalledInternal
+	final void setStateTeamManager(StateTeamManager<P> stm){
+		this.mStm = stm;
+	}
 	
 	/**
 	 * get the state team manager
 	 * @return the team manager.
 	 */
-	StateTeamManager<P> getStateTeamManager();
+	public final StateTeamManager<P> getStateTeamManager(){
+		return mStm;
+	}
 
 	/**
 	 * notify states enter which is from a team and controlled by target controller.
@@ -44,7 +59,7 @@ public interface TeamMediator<P> {
 	 * @param states
 	 *            the states to handle
 	 */
-	void notifyStateEnter(int states, P param);
+	public abstract void notifyStateEnter(int states, P param);
 
 	/**
 	 * notify state exit which is from a team.
@@ -52,7 +67,7 @@ public interface TeamMediator<P> {
 	 * @param states
 	 *            the states to handle
 	 */
-	void notifyStateExit(int states, P param);
+	public abstract void notifyStateExit(int states, P param);
 
 	/**
 	 * notify state reenter which is from a team.
@@ -60,6 +75,6 @@ public interface TeamMediator<P> {
 	 * @param states
 	 *            the states to handle
 	 */
-	void notifyStateReenter(int states, P param);
+	public abstract void notifyStateReenter(int states, P param);
 
 }

@@ -10,16 +10,31 @@ import com.heaven7.java.base.util.Objects;
 import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.base.util.Throwables;
 import com.heaven7.java.mvcs.IController.PolicyType;
+import com.heaven7.java.mvcs.impl.DefaultTeamCllback;
 
 /**
  * the state team manager, across multi {@linkplain IController}. which can communication with multi controller.
- * 
+ * Originally, one member correspond a single state with controller. But many states use same controller.
+ * so one member correspond  multi states .
+ * <ul><h1>Functions</h1><br>
+ * <li>Manage Teams with their members.</li>
+ * <li>Update Teams with their members. by calling {@linkplain #update(int, long, Object)} or
+ *      {@linkplain #update(long, Object)}</li>
+ * <li>Dispatch messages to teams with their members.</li>
+ * <li>According to cooperate method between member and team. You can handle team callback you want. 
+ *     see {@linkplain StateTeamManager#registerTeam(List, List, TeamCallback)}.<br>
+ *     see {@linkplain #COOPERATE_METHOD_BASE}, and etc.<br>
+ *     </li>
+ * </ul>
  * @author heaven7
  *
  * @param
  * 			<P>
  *            the parameter type
  * @since 1.1.8
+ * @see Member
+ * @see Team
+ * @see TeamCallback
  */
 public class StateTeamManager<P>{
 
@@ -719,7 +734,6 @@ public class StateTeamManager<P>{
 
 	/**
 	 * one controller corresponding one member. But can have multi states.
-	 * 
 	 * @author heaven7
 	 *
 	 * @param
@@ -843,8 +857,8 @@ public class StateTeamManager<P>{
 	}
 
 	/**
-	 * the team of members.
-	 * 
+	 * the team of members. Among them, only formal member can callback {@linkplain TeamCallback},
+	 * outer members just only can receive callback.
 	 * @author heaven7
 	 *
 	 * @param
@@ -854,8 +868,11 @@ public class StateTeamManager<P>{
 	 * @see {@linkplain Member}
 	 */
 	public static class Team<P> {
+		/** the formal members */
 		List<Member<P>> formal;
+		/** the outer members */
 		List<Member<P>> outer;
+		/** the callback of team*/
 		TeamCallback<P> callback;
 
 		Team() {
