@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.heaven7.java.base.anno.Nullable;
+import com.heaven7.java.base.util.Objects;
 import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.base.util.Throwables;
 import com.heaven7.java.mvcs.IController.PolicyType;
@@ -780,6 +781,21 @@ public class StateTeamManager<P>{
 		public byte getCooperateMethod() {
 			return cooperateMethod;
 		}
+		
+		/**
+		 * dispatch message to all members.
+		 * @param msg the target message to dispatch.
+		 * @param policy the policy . see {@linkplain IController#POLICY_BROADCAST} or {@linkplain IController#POLICY_CONSUME}.
+		 * @return true if handled
+		 */
+		public boolean dispatchMessage(Message msg, @PolicyType byte policy) {
+			IController<? extends AbstractState<P>, P> controller = getController();
+			if(controller != null){
+				msg.markFromTeam();
+				return controller.dispatchMessage(states, msg, policy);
+			}
+			return false;
+		}
 
 		void update(long deltaTime, P param) {
 			IController<? extends AbstractState<P>, P> controller = getController();
@@ -815,14 +831,15 @@ public class StateTeamManager<P>{
 			return true;
 		}
 
-		public boolean dispatchMessage(Message msg, @PolicyType byte policy) {
-			IController<? extends AbstractState<P>, P> controller = getController();
-			if(controller != null){
-				msg.markFromTeam();
-				return controller.dispatchMessage(states, msg, policy);
-			}
-			return false;
+		@Override
+		public String toString() {
+			return Objects.toStringHelper(this)
+					.add("controller", getController())
+					.add("states", states)
+					.add("cooperate_method", cooperateMethod)
+					.toString();
 		}
+		
 	}
 
 	/**
@@ -882,6 +899,15 @@ public class StateTeamManager<P>{
 		 */
 		public List<Member<P>> getOuterMembers() {
 			return outer;
+		}
+		
+		@Override
+		public String toString() {
+			return Objects.toStringHelper(this)
+					.add("formal_members", formal)
+					.add("outer_members", outer)
+					.add("callback", callback)
+					.toString();
 		}
 
 		public boolean dispatchMessage(Message msg, @PolicyType byte policy, int memberFlags) {
