@@ -9,9 +9,7 @@
 mvc模式 和 状态模式衍生而来(他跟普通的状态机有很大不同).
 
 ## 概念理解
-- Mvcs:  相当于就是Mvc上多了一个 多功能的状态机。 
-- 团队： 这个框架里面每个controller可以包含多个state. 那么多个controller的多个状态如何通信？
-     这里就是用状态团队来解决这个问题的。团队管理器可以跨controller.在N个状态中通信。
+- [click here](https://github.com/LightSun/Mvcs/wiki/%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E7%9A%84%E7%90%86%E8%A7%A3)
 
 ## 核心特征 (java SE平台就支持)
 - ###  支持多状态共存和互斥。
