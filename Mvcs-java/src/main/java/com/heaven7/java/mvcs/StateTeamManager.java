@@ -1018,14 +1018,10 @@ public class StateTeamManager<P>{
 					continue;
 				}
 				if (temp == controller) {
-					if((member.states & states ) != 0 ){
-						//have share state. so some state not success.
-						member.states |= states;
-						return false;
-					}else{
-						member.states |= states;
-						return true;
-					}
+					//share ==0 means all states add success.
+					final int share = member.states & states;
+					member.states |= states;
+					return share == 0;
 				}
 			}
 			return false;
