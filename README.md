@@ -47,6 +47,8 @@ in jcenter.
   compile 'com.heaven7.android.mvcs:mvcs-android:1.0.1'
 
 ```
+## API指南
+  (所有Api)[https://github.com/LightSun/Mvcs/wiki/Api%E6%8C%87%E5%8D%97]
 
 ## Help us
    * if you have any question or good suggestion about this, please tell me... Thanks!
