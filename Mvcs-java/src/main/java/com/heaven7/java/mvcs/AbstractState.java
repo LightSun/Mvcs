@@ -209,7 +209,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	 * 
 	 * @return the state parameter.
 	 */
-	public P getTeamParameter() {
+	public final P getTeamParameter() {
 		return mTeamParam;
 	}
 
@@ -219,7 +219,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	 * @param p
 	 *            the parameter.
 	 */
-	public void setTeamParameter(P p) {
+	public final void setTeamParameter(P p) {
 		this.mTeamParam = p;
 	}
 
@@ -238,7 +238,7 @@ public abstract class AbstractState<P> implements Disposeable {
 	 * @param p
 	 *            the parameter.
 	 */
-	public void setStateParameter(P p) {
+	public final void setStateParameter(P p) {
 		this.mParam = p;
 	}
 
