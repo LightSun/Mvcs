@@ -114,6 +114,7 @@ public class StateTeamManager<P>{
 	
 	/**
 	 * create a team with default callback.
+	 * @param <P> the parameter
 	 * @param formal the formal members
 	 * @param outer the outer members, can be null
 	 * @param callback the team callback.
@@ -127,6 +128,7 @@ public class StateTeamManager<P>{
 	
 	/**
 	 * create a team.
+	 * @param <P> the parameter
 	 * @param formal the formal members
 	 * @param outer the outer members, can be null
 	 * @param callback the team callback.
@@ -144,7 +146,7 @@ public class StateTeamManager<P>{
 	}
 
 	/**
-	 * create a member .
+	 * create a member by target states and cooperate method.
 	 * 
 	 * @param
 	 * 			<P>
@@ -156,6 +158,8 @@ public class StateTeamManager<P>{
 	 * @param cooperateMethod
 	 *            the cooperate method between member and team.
 	 * @return the member.
+	 * @see StateTeamManager#COOPERATE_METHOD_BASE
+	 * @see StateTeamManager#COOPERATE_METHOD_ALL
 	 */
 	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states,
 			byte cooperateMethod) {
@@ -163,7 +167,7 @@ public class StateTeamManager<P>{
 	}
 
 	/**
-	 * create a member .
+	 *  create a member by target states with default cooperate method {@linkplain #COOPERATE_METHOD_BASE}}.
 	 * 
 	 * @param
 	 * 			<P>
@@ -173,6 +177,8 @@ public class StateTeamManager<P>{
 	 * @param states
 	 *            the target states.
 	 * @return the member.
+	 * @see #COOPERATE_METHOD_BASE
+	 * @see #COOPERATE_METHOD_ALL
 	 */
 	public static <P> Member<P> createMember(IController<? extends AbstractState<P>, P> controller, int states) {
 		return new Member<P>(controller, states, COOPERATE_METHOD_BASE);
