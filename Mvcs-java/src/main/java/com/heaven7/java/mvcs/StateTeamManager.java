@@ -1012,8 +1012,14 @@ public class StateTeamManager<P>{
 					continue;
 				}
 				if (temp == controller) {
-					member.states |= states;
-					return true;
+					if((member.states & states ) != 0 ){
+						//have share state. so some state not success.
+						member.states |= states;
+						return false;
+					}else{
+						member.states |= states;
+						return true;
+					}
 				}
 			}
 			return false;
@@ -1068,6 +1074,7 @@ public class StateTeamManager<P>{
 					continue;
 				}
 				if (temp == controller) {
+					//-1. remove all
 					if (states == -1) {
 						it.remove();
 					} else {
