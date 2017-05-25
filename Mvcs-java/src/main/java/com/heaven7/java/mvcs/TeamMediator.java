@@ -54,7 +54,7 @@ public abstract class TeamMediator<P> {
 	}
 
 	/**
-	 * notify states enter which is from a team and controlled by target controller.
+	 * notify states enter which is from a team .
 	 * 
 	 * @param states
 	 *            the states to handle
