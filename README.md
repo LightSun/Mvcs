@@ -45,9 +45,9 @@ in jcenter.
   compile 'com.heaven7.android.mvcs:mvcs-android:1.0.1'
 
 ```
-## Sample
 
-- [Demos](https://github.com/LightSun/Mvcs/wiki/Samples)
+## Sample
+ - [Demos](https://github.com/LightSun/Mvcs/wiki/Samples)
 
 ## API指南
  - [所有Api](https://github.com/LightSun/Mvcs/wiki/Api%E6%8C%87%E5%8D%97).
