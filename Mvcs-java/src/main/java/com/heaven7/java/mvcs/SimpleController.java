@@ -3,6 +3,7 @@ package com.heaven7.java.mvcs;
 import static com.heaven7.java.mvcs.util.MathUtil.max2K;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -900,6 +901,13 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 			return result;
 		}
 	}
+	
+	private static final Comparator<MessageInfo> CMP_MSG = new Comparator<MessageInfo>() {
+		@Override
+		public int compare(MessageInfo o1, MessageInfo o2) {
+			return Long.compare(o1.msg.when, o2.msg.when);
+		}
+	};
 }
 
 class TeamMediatorImpl<P> extends TeamMediator<P> {
