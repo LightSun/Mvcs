@@ -42,7 +42,7 @@ in jcenter.
   //java 版本
   compile 'com.heaven7.java.mvcs:Mvcs-java:<Released-version>'
   //android版本
-  compile 'com.heaven7.android.mvcs:mvcs-android:1.0.1'
+  compile 'com.heaven7.android.mvcs:mvcs-android:<Released-android-version>''
 
 ```
 
