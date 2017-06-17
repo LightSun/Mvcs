@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.heaven7.java.base.util.SearchUtils;
 import com.heaven7.java.base.util.SparseArray;
 
 /**
@@ -527,6 +528,17 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		}
 		return mTransaction;
 	}
+	
+	@Override
+	public boolean compareAndApply(int targetStates, int newStates, byte compareType, byte applyType, P param) {
+		return beginTransaction()
+				.compareStates(targetStates)
+				.compareType(compareType)
+				.operateParameter(param)
+				.operateAdd(newStates)
+				.applyType(applyType)
+				.commit();
+	}
 
 	@Override
 	public final void clearStateParameter() {
@@ -625,11 +637,17 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		// filter delay message.wait it will handle in update method.
 		long now = System.currentTimeMillis();
 		if (msg.when > now) {
+			//insert it in order.
+			final MessageInfo info = new MessageInfo(msg, policy, scope);
 			synchronized (this) {
 				if (mDelayMessages == null) {
 					mDelayMessages = new ArrayList<>(8);
 				}
-				mDelayMessages.add(new MessageInfo(msg, policy, scope));
+				int index = SearchUtils.binarySearch(mDelayMessages, info, CMP_MSG);
+				if( index < 0){
+					index = -(index + 1);
+				}
+				mDelayMessages.add(index, info);
 			}
 			return false;
 		}
@@ -646,17 +664,19 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 	public void update(long deltaTime, P param) {
 
 		final long now = System.currentTimeMillis();
-		MessageInfo info;
 		synchronized (this) {
 			if (mDelayMessages != null) {
 				final Iterator<MessageInfo> it = mDelayMessages.iterator();
+				MessageInfo info;
 				for (; it.hasNext();) {
 					info = it.next();
-					if (info.msg.when <= now) {
-						dispatchMessage0(-1, info.msg, info.policy, info.scope);
-						info.msg.recycleUnchecked();
-						it.remove();
+					//because the all message is in order(sort ascending).
+					if(info.msg.when > now){
+						break;
 					}
+					dispatchMessage0(-1, info.msg, info.policy, info.scope);
+					info.msg.recycleUnchecked();
+					it.remove();
 				}
 			}
 		}
@@ -790,7 +810,7 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 		}
 	}
 
-	// may one method call this method twice.
+	// may one method call this method twice. states = -1 means all.
 	private boolean dispatchMessage0(int states, Message msg, byte policy, byte scope) {
 		boolean handled = false;
 		final boolean includeCache = (scope & FLAG_SCOPE_CACHED) != 0;
@@ -875,6 +895,18 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 	}
 
 	private class StateTransactionImpl extends StateTransaction<P> {
+		
+		@Override
+		protected boolean verifyCompareType(byte type) {
+			switch (type) {
+			case COMPARE_TYPE_HAS:
+				return (getCurrentStateFlags() & mCompareState) != 0;
+				
+			case COMPARE_TYPE_EQUALS:
+				return getCurrentStateFlags() == mCompareState;
+			}
+			return true;
+		}
 		@Override
 		protected boolean performTransaction() {
 
@@ -883,15 +915,15 @@ public class SimpleController<S extends AbstractState<P>, P> implements IControl
 
 			boolean result = false;
 			switch (mOp) {
-			case StateTransaction.OP_ADD:
+			case StateTransaction.APPLY_TYPE_ADD:
 				result = addState(states, param);
 				break;
 
-			case StateTransaction.OP_SET:
+			case StateTransaction.APPLY_TYPE_SET:
 				result = setState(states, param);
 				break;
 
-			case StateTransaction.OP_REMOVE:
+			case StateTransaction.APPLY_TYPE_REMOVE:
 				result = removeState(states, param);
 				break;
 

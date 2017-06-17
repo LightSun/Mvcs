@@ -25,14 +25,14 @@ allprojects {
 dependencies {
 
     testCompile 'junit:junit:4.12'
-    compile 'com.heaven7.java.base:Java-base:1.0.4'
+    compile 'com.heaven7.java.base:Java-base:1.0.5'
 }
 
 publish {
     userOrg = 'lightsun' //bintray user name
     groupId = 'com.heaven7.java.mvcs'
     artifactId = 'Mvcs-java'
-    publishVersion = '1.2.0'
+    publishVersion = '1.2.1'
     desc = 'this is a lib of mvcs. '
     website = 'https://github.com/LightSun/Mvcs'
 }

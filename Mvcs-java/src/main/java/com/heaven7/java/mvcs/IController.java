@@ -441,7 +441,20 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      */
 	S getGlobalState();
 	
-	//============================ message =====================================
+	//has, equals : add, remove, set
+	/**
+	 * compare the target states with current states, if right apply the newStates .
+	 * @param targetStates the target states to compare
+	 * @param newStates the new states to apply
+	 * @param compareType the compare type, see {@linkplain StateTransaction#COMPARE_TYPE_HAS} and etc.
+	 * @param applyType the apply type , see {@linkplain StateTransaction#APPLY_TYPE_ADD} and etc.
+	 * @param param the parameter to carry
+	 * @return true if compare and apply success. false if compare failed or apply failed.
+	 * @since 1.2.1
+	 */
+	boolean compareAndApply(int targetStates, int newStates, byte compareType, byte applyType, P param);
+	
+	//============================ start message ===================================
 
 	/**
 	 * remove the delayed message  which is indicated by what.
@@ -556,6 +569,8 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      */
     void update(long deltaTime,  P param);
     
+    //============================ end message ===================================
+    
     /**
      * update the controller for target active states.  this is often used by game.
      * 
@@ -565,7 +580,6 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
      * @since 1.1.8
      */
     void updateActiveStates(int activeStates, long deltaTime,  P param);
-    
     
 
     //============================== lock event ==================================
@@ -617,7 +631,7 @@ public interface IController<S extends AbstractState<P>, P> extends Disposeable{
     void setParameterMerger(ParameterMerger<P> merger);
     
 	/**
-	 * set the team enabled or not. default is enabled..
+	 * set the team enabled or not. default is enabled.
 	 * 
 	 * @param enable
 	 *            true to enable , false to disable

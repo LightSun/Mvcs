@@ -16,15 +16,42 @@ public abstract class StateTransaction<P> {
 	/* * the flag of save state parameter */
 	//public static final int FLAG_SAVE_STATE_PARAM = 1;
 	
-	/* private */ static final byte OP_ADD = 1;
-	static final byte OP_REMOVE = 2;
-	static final byte OP_SET = 3;
+	/**
+	 * @since 1.2.1
+	 */
+	public static final byte COMPARE_TYPE_HAS    = 1;
+	/**
+	 * @since 1.2.1
+	 */
+	public static final byte COMPARE_TYPE_EQUALS = 2;
+	
+	/**
+	 * @since 1.2.1
+	 */
+	public static final byte APPLY_TYPE_ADD     = 3;
+	/**
+	 * @since 1.2.1
+	 */
+	public static final byte APPLY_TYPE_REMOVE  = 4;
+	/**
+	 * @since 1.2.1
+	 */
+	public static final byte APPLY_TYPE_SET     = 5;
 	
 	/** the states to operate */
 	/* private */ int mOperateStates = -1;
 	/** add, set, or remove. */
 	byte mOp;
 	P mParam;
+	
+	/** the compare type 
+	 * @since 1.2.1 
+	 */
+	byte mCompareType;
+	/** the compare states 
+	 * @since 1.2.1 
+	 */
+	int mCompareState;
 	
 	/* * the extra flags */
 	//int mFlags;
@@ -42,7 +69,7 @@ public abstract class StateTransaction<P> {
 	 * @see IController#addState(int, Object)
 	 */
 	public StateTransaction<P> operateAdd(int states) {
-		this.mOp = OP_ADD;
+		this.mOp = APPLY_TYPE_ADD;
 		this.mOperateStates = states;
 		return this;
 	}
@@ -54,7 +81,7 @@ public abstract class StateTransaction<P> {
 	 * @see IController#setState(int, Object)
 	 */
 	public StateTransaction<P> operateSet(int states) {
-		this.mOp = OP_SET;
+		this.mOp = APPLY_TYPE_SET;
 		this.mOperateStates = states;
 		return this;
 	}
@@ -66,10 +93,42 @@ public abstract class StateTransaction<P> {
 	 * @see IController#removeState(int, Object)
 	 */
 	public StateTransaction<P> operateRemove(int states) {
-		this.mOp = OP_REMOVE;
+		this.mOp = APPLY_TYPE_REMOVE;
 		this.mOperateStates = states;
 		return this;
 	}
+	
+	/**
+	 * set the compare type
+	 * @param cmpType the compare type
+	 * @return this
+	 * @since 1.2.1 
+	 */
+	public StateTransaction<P> compareType(byte cmpType){
+		this.mCompareType = cmpType;
+		return this;
+	}
+	/**
+	 * set the compare states
+	 * @param cmpStates the compare states
+	 * @return this
+	 * @since 1.2.1 
+	 */
+	public StateTransaction<P> compareStates(int cmpStates){
+		this.mCompareState = cmpStates;
+		return this;
+	}
+	/**
+	 * set the apply type
+	 * @param applyType the apply type
+	 * @return this
+	 * @since 1.2.1 
+	 */
+	public StateTransaction<P> applyType(byte applyType){
+		this.mOp = applyType;
+		return this;
+	}
+	
 
 	/**
 	 * add extra flags ,current have nothing effect.
@@ -117,22 +176,40 @@ public abstract class StateTransaction<P> {
 	/**
 	 * commit the transaction and perform the all operations.
 	 */
-	public void commit() {
+	public boolean commit() {
 		if( mOp == 0 ){
 			throw new IllegalStateException("you must assign the operate of IController.");
 		}
 		if( mOperateStates < 0){
 			throw new IllegalStateException("you must assign the states to operate.");
 		}
+		final ResultAction<Boolean> mEnd = this.mEnd;
+		if(!verifyCompareType(mCompareType)){
+			if(mEnd != null){
+				mEnd.onActionResult(Boolean.FALSE);
+			}
+			return false;
+		}
+		
 		if(mStart != null){
 			mStart.run();
 		}
 		final boolean result = performTransaction();
-		final ResultAction<Boolean> mEnd = this.mEnd;
 		reset();
 		if(mEnd != null){
 			mEnd.onActionResult(result);
 		}
+		return result;
+	}
+	
+	/**
+	 * verify the compare type
+	 * @param type the compare type
+	 * @return true if verify success. default is true.
+	 * @since 1.2.1
+	 */
+	protected boolean verifyCompareType(byte type){
+		return true;
 	}
 	
 	/** reset transaction */

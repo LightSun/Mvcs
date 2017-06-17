@@ -7,6 +7,7 @@ import com.heaven7.java.mvcs.Message;
 import com.heaven7.java.mvcs.SimpleController;
 import com.heaven7.java.mvcs.SimpleState;
 import com.heaven7.java.mvcs.StateTeamManager;
+import com.heaven7.java.mvcs.StateTransaction;
 import com.heaven7.java.mvcs.util.ResultAction;
 
 import junit.framework.TestCase;
@@ -50,7 +51,6 @@ public class MvcsTests extends TestCase {
         mController.setParameterMerger(new ParamepterMergerImpl());
     }
     
-    @SuppressWarnings("deprecation")
 	public void testDelayMessage(){
     	final int what = 99;
     	mController.setStateCacheEnabled(true);
@@ -70,7 +70,8 @@ public class MvcsTests extends TestCase {
 		}
     }
     
-    public void testMessage1(){
+    @SuppressWarnings("deprecation")
+	public void testMessage1(){
     	mController.setStateCacheEnabled(true);
     	mController.addState(STATE_EAT);
     	mController.addState(STATE_MOVING);
@@ -91,6 +92,23 @@ public class MvcsTests extends TestCase {
     	msg = Message.obtain(99, "testMessage1__1");
     	assertTrue(mController.dispatchMessage(msg, IController.POLICY_BROADCAST, 
     			IController.FLAG_SCOPE_ALL));
+    }
+    
+    public void testCompareAndApply(){
+    	mController.addMutexState(new int[]{ STATE_EAT, STATE_EAT_MUTEX });
+    	boolean result = mController.compareAndApply(STATE_EAT, STATE_EAT, StateTransaction.COMPARE_TYPE_HAS,
+    			StateTransaction.APPLY_TYPE_REMOVE, null);
+    	assertEquals(false, result);
+    	
+    	mController.addState(STATE_EAT);
+    	result = mController.compareAndApply(STATE_EAT, STATE_EAT, StateTransaction.COMPARE_TYPE_HAS,
+    			StateTransaction.APPLY_TYPE_REMOVE, null);
+    	assertEquals(true, result);
+    	
+    	mController.addState(STATE_EAT);
+    	result = mController.compareAndApply(STATE_EAT, STATE_EAT, StateTransaction.COMPARE_TYPE_EQUALS,
+    			StateTransaction.APPLY_TYPE_REMOVE, null);
+    	assertEquals(true, result);
     }
     
     public void testTransaction(){
