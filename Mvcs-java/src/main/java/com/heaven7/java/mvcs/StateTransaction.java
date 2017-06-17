@@ -219,6 +219,9 @@ public abstract class StateTransaction<P> {
 		//this.mFlags = 0;
 		this.mParam = null;
 		
+		this.mCompareState = 0;
+		this.mCompareType = 0;
+		
 		this.mStart = null;
 		this.mEnd = null;
 	}
