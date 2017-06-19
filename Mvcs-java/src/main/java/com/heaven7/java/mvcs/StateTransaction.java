@@ -185,6 +185,7 @@ public abstract class StateTransaction<P> {
 		}
 		final ResultAction<Boolean> mEnd = this.mEnd;
 		if(!verifyCompareType(mCompareType)){
+			reset();
 			if(mEnd != null){
 				mEnd.onActionResult(Boolean.FALSE);
 			}
