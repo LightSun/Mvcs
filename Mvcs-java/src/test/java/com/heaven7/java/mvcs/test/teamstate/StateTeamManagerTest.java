@@ -40,12 +40,40 @@ public class StateTeamManagerTest extends TestCase {
 		//set default disable team
 		setTeamEnabled(false);
 		
+		//register as formal
 		mTeamId = mJsTm.registerTeam(createMembers());
 	}
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		mJsTm.unregisterAllTeam();
+	}
+	
+	public void testGetTeam(){
+		//======== controller test
+		//same team as formal
+		assertTrue(mJsTm.getTeamAsFormal(mJC1) == mJsTm.getTeam(mTeamId));
+		assertTrue(mJsTm.getTeamAsFormal(mJC2) == mJsTm.getTeam(mTeamId));
+		assertTrue(mJsTm.getTeamAsFormal(mJC3) == mJsTm.getTeam(mTeamId));
+		//not as outer.
+		assertTrue(mJsTm.getTeamAsOuter(mJC1) == null);
+		assertTrue(mJsTm.getTeamAsOuter(mJC2) == null);
+		assertTrue(mJsTm.getTeamAsOuter(mJC3) == null);
+		//current only one relative team
+		assertTrue(mJsTm.getTeamsAsFormal(mJC1, null).size() == 1);
+		assertTrue(mJsTm.getTeamsAsFormal(mJC2, null).size() == 1);
+		assertTrue(mJsTm.getTeamsAsFormal(mJC3, null).size() == 1);
+		
+		//=========member test
+		Member<PropertyBundle> m1 = DefaultStateTeamManager.createMember(mJC1, STATE_ALL);
+		Member<PropertyBundle> m2 = DefaultStateTeamManager.createMember(mJC2, STATE_ALL);
+		Member<PropertyBundle> m3 = DefaultStateTeamManager.createMember(mJC3, STATE_ALL);
+		assertTrue(mJsTm.getTeams(m1, null).size() == 1);
+		assertTrue(mJsTm.getTeams(m2, null).size() == 1);
+		assertTrue(mJsTm.getTeams(m3, null).size() == 1);
+		assertTrue(mJsTm.getTeamsAsFormal(m1, null).size() == 1);
+		assertTrue(mJsTm.getTeamsAsFormal(m2, null).size() == 1);
+		assertTrue(mJsTm.getTeamsAsFormal(m3, null).size() == 1);
 	}
 	
 	public void testTeamMessage(){

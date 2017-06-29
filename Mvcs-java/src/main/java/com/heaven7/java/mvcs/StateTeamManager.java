@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.heaven7.java.base.anno.Nullable;
 import com.heaven7.java.base.util.Objects;
+import com.heaven7.java.base.util.Predicates;
 import com.heaven7.java.base.util.SparseArray;
 import com.heaven7.java.base.util.Throwables;
 import com.heaven7.java.mvcs.IController.PolicyType;
@@ -467,6 +468,56 @@ public class StateTeamManager<P>{
 		}
 		return team.addMemberStates(controller, states, FLAG_MEMBER_OUTER);
 	}
+	
+	/**
+	 * get the team which has a formal member that correspond the target controller.
+	 * @param controller the target controller.
+	 * @return the relative team,  or null if not found.
+	 * @since 1.2.2
+	 */
+	public Team<P> getTeamAsFormal(IController<? extends AbstractState<P>, P> controller){
+		return getTeam(controller, FLAG_MEMBER_FORMAL);
+	}
+	
+	/**
+	 * get the team which has a outer member that correspond the target controller.
+	 * @param controller the target controller.
+	 * @return the relative team. or null if not found
+	 * @since 1.2.2
+	 */
+	public Team<P> getTeamAsOuter(IController<? extends AbstractState<P>, P> controller){
+		return getTeam(controller, FLAG_MEMBER_OUTER);
+	}
+	/**
+	 * get all teams that any one has a outer member correspond the target controller.
+	 * @param controller the target controller.
+	 * @param out the out list ,can be null
+	 * @return the relative teams as outer member.
+	 * @since 1.2.2
+	 */
+	public List<Team<P>> getTeamsAsOuter(IController<? extends AbstractState<P>, P> controller, @Nullable List<Team<P>> out){
+		return getTeams(controller, FLAG_MEMBER_OUTER, out);
+	}
+	/**
+	 * get all teams that any one has a formal member correspond the target controller.
+	 * @param controller the target controller.
+	 * @param out the out list ,can be null
+	 * @return the relative teams as formal member.
+	 * @since 1.2.2
+	 */
+	public List<Team<P>> getTeamsAsFormal(IController<? extends AbstractState<P>, P> controller, @Nullable List<Team<P>> out){
+		return getTeams(controller, FLAG_MEMBER_FORMAL, out);
+	}
+	/**
+	 * get all teams that any one has a member correspond the target controller.
+	 * @param controller the target controller.
+	 * @param out the out list ,can be null
+	 * @return the relative teams as member.
+	 * @since 1.2.2
+	 */
+	public List<Team<P>> getTeams(IController<? extends AbstractState<P>, P> controller, @Nullable List<Team<P>> out){
+		return getTeams(controller, FLAG_MEMBER_FORMAL | FLAG_MEMBER_OUTER, out);
+	}
 
 	/**
 	 * get the team for target team id.
@@ -490,7 +541,7 @@ public class StateTeamManager<P>{
 		Throwables.checkNull(member);
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
-			if (mMap.get(i).isFormalMember(member)) {
+			if (mMap.valueAt(i).isFormalMember(member)) {
 				return true;
 			}
 		}
@@ -508,7 +559,7 @@ public class StateTeamManager<P>{
 		Throwables.checkNull(member);
 		final int size = mMap.size();
 		for (int i = size - 1; i >= 0; i--) {
-			if (mMap.get(i).isOuterMember(member)) {
+			if (mMap.valueAt(i).isOuterMember(member)) {
 				return true;
 			}
 		}
@@ -658,6 +709,47 @@ public class StateTeamManager<P>{
 	// ================ start private method ===============
 	
 	/**
+	 * get the target team which is indicate by controller.
+	 * @param controller the controller.
+	 * @param memberFlags the member flags 
+	 * @return the team or null if not found.
+	 * @since 1.2.2
+	 */
+	private Team<P> getTeam(IController<? extends AbstractState<P>, P> controller, int memberFlags){
+		Throwables.checkNull(controller);
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			Team<P> team = mMap.valueAt(i);
+			if(team.hasController(controller, memberFlags)){
+				return team;
+			}
+		}
+		return null;
+	}
+	/**
+	 * get all teams which is indicate by controller.
+	 * @param controller the controller.
+	 * @param memberFlags the member flags 
+	 * @param out the out list , can be null
+	 * @return the all teams 
+	 * @since 1.2.2
+	 */
+	private List<Team<P>> getTeams(IController<? extends AbstractState<P>, P> controller, int memberFlags, @Nullable List<Team<P>> out){
+		Throwables.checkNull(controller);
+		if(out == null){
+			out = new ArrayList<>();
+		}
+		final int size = mMap.size();
+		for (int i = size - 1; i >= 0; i--) {
+			Team<P> team = mMap.valueAt(i);
+			if(team.hasController(controller, memberFlags)){
+				out.add(team);
+			}
+		}
+		return out;
+	}
+	
+	/**
 	 * delete the member states which is indicated by target controller and
 	 * states.
 	 * 
@@ -723,7 +815,7 @@ public class StateTeamManager<P>{
 		final int size = mMap.size();
 		Team<P> team;
 		for (int i = size - 1; i >= 0; i--) {
-			team = mMap.get(i);
+			team = mMap.valueAt(i);
 			if (hasFormal && team.isFormalMember(member)) {
 				outList.add(team);
 			} else {
@@ -873,10 +965,10 @@ public class StateTeamManager<P>{
 	 * @see {@linkplain Member}
 	 */
 	public static class Team<P> {
-		/** the formal members */
+		/** the formal members . can't be null*/
 		List<Member<P>> formal;
-		/** the outer members */
-		List<Member<P>> outer;
+		/** the outer members . */
+		@Nullable List<Member<P>> outer;
 		/** the callback of team*/
 		TeamCallback<P> callback;
 
@@ -972,6 +1064,31 @@ public class StateTeamManager<P>{
 				throw new RuntimeException("wrong policy = " + policy);
 			}
 			return handled;
+		}
+		
+		/**
+		 * indicate the team has the target controller or not. 
+		 * @param controller the controller
+		 * @param memberFlags the member flags
+		 * @return true if any member has the target controller .
+		 * @since 1.2.2
+		 */
+		public boolean hasController(IController<? extends AbstractState<P>, P> controller, int memberFlags) {
+			if((memberFlags & FLAG_MEMBER_FORMAL) != 0){
+				for(Member<P> m : formal){
+					if(m.getController() == controller){
+						return true;
+					}
+				}
+			}
+			if((memberFlags & FLAG_MEMBER_OUTER) != 0 && !Predicates.isEmpty(outer)){
+				for(Member<P> m : outer){
+					if(m.getController() == controller){
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
